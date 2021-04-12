@@ -1,6 +1,7 @@
 package com.safetynet.alertsapp.jsonfilemapper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,23 +31,23 @@ public class JsonFileMapper {
 
 	@Autowired
 	private ObjectMapper objectMapper; //this is for mocking purpose
-	
+
 	/**
-     * Method to map from JSON file with safetynet alerts format to Java Objects
-     * 
-     * @param <T> the java Object type that is linked to the objectNodeName (Person, Firestation,...)
-     * @param jsonFile the File object path to the JSON file.
-     * @param objectNodeName the first level of json file containing arrays of Objects.
-     * Example in our file : "persons" , "firestations", ...
-     * @param typeReference TypeReference required by Jackson, note that it is REQUIRED to create this TypeReference
-     * before entering our generic method. If we create this TypeReference in the method, jackson mapping won't create
-     * our java List of Objects but instead a List of LinkedHashMap. This happens because we have a generic method, 
-     * when we use directly the ObjectMapper.readValue the problem is not present. 
-     *
-     * @return a List with the required Object type.
-     *   
-     */
-	public <T> List<T> map(File jsonFile, String objectNodeName, TypeReference<List<T>> typeReference) {
+	 * Method to map from JSON file with safetynet alerts format to Java Objects
+	 * 
+	 * @param <T> the java Object type that is linked to the objectNodeName (Person, Firestation,...)
+	 * @param jsonFile the File object path to the JSON file.
+	 * @param objectNodeNameString the first level of json file containing arrays of Objects.
+	 * Example in our file : "persons" , "firestations", ...
+	 * @param typeReference TypeReference required by Jackson, note that it is REQUIRED to create this TypeReference
+	 * before entering our generic method. If we create this TypeReference in the method, jackson mapping won't create
+	 * our java List of Objects but instead a List of LinkedHashMap. This happens because we have a generic method, 
+	 * when we use directly the ObjectMapper.readValue the problem is not present. 
+	 *
+	 * @return a List with the required Object type.
+	 *   
+	 */
+	public <T> List<T> map(File jsonFile, String objectNodeNameString, TypeReference<List<T>> typeReference) {
 
 		logger.debug("JsonFileMapper loadJsonDataFromFile launched");
 		List<T> objectList = null;
@@ -54,15 +55,21 @@ public class JsonFileMapper {
 			JsonNode jsonNode = objectMapper.readTree(jsonFile);
 
 			//Get objects array under objectNodeName:
-			String objectsJsonString = jsonNode.get(objectNodeName).toString();
-			logger.debug("objectsJsonString={}",objectsJsonString);
-			//need a second step ObjectMapper because first one needs mock but not this one:
-			ObjectMapper objectMapperSecondStep = new ObjectMapper();
-			objectList = objectMapperSecondStep.readValue(objectsJsonString, typeReference);
-	
+			JsonNode jsonNodeObjectName = jsonNode.get(objectNodeNameString); //returns null if objectNodeName not found
+			if (jsonNodeObjectName != null) {
+				String objectsJsonString = jsonNodeObjectName.toString();
+				logger.debug("objectsJsonString={}",objectsJsonString);
+				//need a second step ObjectMapper because first one needs mock but not this one:
+				ObjectMapper objectMapperSecondStep = new ObjectMapper();
+				objectList = objectMapperSecondStep.readValue(objectsJsonString, typeReference);
+			}
+			else {
+				logger.debug("{} not found in json file.", objectNodeNameString);
+			}
+			
 			//TODO: manage exceptions :
 		} catch (Exception e) {
-			logger.error("{} loadJsonDataFromFile has failed", objectNodeName);
+			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e.toString(), e.getMessage());
 			e.printStackTrace();
 		}
 
