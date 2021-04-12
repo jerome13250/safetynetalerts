@@ -20,14 +20,16 @@ import com.safetynet.alertsapp.model.Medicalrecord;
 
 @Repository
 public class MedicalrecordRepository {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(MedicalrecordRepository.class);
 	private List<Medicalrecord> medicalrecordList;
-	
+
 	@Autowired
 	private JsonFileMapper jsonFileMapper;
-		
-	//One time loading data from json file after Spring boot start:
+
+	//Cannot use constructor, must use @PostConstruct to access to jsonFileMapper :
+	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
+	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
 	private void loadJsonDataFromFile() {
 		medicalrecordList = jsonFileMapper.map(
@@ -35,7 +37,7 @@ public class MedicalrecordRepository {
 				"medicalrecords",
 				new TypeReference<List<Medicalrecord>>(){});
 	}
-	
-	
+
+
 
 }

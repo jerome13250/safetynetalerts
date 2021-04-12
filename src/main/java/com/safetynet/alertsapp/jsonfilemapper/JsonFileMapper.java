@@ -1,7 +1,6 @@
 package com.safetynet.alertsapp.jsonfilemapper;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class JsonFileMapper {
 			
 			//TODO: manage exceptions :
 		} catch (Exception e) {
-			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e.toString(), e.getMessage());
+			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
 			e.printStackTrace();
 		}
 

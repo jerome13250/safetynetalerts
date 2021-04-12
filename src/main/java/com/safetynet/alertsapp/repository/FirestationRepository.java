@@ -23,14 +23,16 @@ import com.safetynet.alertsapp.model.Firestation;
  */
 @Repository
 public class FirestationRepository {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(FirestationRepository.class);
 	private List <Firestation> firestationList;
 
 	@Autowired
 	private JsonFileMapper jsonFileMapper;
 	
-	//comment ????????????????
+	//Cannot use constructor, must use @PostConstruct to access to jsonFileMapper :
+	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
+	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
 	public void loadJsonDataFromFile() {
 		firestationList = jsonFileMapper.map(
@@ -42,11 +44,11 @@ public class FirestationRepository {
 	public List<Firestation> getAll(){
 		return firestationList;
 	}
-	
+
 	public void add(Firestation firestation) {
 		firestationList.add(firestation);
 	}
-	
+
 	public void update(Firestation firestation) {
 		for (Firestation f : firestationList) {
 			if (f.getAddress().equals(firestation.getAddress())) {
@@ -55,11 +57,11 @@ public class FirestationRepository {
 		}
 		firestationList.add(firestation);
 	}
-	
+
 	public boolean delete(String address) {
 		return firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
 	}
-	
-	
-	
+
+
+
 }
