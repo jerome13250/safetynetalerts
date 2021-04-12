@@ -1,6 +1,8 @@
 package com.safetynet.alertsapp.jsonfilemapper;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,10 @@ public class JsonFileMapper {
 				logger.debug("objectsJsonString={}",objectsJsonString);
 				//need a second step ObjectMapper because first one needs mock but not this one:
 				ObjectMapper objectMapperSecondStep = new ObjectMapper();
+				//setting date format for deserializing:
+				final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+				objectMapperSecondStep.setDateFormat(df);
+				
 				objectList = objectMapperSecondStep.readValue(objectsJsonString, typeReference);
 			}
 			else {

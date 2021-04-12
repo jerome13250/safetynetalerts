@@ -3,6 +3,8 @@ package com.safetynet.alertsapp.jsonfilemapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,7 @@ class JsonFileMapperTest {
 	ObjectMapper objectMapperMock;
 
 	@Test
+	@DisplayName("2 objects Firestation are processed")
 	void testMapObject_2firestations()  throws Exception {
 		//Arrange
 		String jsonTestString = 
@@ -64,6 +67,7 @@ class JsonFileMapperTest {
 	}
 
 	@Test
+	@DisplayName("2 objects Person are processed")
 	void testMapObject_2persons()  throws Exception {
 		//Arrange
 		String jsonTestString = 
@@ -92,6 +96,7 @@ class JsonFileMapperTest {
 	}
 
 	@Test
+	@DisplayName("3 objects Medicalrecord are processed")
 	void testMapObject_3medicalrecords()  throws Exception {
 		//Arrange
 		String jsonTestString = 
@@ -113,7 +118,13 @@ class JsonFileMapperTest {
 		assertEquals(3,objectList.size(),"Expected list size is 2");
 		assertEquals("John",objectList.get(0).getFirstName(),"FirstName value must be same as in jsonTestString");
 		assertEquals("Boyd",objectList.get(0).getLastName(),"LastName value must be same as in jsonTestString");
-		assertEquals("03/06/1984",objectList.get(0).getBirthdate(),"Birthdate value must be same as in jsonTestString");
+		//creating expected date 
+		Calendar cal = Calendar.getInstance(); //get current system Date
+		cal.set(1984, Calendar.MARCH, 6, 0, 0, 0); //Year, month, day, hour, min , seconds
+		cal.set(14, 0); //MILLISECOND field id = 14 
+		Date dateMarch6th1984 = cal.getTime();
+		
+		assertEquals(dateMarch6th1984,objectList.get(0).getBirthdate(),"Birthdate value must be same as in jsonTestString");
 		assertEquals(Arrays.asList("aznol:350mg","hydrapermazol:100mg"),objectList.get(0).getMedications(),"Medications value must be same as in jsonTestString");
 		assertEquals(Arrays.asList("nillacilan"),objectList.get(0).getAllergies(),"Allergies value must be same as in jsonTestString");
 
