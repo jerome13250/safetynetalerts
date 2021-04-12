@@ -1,7 +1,6 @@
 package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -12,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
-import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @Repository
@@ -38,6 +34,33 @@ public class MedicalrecordRepository {
 				new TypeReference<List<Medicalrecord>>(){});
 	}
 
+	public List<Medicalrecord> getAll(){
+		return medicalrecordList;
+	}
 
+	public void add(Medicalrecord medicalrecord) {
+		medicalrecordList.add(medicalrecord);
+	}
+
+	public boolean update(Medicalrecord medicalrecord) {
+		for (Medicalrecord f : medicalrecordList) {
+			if (f.getFirstName().equals(medicalrecord.getFirstName()) &&
+					f.getLastName().equals(medicalrecord.getLastName())) {
+				f.setBirthdate(medicalrecord.getBirthdate());
+				f.setMedications(medicalrecord.getMedications());
+				f.setAllergies(medicalrecord.getAllergies());
+				return true; //firstname+lastname considered as primary key
+			}
+		}
+		return false; //update failed, firstname+lastname not found
+	}
+
+	public boolean delete(String firstName, String lastName) {
+		return medicalrecordList.removeIf(medicalrecord-> 
+			( 
+				medicalrecord.getFirstName().equals(firstName) &&
+				medicalrecord.getLastName().equals(lastName)
+			));
+	}
 
 }

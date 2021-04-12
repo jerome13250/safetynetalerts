@@ -1,7 +1,6 @@
 package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -12,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Firestation;
 
@@ -34,7 +31,8 @@ public class FirestationRepository {
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
-	public void loadJsonDataFromFile() {
+	protected void loadJsonDataFromFile() {
+		logger.debug("Calling @PostConstruct loadJsonDataFromFile()");
 		firestationList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"firestations",
@@ -47,21 +45,22 @@ public class FirestationRepository {
 
 	public void add(Firestation firestation) {
 		firestationList.add(firestation);
+		//TODO: exception to manage ? boolean to return ?
 	}
 
-	public void update(Firestation firestation) {
+	public boolean update(Firestation firestation) {
 		for (Firestation f : firestationList) {
 			if (f.getAddress().equals(firestation.getAddress())) {
 				f.setStation(firestation.getStation());
+				return true;
 			}
 		}
-		firestationList.add(firestation);
+		return false; //update failed, address not found
 	}
 
 	public boolean delete(String address) {
 		return firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
 	}
-
-
-
 }
+
+
