@@ -28,6 +28,7 @@ public class MedicalrecordRepository {
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
 	protected void loadJsonDataFromFile() {
+		logger.debug("Calling loadJsonDataFromFile");
 		medicalrecordList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"medicalrecords",

@@ -18,8 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
@@ -28,7 +26,6 @@ import com.safetynet.alertsapp.model.Firestation;
 @ExtendWith(MockitoExtension.class)
 class FirestationRepositoryTest {
 
-	private final Logger logger = LoggerFactory.getLogger(FirestationRepositoryTest.class);
 
 	@InjectMocks
 	FirestationRepository firestationRepositoryCUT;

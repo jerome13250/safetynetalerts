@@ -28,6 +28,7 @@ public class PersonRepository {
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
 	private void loadJsonDataFromFile() {
+		logger.debug("Calling loadJsonDataFromFile");
 		personList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"persons",
