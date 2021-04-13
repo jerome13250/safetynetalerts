@@ -36,9 +36,6 @@ class FirestationRepositoryTest {
 	@Mock
 	private JsonFileMapper jsonFileMapperMock;
 
-	//TODO : ONLY TEST FUNCTION map ONCE with Mock
-	//Then create @BeforeEach to create a default mockedList
-
 	@BeforeEach
 	void initializeData() {
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
@@ -98,7 +95,6 @@ class FirestationRepositoryTest {
 		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
 	}
 
-
 	@Test
 	@DisplayName("3 objects Firestation + update one")
 	void testUpdate_3firestations_updateOne()  throws Exception {
@@ -136,7 +132,7 @@ class FirestationRepositoryTest {
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
 		assertFalse(result,"Expected result to be failure : false");
-		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation must be 1 for address2");
+		assertEquals(expectedList,objectList,"Returned list must be same as mockedList");
 	}
 
 	@Test

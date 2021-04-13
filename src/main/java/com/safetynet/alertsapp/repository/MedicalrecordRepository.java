@@ -27,11 +27,16 @@ public class MedicalrecordRepository {
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
-	private void loadJsonDataFromFile() {
+	protected void loadJsonDataFromFile() {
 		medicalrecordList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"medicalrecords",
 				new TypeReference<List<Medicalrecord>>(){});
+	}
+	
+	protected void setMedicalrecordList(List<Medicalrecord> medicalrecordList) {
+		this.medicalrecordList = medicalrecordList;
+		
 	}
 
 	public List<Medicalrecord> getAll(){
@@ -62,5 +67,7 @@ public class MedicalrecordRepository {
 				medicalrecord.getLastName().equals(lastName)
 			));
 	}
+
+
 
 }
