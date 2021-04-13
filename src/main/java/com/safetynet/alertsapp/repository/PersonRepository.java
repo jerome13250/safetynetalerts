@@ -26,12 +26,16 @@ public class PersonRepository {
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
-	private void loadJsonDataFromFile() {
+	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
 		personList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"persons",
 				Person.class);
+	}
+	
+	protected void setPersonList(List<Person> personList) {
+		this.personList = personList;
 	}
 	
 	public List<Person> getAll(){

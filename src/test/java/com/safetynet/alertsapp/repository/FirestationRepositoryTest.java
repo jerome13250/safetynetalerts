@@ -43,7 +43,6 @@ class FirestationRepositoryTest {
 		firestationRepositoryCUT.setFirestationList(dataInitialList);
 	}
 
-	
 	@Test
 	@DisplayName("2 objects Firestation: LoadJsonDataFromFile")
 	void testLoadJsonDataFromFile_2firestations()  throws Exception {
@@ -132,7 +131,7 @@ class FirestationRepositoryTest {
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
 		assertFalse(result,"Expected result to be failure : false");
-		assertEquals(expectedList,objectList,"Returned list must be same as mockedList");
+		assertEquals(expectedList,objectList,"Returned list must be same as initial List");
 	}
 
 	@Test
