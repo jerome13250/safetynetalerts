@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,27 +32,27 @@ public class JsonFileMapper {
 	@Autowired
 	private ObjectMapper objectMapper; //this is for mocking purpose
 
+	
 	/**
 	 * Method to map from JSON file with safetynet alerts format to Java Objects
 	 * 
 	 * @param <T> the java Object type that is linked to the objectNodeName (Person, Firestation,...)
-	 * @param jsonFile the File object path to the JSON file.
+	 * @param jsonURL the URL path to the JSON file.
 	 * @param objectNodeNameString the first level of json file containing arrays of Objects.
 	 * Example in our file : "persons" , "firestations", ...
-	 * @param typeReference TypeReference required by Jackson, note that it is REQUIRED to create this TypeReference
-	 * before entering our generic method. If we create this TypeReference in the method, jackson mapping won't create
-	 * our java List of Objects but instead a List of LinkedHashMap. This happens because we have a generic method, 
-	 * when we use directly the ObjectMapper.readValue the problem is not present. 
 	 *
 	 * @return a List with the required Object type.
 	 *   
 	 */
-	public <T> List<T> map(File jsonFile, String objectNodeNameString, TypeReference<List<T>> typeReference) {
+	
+	//TODO:use url instead
+	public <T> List<T> map(File jsonSource, String objectNodeNameString, Class<T> classType) {
 
 		logger.debug("JsonFileMapper loadJsonDataFromFile launched");
-		List<T> objectList = null;
+		
+		List<T> objectList = new ArrayList<>();
 		try {
-			JsonNode jsonNode = objectMapper.readTree(jsonFile);
+			JsonNode jsonNode = objectMapper.readTree(jsonSource);
 
 			//Get objects array under objectNodeName:
 			JsonNode jsonNodeObjectName = jsonNode.get(objectNodeNameString); //returns null if objectNodeName not found
@@ -66,7 +65,10 @@ public class JsonFileMapper {
 				final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 				objectMapperSecondStep.setDateFormat(df);
 				
-				objectList = objectMapperSecondStep.readValue(objectsJsonString, typeReference);
+				for(JsonNode j : jsonNodeObjectName) {
+					objectList.add(objectMapperSecondStep.readValue(j.toString(), classType));
+				}
+				
 			}
 			else {
 				logger.debug("{} not found in json file.", objectNodeNameString);
@@ -78,9 +80,8 @@ public class JsonFileMapper {
 			e.printStackTrace();
 		}
 
-		if (objectList==null) {
-			return new ArrayList<>();
-		}
 		return objectList;
 	}
+	
+	
 }

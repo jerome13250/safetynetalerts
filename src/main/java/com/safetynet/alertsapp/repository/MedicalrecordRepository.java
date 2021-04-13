@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
@@ -32,7 +31,7 @@ public class MedicalrecordRepository {
 		medicalrecordList = jsonFileMapper.map(
 				Paths.get("json/data.json").toFile(),
 				"medicalrecords",
-				new TypeReference<List<Medicalrecord>>(){});
+				Medicalrecord.class);
 	}
 	
 	protected void setMedicalrecordList(List<Medicalrecord> medicalrecordList) {

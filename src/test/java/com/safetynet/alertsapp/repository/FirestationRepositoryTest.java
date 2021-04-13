@@ -3,10 +3,9 @@ package com.safetynet.alertsapp.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Firestation;
 
@@ -55,7 +53,12 @@ class FirestationRepositoryTest {
 				new Firestation("adress100", 10),
 				new Firestation("adress200", 20)
 				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
+		
+		when(jsonFileMapperMock.map(
+				Paths.get("json/data.json").toFile(),
+				"firestations",
+				Firestation.class))
+		.thenReturn(mockedList);
 
 		List<Firestation> expectedList = Arrays.asList(
 				new Firestation("adress100", 10),
