@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,25 +38,38 @@ class FirestationRepositoryTest {
 
 	//TODO : ONLY TEST FUNCTION map ONCE with Mock
 	//Then create @BeforeEach to create a default mockedList
+
+	@BeforeEach
+	void initializeData() {
+		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
+		List<Firestation> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+	
+		firestationRepositoryCUT.setFirestationList(dataInitialList);
+	}
+
 	
 	@Test
-	@DisplayName("2 objects Firestation, test getAll")
-	void testgetAll_2firestations()  throws Exception {
+	@DisplayName("2 objects Firestation: LoadJsonDataFromFile")
+	void testLoadJsonDataFromFile_2firestations()  throws Exception {
 		//Arrange
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Firestation> mockedList = new ArrayList<> (Arrays.asList( 				
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345)
+				new Firestation("adress100", 10),
+				new Firestation("adress200", 20)
 				));
 		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
 
 		List<Firestation> expectedList = Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345)
+				new Firestation("adress100", 10),
+				new Firestation("adress200", 20)
 				);
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
+		firestationRepositoryCUT.loadJsonDataFromFile();
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
@@ -64,45 +78,31 @@ class FirestationRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("2 objects Firestation + add one more")
-	void testAdd_2firestations_addOneMore()  throws Exception {
+	@DisplayName("3 objects Firestation + add one more")
+	void testAdd_3firestations_addOneMore()  throws Exception {
 		//Arrange
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
-		List<Firestation> mockedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345)
-				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
-
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
 				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
+				new Firestation("adress3", 333),
+				new Firestation("adress4", 444)
 				));
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
-		firestationRepositoryCUT.add(new Firestation("adress3", 333));
+		firestationRepositoryCUT.add(new Firestation("adress4", 444));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
-		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertEquals(expectedList,objectList,"Returned list must be mockedList + added firestation");
+		assertEquals(4,objectList.size(),"Expected list size is 4");
+		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
 	}
-	
-	
+
+
 	@Test
 	@DisplayName("3 objects Firestation + update one")
 	void testUpdate_3firestations_updateOne()  throws Exception {
 		//Arrange
-		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
-		List<Firestation> mockedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
-				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
-
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
 				new Firestation("adress2", 1),
@@ -110,7 +110,6 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
 		boolean result = firestationRepositoryCUT.update(new Firestation("adress2", 1));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
@@ -119,19 +118,11 @@ class FirestationRepositoryTest {
 		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation must be 1 for address2");
 	}
-	
+
 	@Test
 	@DisplayName("3 objects Firestation + try update inexistant one")
 	void testUpdate_3firestations_tryUpdateInexistantOne()  throws Exception {
 		//Arrange
-		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
-		List<Firestation> mockedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
-				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
-
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
 				new Firestation("adress2", 12345),
@@ -139,7 +130,6 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
 		boolean result = firestationRepositoryCUT.update(new Firestation("adressUnknown", 1));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
@@ -148,26 +138,17 @@ class FirestationRepositoryTest {
 		assertFalse(result,"Expected result to be failure : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation must be 1 for address2");
 	}
-	
+
 	@Test
 	@DisplayName("3 objects Firestation + delete one")
 	void testDelete_3firestations_deleteOne()  throws Exception {
 		//Arrange
-		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
-		List<Firestation> mockedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
-				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
-
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress2", 12345),
 				new Firestation("adress3", 333)
 				));
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
 		boolean result = firestationRepositoryCUT.delete("adress1");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
@@ -181,14 +162,6 @@ class FirestationRepositoryTest {
 	@DisplayName("3 objects Firestation + try delete inexistant one")
 	void testDelete_3firestations_tryDeleteInexistantOne()  throws Exception {
 		//Arrange
-		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
-		List<Firestation> mockedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
-				));
-		when(jsonFileMapperMock.map(any(File.class), any(String.class), any(TypeReference.class))).thenReturn(mockedList);
-
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
 				new Firestation("adress2", 12345),
@@ -196,7 +169,6 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		firestationRepositoryCUT.loadJsonDataFromFile(); //need explicit call, @Postconstruct is not executed by Mockito
 		boolean result = firestationRepositoryCUT.delete("adressUnknown");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
@@ -205,5 +177,5 @@ class FirestationRepositoryTest {
 		assertFalse(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
-	
+
 }

@@ -38,6 +38,10 @@ public class FirestationRepository {
 				"firestations",
 				new TypeReference<List<Firestation>>(){});
 	}
+	
+	protected void setFirestationList(List<Firestation> firestationList) {
+		this.firestationList = firestationList;
+	}
 
 	public List<Firestation> getAll(){
 		return firestationList;
