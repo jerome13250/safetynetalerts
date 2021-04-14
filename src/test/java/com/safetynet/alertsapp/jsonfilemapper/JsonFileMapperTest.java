@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -117,10 +118,7 @@ class JsonFileMapperTest {
 		assertEquals("John",objectList.get(0).getFirstName(),"FirstName value must be same as in jsonTestString");
 		assertEquals("Boyd",objectList.get(0).getLastName(),"LastName value must be same as in jsonTestString");
 		//creating expected date 
-		Calendar cal = Calendar.getInstance(); //get current system Date
-		cal.set(1984, Calendar.MARCH, 6, 0, 0, 0); //Year, month, day, hour, min , seconds
-		cal.set(14, 0); //MILLISECOND field id = 14 
-		Date dateMarch6th1984 = cal.getTime();
+		LocalDate dateMarch6th1984 = LocalDate.of(1984, 3, 6);
 		
 		assertEquals(dateMarch6th1984,objectList.get(0).getBirthdate(),"Birthdate value must be same as in jsonTestString");
 		assertEquals(Arrays.asList("aznol:350mg","hydrapermazol:100mg"),objectList.get(0).getMedications(),"Medications value must be same as in jsonTestString");

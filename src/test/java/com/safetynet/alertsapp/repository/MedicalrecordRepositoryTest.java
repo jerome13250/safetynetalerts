@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -27,30 +28,15 @@ import com.safetynet.alertsapp.model.Medicalrecord;
 @ExtendWith(MockitoExtension.class)
 class MedicalrecordRepositoryTest {
 
-	static Calendar cal = Calendar.getInstance(); //get current system Date
-	static Date date1984March6th;
-	static Date date1990December15th;
-	static Date date1928February28th;
-
+	static LocalDate date1984March6th = LocalDate.of(1984, 3, 6);
+	static LocalDate date1990December15th = LocalDate.of(1990, 12, 15);
+	static LocalDate date1928February28th = LocalDate.of(1928, 2, 28);
 
 	@InjectMocks
 	MedicalrecordRepository medicalrecordRepositoryCUT;
 
 	@Mock
 	private JsonFileMapper jsonFileMapperMock;
-
-	@BeforeAll
-	static void initializeCalendarAndDate() {
-		//clean calendar to set Date = 0
-		cal.clear();
-		//create Dates
-		cal.set(1984, Calendar.MARCH, 6); //Year, month, day
-		date1984March6th = cal.getTime();
-		cal.set(1990, Calendar.DECEMBER, 15); //Year, month, day
-		date1990December15th = cal.getTime();
-		cal.set(1928, Calendar.FEBRUARY, 28); //Year, month, day
-		date1928February28th = cal.getTime();
-	}
 
 	@BeforeEach
 	void initializeList() {
@@ -86,10 +72,8 @@ class MedicalrecordRepositoryTest {
 	@DisplayName("2 objects Medicalrecord: LoadJsonDataFromFile")
 	void testLoadJsonDataFromFile_2Medicalrecords()  throws Exception {
 		//Arrange
-		cal.set(1999, Calendar.APRIL, 6); //Year, month, day
-		Date date1999April6th = cal.getTime();
-		cal.set(1920, Calendar.DECEMBER, 30); //Year, month, day
-		Date date1920December30th = cal.getTime();
+		LocalDate date1999April6th = LocalDate.of(1999, 4, 16);
+		LocalDate date1920December30th = LocalDate.of(1920, 12, 30);
 
 		List<Medicalrecord> mockedList = new ArrayList<> (Arrays.asList( 				
 				new Medicalrecord(
@@ -142,9 +126,8 @@ class MedicalrecordRepositoryTest {
 	@DisplayName("3 objects Medicalrecord + add one more")
 	void testAdd_3medicalrecords_addOneMore()  throws Exception {
 		//Arrange
-		cal.set(2021, Calendar.APRIL, 1);
-		Date date2021April1 = cal.getTime();
-
+		LocalDate date2021April1 = LocalDate.of(2021, 4, 1);
+		
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
 				new Medicalrecord(
@@ -197,8 +180,7 @@ class MedicalrecordRepositoryTest {
 	@DisplayName("3 objects Medicalrecord, update one")
 	void testUpdate_3medicalrecords_updateOne()  throws Exception {
 		//Arrange
-		cal.set(1998, Calendar.SEPTEMBER, 11); //Year, month, day
-		Date date1998September11th = cal.getTime();
+		LocalDate date1998September11th = LocalDate.of(1998, 9, 11);
 
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
@@ -246,8 +228,7 @@ class MedicalrecordRepositoryTest {
 	@DisplayName("3 objects Medicalrecord, try update inexistant one")
 	void testUpdate_3medicalrecords_tryUpdateInexistantOne()  throws Exception {
 		//Arrange
-		cal.set(2050, Calendar.JANUARY, 1); //Year, month, day
-		Date date2050January1st = cal.getTime();
+		LocalDate date2050January1st = LocalDate.of(2050, 1, 1);
 
 		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
 				new Medicalrecord(

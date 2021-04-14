@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -31,12 +32,12 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 @ExtendWith(MockitoExtension.class)
 public class SafetynetalertsServiceTest {
 
-	static Calendar cal;
-	static Date dateFor5YearsOld;
-	static Date dateFor15YearsOld;
-	static Date dateFor19YearsOld;
-	static Date dateFor35YearsOld;
-	static Date dateFor80YearsOld;
+	static LocalDate dateNow = LocalDate.now(); 
+	static LocalDate dateFor5YearsOld;
+	static LocalDate dateFor15YearsOld;
+	static LocalDate dateFor19YearsOld;
+	static LocalDate dateFor35YearsOld;
+	static LocalDate dateFor80YearsOld;
 
 	@InjectMocks
 	SafetynetalertsService SafetynetalertsServiceCUT;
@@ -50,39 +51,14 @@ public class SafetynetalertsServiceTest {
 	@Mock
 	PersonRepository personRepositoryMock;
 
-	/**
-	 * This creates a Calendar for Today but removes Hour,minutes,seconds and millis
-	 *
-	 * @return the today Calendar
-	 */
-	static Calendar getInstanceCalendarYearMonthDay() {
-		cal = Calendar.getInstance();
-		cal.set(Calendar.HOUR, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return cal;
-	}
-
 	@BeforeAll
 	static void initializeCalendarAndDate() {
 		// create Dates for specific age
-		cal = getInstanceCalendarYearMonthDay();
-		cal.add(Calendar.YEAR, 5);
-		dateFor5YearsOld = cal.getTime();
-		cal = getInstanceCalendarYearMonthDay();
-		cal.add(Calendar.YEAR, 15);
-		dateFor15YearsOld = cal.getTime();
-		cal = getInstanceCalendarYearMonthDay();
-		cal.add(Calendar.YEAR, 19);
-		dateFor19YearsOld = cal.getTime();
-		cal = getInstanceCalendarYearMonthDay();
-		cal.add(Calendar.YEAR, 35);
-		dateFor35YearsOld = cal.getTime();
-		cal = getInstanceCalendarYearMonthDay();
-		cal.add(Calendar.YEAR, 80);
-		dateFor80YearsOld = cal.getTime();
-
+		dateFor5YearsOld = dateNow.minusYears(5);
+		dateFor15YearsOld = dateNow.minusYears(15);
+		dateFor19YearsOld = dateNow.minusYears(19);
+		dateFor35YearsOld = dateNow.minusYears(35);
+		dateFor80YearsOld = dateNow.minusYears(80);
 	}
 
 	@BeforeEach
@@ -153,8 +129,8 @@ public class SafetynetalertsServiceTest {
 		expectedMap.put("persons", persondataMapList);
 		
 		//décompte du nombre d'adultes et du nombre d'enfants
-		expectedMap.put("adults", 2);
-		expectedMap.put("children", 2);
+		expectedMap.put("numberOfadults", 2);
+		expectedMap.put("numberOfChildren", 2);
 		
 		//Act
 		Map<String,Object> resultMap = SafetynetalertsServiceCUT.getPersonsByStationnumber(1);

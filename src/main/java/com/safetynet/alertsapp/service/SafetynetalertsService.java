@@ -1,5 +1,7 @@
 package com.safetynet.alertsapp.service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,8 +22,6 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 @Service
 public class SafetynetalertsService {
 
-	Calendar todayCal = Calendar.getInstance();
-	
 	@Autowired
 	FirestationRepository firestationRepository;
 
@@ -95,10 +95,9 @@ public class SafetynetalertsService {
 
 	}
 	
-	//TODO : refactor all project to LocalDate
-	private int calculateAge(Date birthdate) {
-	
-		return 0;
+	private int calculateAge(LocalDate birthdate) {
+		Period p = Period.between(birthdate, LocalDate.now());
+		return p.getYears();
 	}
 	
 	
