@@ -42,8 +42,7 @@ class MedicalrecordRepositoryTest {
 	@BeforeAll
 	static void initializeCalendarAndDate() {
 		//clean calendar to set Date = 0
-		cal.set(1970, Calendar.JANUARY, 0, 0, 0, 0); //Year, month, day, hour, min , seconds
-		cal.set(14, 0); //MILLISECOND field id = 14
+		cal.clear();
 		//create Dates
 		cal.set(1984, Calendar.MARCH, 6); //Year, month, day
 		date1984March6th = cal.getTime();

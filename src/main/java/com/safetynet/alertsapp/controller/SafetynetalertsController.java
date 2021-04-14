@@ -1,6 +1,7 @@
 package com.safetynet.alertsapp.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +18,9 @@ public class SafetynetalertsController {
 	private SafetynetalertsService safetynetalertsService;
 	
 	@GetMapping("/firestation")
-	public List<Firestation> showWatchlistItemForm(@RequestParam(required=true) Integer stationNumber) {
+	public Map<String, Object> showWatchlistItemForm(@RequestParam(required=true) Integer stationNumber) {
 		
-		return safetynetalertsService.getFirestationByStationnumber(3);
+		return safetynetalertsService.getPersonsByStationnumber(stationNumber);
 		
 	}
 	

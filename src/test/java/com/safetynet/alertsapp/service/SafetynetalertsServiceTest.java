@@ -1,0 +1,166 @@
+package com.safetynet.alertsapp.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.safetynet.alertsapp.model.Firestation;
+import com.safetynet.alertsapp.model.Medicalrecord;
+import com.safetynet.alertsapp.model.Person;
+import com.safetynet.alertsapp.repository.FirestationRepository;
+import com.safetynet.alertsapp.repository.MedicalrecordRepository;
+import com.safetynet.alertsapp.repository.PersonRepository;
+
+@ExtendWith(MockitoExtension.class)
+public class SafetynetalertsServiceTest {
+
+	static Calendar cal;
+	static Date dateFor5YearsOld;
+	static Date dateFor15YearsOld;
+	static Date dateFor19YearsOld;
+	static Date dateFor35YearsOld;
+	static Date dateFor80YearsOld;
+
+	@InjectMocks
+	SafetynetalertsService SafetynetalertsServiceCUT;
+
+	@Mock
+	FirestationRepository firestationRepositoryMock;
+
+	@Mock
+	MedicalrecordRepository medicalrecordRepositoryMock;
+
+	@Mock
+	PersonRepository personRepositoryMock;
+
+	/**
+	 * This creates a Calendar for Today but removes Hour,minutes,seconds and millis
+	 *
+	 * @return the today Calendar
+	 */
+	static Calendar getInstanceCalendarYearMonthDay() {
+		cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal;
+	}
+
+	@BeforeAll
+	static void initializeCalendarAndDate() {
+		// create Dates for specific age
+		cal = getInstanceCalendarYearMonthDay();
+		cal.add(Calendar.YEAR, 5);
+		dateFor5YearsOld = cal.getTime();
+		cal = getInstanceCalendarYearMonthDay();
+		cal.add(Calendar.YEAR, 15);
+		dateFor15YearsOld = cal.getTime();
+		cal = getInstanceCalendarYearMonthDay();
+		cal.add(Calendar.YEAR, 19);
+		dateFor19YearsOld = cal.getTime();
+		cal = getInstanceCalendarYearMonthDay();
+		cal.add(Calendar.YEAR, 35);
+		dateFor35YearsOld = cal.getTime();
+		cal = getInstanceCalendarYearMonthDay();
+		cal.add(Calendar.YEAR, 80);
+		dateFor80YearsOld = cal.getTime();
+
+	}
+
+	@BeforeEach
+	void parameterMock() {
+		List<Firestation> firestationInitialList = new ArrayList<>(Arrays.asList(
+				new Firestation("adress1", 1),
+				new Firestation("adress2", 1), 
+				new Firestation("adress3", 2)));
+		List<Medicalrecord> medicalrecordInitialList = new ArrayList<>(Arrays.asList(
+				new Medicalrecord("John", "Doe", dateFor5YearsOld,
+						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2")),
+						new ArrayList<>(Arrays.asList("fakeAllergy1"))),
+				new Medicalrecord("Mike", "Doe", dateFor15YearsOld,
+						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2", "fakeMedic3")),
+						new ArrayList<>()),
+				new Medicalrecord("Jack", "Doe", dateFor35YearsOld,
+						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2")),
+						new ArrayList<>(Arrays.asList("fakeAllergy1", "fakeAllergy2"))),
+				new Medicalrecord("Jason", "Young", dateFor19YearsOld, new ArrayList<>(), new ArrayList<>()),
+				new Medicalrecord("Mike", "Old", dateFor80YearsOld,
+						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2", "fakeMedic3")),
+						new ArrayList<>(Arrays.asList("fakeAllergy1", "fakeAllergy2")))));
+		List<Person> personInitialList = new ArrayList<>(
+				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+						new Person("Mike", "Doe", "1-1111", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
+						new Person("Jack", "Doe", "1-1111", 12345, "adress1", "Gotham", "jackdoe@mail.com"),
+						new Person("Jason", "Young", "2-2222", 78965, "adress2", "New-York", "jasonyoung@mail.com"),
+						new Person("Mike", "Old", "3-3333", 95175, "adress3", "Los Angeles", "mikeold@mail.com"),
+						new Person("Clark", "Kent", "4-4444", 99999, "adress4", "Metropolis", "superman@mail.com")));
+
+		when(firestationRepositoryMock.getAll()).thenReturn(firestationInitialList);
+		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);
+		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
+
+	}
+
+	/**
+	 * Create a map from 2 Arrays, one contains keys, the other contains objects.
+	 *
+	 * @param keys contains the Map keys
+	 * @param objects contains the Map values
+	 * @return created with the 2 arrays
+	 */
+	private Map<String, Object> createMapFromArray(String[] keys , String[] objects) {
+		Map<String, Object> m = new HashMap<>();
+		for (int i = 0; i < keys.length; i++) {
+			m.put(keys[i], objects[i]);
+		}
+
+		return m;
+	}
+
+	@Test
+	@DisplayName("Get Persons By Stationnumber + Number of adults and children")
+	void test_getPersonByStationnumber() {
+		//Arrange
+		Map<String,Object> expectedMap = new HashMap<>();
+
+		//List of Hashmap that contains Person "class-like" (limited to some parameters)
+		List<Map<String,Object>> persondataMapList = new ArrayList<>();
+
+		//Persons au format Hashmap: Prénom, nom, adresse, numéro de téléphone.
+		String[] keys = {"firstName","lastName","address","phone"};
+		persondataMapList.add(createMapFromArray(keys,new String[] {"John","Doe","adress1","1-1111"}));
+		persondataMapList.add(createMapFromArray(keys,new String[] {"Mike","Doe","adress1","1-1111"}));
+		persondataMapList.add(createMapFromArray(keys,new String[] {"Jack","Doe","adress1","1-1111"}));
+		persondataMapList.add(createMapFromArray(keys,new String[] {"Jason","Young","adress2","2-2222"}));
+		expectedMap.put("persons", persondataMapList);
+		
+		//décompte du nombre d'adultes et du nombre d'enfants
+		expectedMap.put("adults", 2);
+		expectedMap.put("children", 2);
+		
+		//Act
+		Map<String,Object> resultMap = SafetynetalertsServiceCUT.getPersonsByStationnumber(1);
+
+		//Assert
+		assertEquals(expectedMap,resultMap,"The 2 maps must have the dame data");
+	}
+
+}
