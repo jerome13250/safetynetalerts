@@ -176,8 +176,8 @@ class SafetynetalertsServiceTest {
 	void test_getChildrenByAddressAndListOtherFamilyMembers() {
 		//Arrange
 		StringBuilder expected = new StringBuilder();
-		expected.append("John Doe age=5, familyMembers: Mike Doe, Jack Doe<br>");
-		expected.append("Mike Doe age=15, familyMembers: John Doe, Jack Doe<br>");
+		expected.append("John Doe age=5, familyMembers: Mike Doe,Jack Doe<br>");
+		expected.append("Mike Doe age=15, familyMembers: John Doe,Jack Doe<br>");
 		
 		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
 		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);

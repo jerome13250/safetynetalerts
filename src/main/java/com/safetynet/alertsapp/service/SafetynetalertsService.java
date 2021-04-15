@@ -27,7 +27,7 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 public class SafetynetalertsService {
 
 	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsService.class);
-	
+
 	@Autowired
 	FirestationRepository firestationRepository;
 
@@ -118,8 +118,6 @@ public class SafetynetalertsService {
 		//This will contain all the data :
 		StringBuilder reportPersons = new StringBuilder();
 
-		//Get all the persons:
-		//List<String> adressesByStationnumber =
 		logger.debug("firestationRepository.getByStationnumber(stationNumber): {}",firestationRepository.getByStationnumber(stationNumber) );
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
 		logger.debug("adressesByStationnumber: {}",adressesByStationnumber );
@@ -167,13 +165,47 @@ public class SafetynetalertsService {
 	 * Service that returns the children list (firstname, name, age) living at a specified address.
 	 * For each child, provides a list of other family members. 
 	 * If no child lives at this address, return an empty String.
-	 * @param string
-	 * @return
+	 * @param address
+	 * @return containing all the informations
 	 */
-	public String getChildrenByAddressAndListOtherFamilyMembers(String string) {
+	public String getChildrenByAddressAndListOtherFamilyMembers(String address) {
+		//This will contain all the data :
+		StringBuilder reportChildAndOtherFamilyMembers = new StringBuilder();
+		
+		//Get All children at a specific address:
+		List<Person> personListForAddress = personRepository.getByAddress(address);
+		
+		for(Person p : personListForAddress) {
+			for (Medicalrecord med : medicalrecordRepository.getAll()) {
+				if(p.getFirstName().equals(med.getFirstName()) && 
+						p.getLastName().equals(med.getLastName()) &&
+								(calculateAge(med.getBirthdate())<18)  ) {
+					
+					String child = p.getFirstName() + " " + p.getLastName() + " age=" + calculateAge(med.getBirthdate());
+					logger.debug("child: {}",child );
+					reportChildAndOtherFamilyMembers.append(child);
+					
+					String otherMembersFamily = 
+					personListForAddress.stream().filter(person->(
+							!person.getFirstName().equals(p.getFirstName()) ||
+									!person.getLastName().equals(p.getLastName())))
+					.map(person->person.getFirstName() + " " + person.getLastName())
+					.collect(Collectors.joining (","));
+					logger.debug("otherMembersFamily: {}",otherMembersFamily );
+					
+					
+					reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
+					reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
+				}
+					
+					
+			}
+		}
+		
+		
+		
+		return reportChildAndOtherFamilyMembers.toString();
 
-
-		return null;
 	}
 
 
