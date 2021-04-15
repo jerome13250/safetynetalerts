@@ -28,5 +28,11 @@ public class SafetynetalertsControllerTest {
 		mockMvc.perform(get("/firestation?stationNumber=3"))
 		.andExpect(status().isOk());
 	}
+	
+	@Test
+	public void testGetChildrenByAddressAndListOtherFamilyMembers() throws Exception {
+		mockMvc.perform(get("/childAlert?address=adress1"))
+		.andExpect(status().isOk());
+	}
 
 }

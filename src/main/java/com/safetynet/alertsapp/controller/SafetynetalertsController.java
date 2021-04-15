@@ -18,17 +18,18 @@ public class SafetynetalertsController {
 	private SafetynetalertsService safetynetalertsService;
 	
 	@GetMapping("/firestationMap")
-	public Map<String, Object> showWatchlistItemFormMap(@RequestParam(required=true) Integer stationNumber) {
-		
+	public Map<String, Object> GetPersonsByStationnumberMap(@RequestParam(required=true) Integer stationNumber) {
 		return safetynetalertsService.getPersonsByStationnumberMap(stationNumber);
-		
 	}
 	
 	@GetMapping("/firestation")
-	public String showWatchlistItemFormString(@RequestParam(required=true) Integer stationNumber) {
-		
+	public String GetPersonsByStationnumberString(@RequestParam(required=true) Integer stationNumber) {
 		return safetynetalertsService.getPersonsByStationnumberString(stationNumber);
-		
+	}
+	
+	@GetMapping("/childAlert")
+	public String getChildrenByAddressAndListOtherFamilyMembers(@RequestParam(required=true) String address) {
+		return safetynetalertsService.getChildrenByAddressAndListOtherFamilyMembers(address);
 	}
 	
 	

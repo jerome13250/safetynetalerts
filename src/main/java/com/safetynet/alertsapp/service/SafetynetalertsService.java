@@ -45,7 +45,7 @@ public class SafetynetalertsService {
 	}
 
 	/**
-	 * Service that returns a Map object containing following keys: "persons", "numberOfadults", "numberOfchildren"
+	 * returns a Map object containing following keys: "persons", "numberOfadults", "numberOfchildren"
 	 * 
 	 * @param stationNumber
 	 * @return containing key="persons" / value=List of persons 
@@ -102,7 +102,7 @@ public class SafetynetalertsService {
 
 
 	/**
-	 * Service that returns a String object containing following informations on a specific firestation:
+	 * returns a String object containing following informations on a specific firestation:
 	 * <ul>
 	 * <li>List of persons : firstname, lastname, address, phone</li
 	 * <li>numberOfadults</li>
@@ -132,7 +132,6 @@ public class SafetynetalertsService {
 
 				//Save the person list:
 				personsForStationnumber.add(p);
-
 			}
 		}
 
@@ -162,7 +161,7 @@ public class SafetynetalertsService {
 
 
 	/**
-	 * Service that returns the children list (firstname, name, age) living at a specified address.
+	 * returns the children list (firstname, name, age) living at a specified address.
 	 * For each child, provides a list of other family members. 
 	 * If no child lives at this address, return an empty String.
 	 * @param address
@@ -193,19 +192,12 @@ public class SafetynetalertsService {
 					.collect(Collectors.joining (","));
 					logger.debug("otherMembersFamily: {}",otherMembersFamily );
 					
-					
 					reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
 					reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
 				}
-					
-					
 			}
 		}
-		
-		
-		
 		return reportChildAndOtherFamilyMembers.toString();
-
 	}
 
 
