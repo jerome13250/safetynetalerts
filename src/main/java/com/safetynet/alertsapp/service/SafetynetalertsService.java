@@ -8,7 +8,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,8 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 @Service
 public class SafetynetalertsService {
 
+	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsService.class);
+	
 	@Autowired
 	FirestationRepository firestationRepository;
 
@@ -31,22 +37,13 @@ public class SafetynetalertsService {
 	@Autowired
 	PersonRepository personRepository;
 
-	public List<String> getAdressesByStationnumber(Integer stationNumber) {
-		List<String> adressesByStationnumber = new ArrayList<>();
-		for (Firestation i: firestationRepository.getAll() ) {
-			if (i.getStation().equals(stationNumber)) {
-				adressesByStationnumber.add(i.getAddress());
-			}
-		}
 
-		return adressesByStationnumber;
-	}
 
 	private int calculateAge(LocalDate birthdate) {
 		Period p = Period.between(birthdate, LocalDate.now());
 		return p.getYears();
 	}
-	
+
 	/**
 	 * Service that returns a Map object containing following keys: "persons", "numberOfadults", "numberOfchildren"
 	 * 
@@ -56,14 +53,17 @@ public class SafetynetalertsService {
 	 * + key="numberOfchildren" / value=numberOfchildren"
 	 */
 	public Map<String,Object> getPersonsByStationnumberMap(int stationNumber) {
-		
+
 		//This will contain all the data :
 		Map<String,Object> reportPersons = new HashMap<>();
-		
+
 		//Get all the persons:
-		List<String> adressesByStationnumber = getAdressesByStationnumber(stationNumber);
+		//List<String> adressesByStationnumber =
+		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
+		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
 		List<Map<String,Object>> personsForStationnumber = new ArrayList<>();
 		for (Person p: personRepository.getAll() ) {
+			logger.debug("Person p: {}", p);
 			if (adressesByStationnumber.contains(p.getAddress())) {
 				//Create Hashmap that contains only needed informations: Prénom, nom, adresse, numéro de téléphone.
 				Map<String,Object> persondataMap = new HashMap<>();
@@ -75,7 +75,7 @@ public class SafetynetalertsService {
 			}
 		}
 		reportPersons.put("persons", personsForStationnumber);
-		
+
 		//Get numberOfadults and numberOfChildren:
 		int numberOfadults = 0;
 		int numberOfChildren = 0;
@@ -83,7 +83,7 @@ public class SafetynetalertsService {
 			for (Medicalrecord med : medicalrecordRepository.getAll()) {
 				if( persondataMap.get("firstName").equals(med.getFirstName()) && 
 						persondataMap.get("lastName").equals(med.getLastName()) ) {
-					
+
 					if (calculateAge(med.getBirthdate()) >=18 ) {
 						numberOfadults++;
 					}
@@ -95,12 +95,12 @@ public class SafetynetalertsService {
 		}
 		reportPersons.put("numberOfadults", numberOfadults);
 		reportPersons.put("numberOfChildren", numberOfChildren);
-		
+
 		return reportPersons;
 
 	}
-	
-	
+
+
 	/**
 	 * Service that returns a String object containing following informations on a specific firestation:
 	 * <ul>
@@ -114,12 +114,15 @@ public class SafetynetalertsService {
 	 * + key="numberOfchildren" / value=numberOfchildren"
 	 */
 	public String getPersonsByStationnumberString(int stationNumber) {
-		
+
 		//This will contain all the data :
 		StringBuilder reportPersons = new StringBuilder();
-		
+
 		//Get all the persons:
-		List<String> adressesByStationnumber = getAdressesByStationnumber(stationNumber);
+		//List<String> adressesByStationnumber =
+		logger.debug("firestationRepository.getByStationnumber(stationNumber): {}",firestationRepository.getByStationnumber(stationNumber) );
+		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
+		logger.debug("adressesByStationnumber: {}",adressesByStationnumber );
 		List<Person> personsForStationnumber = new ArrayList<>();
 		for (Person p: personRepository.getAll() ) {
 			if (adressesByStationnumber.contains(p.getAddress())) {
@@ -128,13 +131,13 @@ public class SafetynetalertsService {
 				reportPersons.append("lastName: " + p.getLastName() + " / ");
 				reportPersons.append("address: " + p.getAddress() + " / ");
 				reportPersons.append("phone: " + p.getPhone() + "<br>");
-				
+
 				//Save the person list:
 				personsForStationnumber.add(p);
-				
+
 			}
 		}
-		
+
 		//Get numberOfadults and numberOfChildren:
 		int numberOfadults = 0;
 		int numberOfChildren = 0;
@@ -142,7 +145,7 @@ public class SafetynetalertsService {
 			for (Medicalrecord med : medicalrecordRepository.getAll()) {
 				if( p.getFirstName().equals(med.getFirstName()) && 
 						p.getLastName().equals(med.getLastName()) ) {
-					
+
 					if (calculateAge(med.getBirthdate()) >=18 ) {
 						numberOfadults++;
 					}
@@ -154,21 +157,28 @@ public class SafetynetalertsService {
 		}
 		reportPersons.append("numberOfAdults: " + numberOfadults  + "<br>");
 		reportPersons.append("numberOfChildren: " + numberOfChildren);
-		
+
 		return reportPersons.toString();
 
 	}
 
 
-	
+	/**
+	 * Service that returns the children list (firstname, name, age) living at a specified address.
+	 * For each child, provides a list of other family members. 
+	 * If no child lives at this address, return an empty String.
+	 * @param string
+	 * @return
+	 */
 	public String getChildrenByAddressAndListOtherFamilyMembers(String string) {
-		// TODO Auto-generated method stub
+
+
 		return null;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 
 }

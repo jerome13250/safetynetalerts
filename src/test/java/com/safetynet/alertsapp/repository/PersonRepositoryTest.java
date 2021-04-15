@@ -176,4 +176,22 @@ public class PersonRepositoryTest {
 		assertFalse(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
+	
+	@Test
+	@DisplayName("3 objects Person + try delete inexistant one")
+	void testgetByAddress()  throws Exception {
+		//Arrange
+		List<Person> expectedList = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com")
+				));
+
+		//Act
+		List<Person> objectList = personRepositoryCUT.getByAddress("adress1");
+
+		//Assert
+		assertEquals(2,objectList.size(),"Expected list size is 3");
+		assertEquals(expectedList,objectList,"Returned list must be mockedList, filtered on address1");
+	}
+	
 }

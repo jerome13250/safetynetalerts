@@ -1,6 +1,7 @@
 package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +45,16 @@ public class FirestationRepository {
 
 	public List<Firestation> getAll(){
 		return firestationList;
+	}
+	
+	public List<Firestation> getByStationnumber(Integer stationNumber) {
+		List<Firestation> firestationByStationnumber = new ArrayList<>();
+		for (Firestation i: firestationList ) {
+			if (i.getStation().equals(stationNumber)) {
+				firestationByStationnumber.add(i);
+			}
+		}
+		return firestationByStationnumber;
 	}
 
 	public void add(Firestation firestation) {

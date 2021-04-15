@@ -2,6 +2,7 @@ package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -41,6 +42,10 @@ public class PersonRepository {
 	public List<Person> getAll(){
 		return personList;
 	}
+	
+	public List<Person> getByAddress(String address) {
+		return personList.stream().filter(person->person.getAddress().equals(address)).collect(Collectors.toList());
+	}
 
 	public void add(Person person) {
 		personList.add(person);
@@ -68,5 +73,7 @@ public class PersonRepository {
 				person.getLastName().equals(lastName)
 			));
 	}
+
+	
 
 }

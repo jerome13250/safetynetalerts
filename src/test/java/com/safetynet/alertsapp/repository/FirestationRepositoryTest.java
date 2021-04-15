@@ -173,4 +173,19 @@ class FirestationRepositoryTest {
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
 
+	@Test
+	@DisplayName("Test testgetByStationnumber")
+	void testgetByStationnumber()  throws Exception {
+		//Arrange
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000)
+				));
+
+		//Act
+		List<Firestation> objectList = firestationRepositoryCUT.getByStationnumber(1000);
+
+		//Assert
+		assertEquals(1,objectList.size(),"Expected list size is 3");
+		assertEquals(expectedList,objectList,"Returned list must one Firestation");
+	}
 }
