@@ -77,7 +77,9 @@ public class SafetynetalertsServiceTest {
 				new Medicalrecord("Jack", "Doe", dateFor35YearsOld,
 						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2")),
 						new ArrayList<>(Arrays.asList("fakeAllergy1", "fakeAllergy2"))),
-				new Medicalrecord("Jason", "Young", dateFor19YearsOld, new ArrayList<>(), new ArrayList<>()),
+				new Medicalrecord("Jason", "Young", dateFor19YearsOld, 
+						new ArrayList<>(), 
+						new ArrayList<>()),
 				new Medicalrecord("Mike", "Old", dateFor80YearsOld,
 						new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2", "fakeMedic3")),
 						new ArrayList<>(Arrays.asList("fakeAllergy1", "fakeAllergy2")))));
@@ -113,7 +115,7 @@ public class SafetynetalertsServiceTest {
 
 	@Test
 	@DisplayName("Get Persons By Stationnumber + Number of adults and children")
-	void test_getPersonByStationnumber() {
+	void test_getPersonByStationnumberMap() {
 		//Arrange
 		Map<String,Object> expectedMap = new HashMap<>();
 
@@ -133,10 +135,52 @@ public class SafetynetalertsServiceTest {
 		expectedMap.put("numberOfChildren", 2);
 		
 		//Act
-		Map<String,Object> resultMap = SafetynetalertsServiceCUT.getPersonsByStationnumber(1);
+		Map<String,Object> resultMap = SafetynetalertsServiceCUT.getPersonsByStationnumberMap(1);
 
 		//Assert
 		assertEquals(expectedMap,resultMap,"The 2 maps must have the dame data");
+	}
+	
+	@Test
+	@DisplayName("Get Persons By Stationnumber + Number of adults and children")
+	void test_getPersonByStationnumberString() {
+		//Arrange
+		StringBuilder expected = new StringBuilder();
+		expected.append("firstName: John / lastName: Doe / address: adress1 / phone: 1-1111<br>");
+		expected.append("firstName: Mike / lastName: Doe / address: adress1 / phone: 1-1111<br>");
+		expected.append("firstName: Jack / lastName: Doe / address: adress1 / phone: 1-1111<br>");
+		expected.append("firstName: Jason / lastName: Young / address: adress2 / phone: 2-2222<br>");
+		expected.append("numberOfAdults: 2<br>");
+		expected.append("numberOfChildren: 2");
+		
+		//Act
+		String result = SafetynetalertsServiceCUT.getPersonsByStationnumberString(1);
+
+		//Assert
+		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+	}
+	
+	/**
+	 * http://localhost:8080/childAlert?address=<address>
+	 * Cette url doit retourner une liste d'enfants (tout individu âgé de 18 ans ou moins) habitant
+	 *  à cette adresse.La liste doit comprendre le prénom et le nom de famille de chaque enfant,
+	 *   son âge et une liste des autresmembres du foyer. 
+	 *   S'il n'y a pas d'enfant, cette url peut renvoyer une chaîne vide.
+	 */
+	@Test
+	@DisplayName("Get Children By Address + List of other family members")
+	void test_getChildrenByAddressAndListOtherFamilyMembers() {
+		//Arrange
+		StringBuilder expected = new StringBuilder();
+		//TODO:
+		expected.append("John Doe, familyMembers: Mike Doe, Jack Doe<br>");
+		expected.append("Mike Doe, familyMembers: John Doe, Jack Doe<br>");
+		
+		//Act
+		String result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("adress1");
+
+		//Assert
+		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
 	}
 
 }

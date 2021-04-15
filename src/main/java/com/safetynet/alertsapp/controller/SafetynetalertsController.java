@@ -17,14 +17,19 @@ public class SafetynetalertsController {
 	@Autowired
 	private SafetynetalertsService safetynetalertsService;
 	
-	@GetMapping("/firestation")
-	public Map<String, Object> showWatchlistItemForm(@RequestParam(required=true) Integer stationNumber) {
+	@GetMapping("/firestationMap")
+	public Map<String, Object> showWatchlistItemFormMap(@RequestParam(required=true) Integer stationNumber) {
 		
-		return safetynetalertsService.getPersonsByStationnumber(stationNumber);
+		return safetynetalertsService.getPersonsByStationnumberMap(stationNumber);
 		
 	}
 	
-	
+	@GetMapping("/firestation")
+	public String showWatchlistItemFormString(@RequestParam(required=true) Integer stationNumber) {
+		
+		return safetynetalertsService.getPersonsByStationnumberString(stationNumber);
+		
+	}
 	
 	
 }

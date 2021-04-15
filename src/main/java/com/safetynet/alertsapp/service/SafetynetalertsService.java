@@ -42,6 +42,11 @@ public class SafetynetalertsService {
 		return adressesByStationnumber;
 	}
 
+	private int calculateAge(LocalDate birthdate) {
+		Period p = Period.between(birthdate, LocalDate.now());
+		return p.getYears();
+	}
+	
 	/**
 	 * Service that returns a Map object containing following keys: "persons", "numberOfadults", "numberOfchildren"
 	 * 
@@ -50,7 +55,7 @@ public class SafetynetalertsService {
 	 * + key="numberOfadults" / value=numberOfAdults"
 	 * + key="numberOfchildren" / value=numberOfchildren"
 	 */
-	public Map<String,Object> getPersonsByStationnumber(int stationNumber) {
+	public Map<String,Object> getPersonsByStationnumberMap(int stationNumber) {
 		
 		//This will contain all the data :
 		Map<String,Object> reportPersons = new HashMap<>();
@@ -95,11 +100,71 @@ public class SafetynetalertsService {
 
 	}
 	
-	private int calculateAge(LocalDate birthdate) {
-		Period p = Period.between(birthdate, LocalDate.now());
-		return p.getYears();
-	}
 	
+	/**
+	 * Service that returns a String object containing following informations on a specific firestation:
+	 * <ul>
+	 * <li>List of persons : firstname, lastname, address, phone</li
+	 * <li>numberOfadults</li>
+	 * <li>numberOfchildren</li>
+	 * 
+	 * @param stationNumber
+	 * @return containing key="persons" / value=List of persons 
+	 * + key="numberOfadults" / value=numberOfAdults"
+	 * + key="numberOfchildren" / value=numberOfchildren"
+	 */
+	public String getPersonsByStationnumberString(int stationNumber) {
+		
+		//This will contain all the data :
+		StringBuilder reportPersons = new StringBuilder();
+		
+		//Get all the persons:
+		List<String> adressesByStationnumber = getAdressesByStationnumber(stationNumber);
+		List<Person> personsForStationnumber = new ArrayList<>();
+		for (Person p: personRepository.getAll() ) {
+			if (adressesByStationnumber.contains(p.getAddress())) {
+				//Prénom, nom, adresse, numéro de téléphone.
+				reportPersons.append("firstName: " + p.getFirstName() + " / ");
+				reportPersons.append("lastName: " + p.getLastName() + " / ");
+				reportPersons.append("address: " + p.getAddress() + " / ");
+				reportPersons.append("phone: " + p.getPhone() + "<br>");
+				
+				//Save the person list:
+				personsForStationnumber.add(p);
+				
+			}
+		}
+		
+		//Get numberOfadults and numberOfChildren:
+		int numberOfadults = 0;
+		int numberOfChildren = 0;
+		for (Person p : personsForStationnumber) {
+			for (Medicalrecord med : medicalrecordRepository.getAll()) {
+				if( p.getFirstName().equals(med.getFirstName()) && 
+						p.getLastName().equals(med.getLastName()) ) {
+					
+					if (calculateAge(med.getBirthdate()) >=18 ) {
+						numberOfadults++;
+					}
+					else {
+						numberOfChildren++;
+					}
+				}
+			}
+		}
+		reportPersons.append("numberOfAdults: " + numberOfadults  + "<br>");
+		reportPersons.append("numberOfChildren: " + numberOfChildren);
+		
+		return reportPersons.toString();
+
+	}
+
+
+	
+	public String getChildrenByAddressAndListOtherFamilyMembers(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 	
