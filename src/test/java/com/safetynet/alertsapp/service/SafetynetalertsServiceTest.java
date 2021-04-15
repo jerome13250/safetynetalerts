@@ -120,7 +120,7 @@ class SafetynetalertsServiceTest {
 	}
 
 	@Test
-	@DisplayName("Get Persons By Stationnumber + Number of adults and children")
+	@DisplayName("Get Persons By Stationnumber + Number of adults and children, MAP Version")
 	void test_getPersonByStationnumberMap() {
 		//Arrange
 		Map<String,Object> expectedMap = new HashMap<>();
@@ -178,12 +178,36 @@ class SafetynetalertsServiceTest {
 		StringBuilder expected = new StringBuilder();
 		expected.append("John Doe age=5, familyMembers: Mike Doe,Jack Doe<br>");
 		expected.append("Mike Doe age=15, familyMembers: John Doe,Jack Doe<br>");
-		
+
 		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
 		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);
-		
+
 		//Act
 		String result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("adress1");
+
+		//Assert
+		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+	}
+
+	/**
+	 * http://localhost:8080/phoneAlert?firestation=<firestation_number>
+	 * Cette url doit retourner une liste des
+	 *  numéros de téléphone des résidents desservis par la caserne depompiers. Nous l'utiliserons pour envoyer
+	 *   des messages texte d'urgence à des foyers spécifiques.
+	 */
+	@Test
+	@DisplayName("Get phone numbers for a specific firestation number")
+	void test_getPhoneNumbersForStationNumber() {
+		//Arrange
+		StringBuilder expected = new StringBuilder();
+		expected.append("1-1111<br>");
+		expected.append("2-2222");
+
+		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
+		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
+
+		//Act
+		String result = SafetynetalertsServiceCUT.getPhoneNumbersForStationNumber(1);
 
 		//Assert
 		assertEquals(expected.toString(),result,"The 2 String must have the dame data");

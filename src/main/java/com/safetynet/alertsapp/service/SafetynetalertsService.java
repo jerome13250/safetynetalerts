@@ -3,20 +3,18 @@ package com.safetynet.alertsapp.service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
 import com.safetynet.alertsapp.repository.FirestationRepository;
@@ -57,8 +55,7 @@ public class SafetynetalertsService {
 		//This will contain all the data :
 		Map<String,Object> reportPersons = new HashMap<>();
 
-		//Get all the persons:
-		//List<String> adressesByStationnumber =
+		//Get all addresses with stationNumber:
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
 		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
 		List<Map<String,Object>> personsForStationnumber = new ArrayList<>();
@@ -99,7 +96,6 @@ public class SafetynetalertsService {
 		return reportPersons;
 
 	}
-
 
 	/**
 	 * returns a String object containing following informations on a specific firestation:
@@ -159,7 +155,6 @@ public class SafetynetalertsService {
 
 	}
 
-
 	/**
 	 * returns the children list (firstname, name, age) living at a specified address.
 	 * For each child, provides a list of other family members. 
@@ -198,6 +193,31 @@ public class SafetynetalertsService {
 			}
 		}
 		return reportChildAndOtherFamilyMembers.toString();
+	}
+	
+	/**
+	 * Finds the phone number of people under a specific firestation number 
+	 * @param stationNumber
+	 * @return the list of phone numbers
+	 */
+
+	public String getPhoneNumbersForStationNumber(int stationNumber) {
+		
+		//This will contain the phone numbers, HashSet to avoid doubles :
+		Set<String> phoneNumbersSet = new HashSet<>();
+		
+		//Get all addresses with stationNumber:
+		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
+		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
+		
+		for (Person p: personRepository.getAll() ) {
+			logger.trace("Person p: {}", p);
+			if (adressesByStationnumber.contains(p.getAddress())) {
+				phoneNumbersSet.add(p.getPhone());
+			}
+		}
+		
+		return String.join("<br>", phoneNumbersSet);
 	}
 
 
