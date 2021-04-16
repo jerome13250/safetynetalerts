@@ -32,5 +32,10 @@ public class SafetynetalertsController {
 		return safetynetalertsService.getChildrenByAddressAndListOtherFamilyMembers(address);
 	}
 	
+	@GetMapping("/phoneAlert")
+	public String getPhoneNumbersForStationNumber(@RequestParam(required=true) Integer firestation) {
+		return safetynetalertsService.getPhoneNumbersForStationNumber(firestation);
+	}
+	
 	
 }

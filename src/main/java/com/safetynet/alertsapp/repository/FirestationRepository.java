@@ -56,6 +56,21 @@ public class FirestationRepository {
 		}
 		return firestationByStationnumber;
 	}
+	
+	public int getByAddress(String address) {
+		List<Firestation> firestationByAdress = new ArrayList<>();
+		for (Firestation i: firestationList ) {
+			if (i.getAddress().equals(address)) {
+				firestationByAdress.add(i);
+			}
+		}
+		if (firestationByAdress.size()==1) {
+			return firestationByAdress.get(0).getStation();
+		}
+		logger.warn("Found {} firestation ids for address:{}", firestationByAdress.size(), address );
+		return -1; //this is an error case
+	}
+	
 
 	public void add(Firestation firestation) {
 		firestationList.add(firestation);

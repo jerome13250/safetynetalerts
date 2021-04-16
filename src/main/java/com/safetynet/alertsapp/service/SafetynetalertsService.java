@@ -35,8 +35,6 @@ public class SafetynetalertsService {
 	@Autowired
 	PersonRepository personRepository;
 
-
-
 	private int calculateAge(LocalDate birthdate) {
 		Period p = Period.between(birthdate, LocalDate.now());
 		return p.getYears();
@@ -216,8 +214,51 @@ public class SafetynetalertsService {
 				phoneNumbersSet.add(p.getPhone());
 			}
 		}
-		
 		return String.join("<br>", phoneNumbersSet);
+	}
+	
+	/**
+	 * Finds the list of persons living at a specific address with following informations:
+	 * <ul>
+	 * <li>firstname</li>
+	 * <li>name</li>
+	 * <li>phone</li>
+	 * <li>age</li>
+	 * <li>firestation</li>
+	 * <li>medications</li>
+	 * <li>allergies</li>
+	 * </ul>
+	 * 
+	 * @param address of persons
+	 * @return the string with all required informations
+	 */
+
+	public String getPersonsFirestationAndMedicalRecordByAddress(String address) {
+	
+		StringBuilder result = new StringBuilder();
+		
+		List<Person> personList = personRepository.getByAddress(address);
+		int firestationNumber = firestationRepository.getByAddress(address);
+		//TODO : if -1 throw BusinessException
+		List<Medicalrecord> medicalrecordList = medicalrecordRepository.getAll();
+		
+		for(Person p: personList) {
+			for(Medicalrecord med : medicalrecordList) {
+				if(p.getFirstName().equals(med.getFirstName()) &&
+						p.getLastName().equals(med.getLastName())) {
+					//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
+					result.append(p.getFirstName() + " " + p.getLastName() + " phone=" + p.getPhone());
+					result.append(" age=" + calculateAge(med.getBirthdate()));
+					result.append(" firestation=" + firestationNumber);
+					result.append(" medications=" + med.getMedications().toString());
+					result.append(" allergies=" + med.getAllergies().toString());
+					result.append("<br>");
+				}
+			}
+		}
+		
+		
+		return result.toString();
 	}
 
 

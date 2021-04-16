@@ -189,12 +189,6 @@ class SafetynetalertsServiceTest {
 		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
 	}
 
-	/**
-	 * http://localhost:8080/phoneAlert?firestation=<firestation_number>
-	 * Cette url doit retourner une liste des
-	 *  numéros de téléphone des résidents desservis par la caserne depompiers. Nous l'utiliserons pour envoyer
-	 *   des messages texte d'urgence à des foyers spécifiques.
-	 */
 	@Test
 	@DisplayName("Get phone numbers for a specific firestation number")
 	void test_getPhoneNumbersForStationNumber() {
@@ -208,6 +202,32 @@ class SafetynetalertsServiceTest {
 
 		//Act
 		String result = SafetynetalertsServiceCUT.getPhoneNumbersForStationNumber(1);
+
+		//Assert
+		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+	}
+	
+	/**
+	 * http://localhost:8080/fire?address=<address>Cette url doit retourner la liste des habitants vivant
+	 *  à l’adresse donnée ainsi que le numéro de la casernede pompiers la desservant.
+	 *  La liste doit inclure le nom, le numéro de téléphone, l'âge et les antécédents
+	 *  médicaux (médicaments, posologie et allergies) de chaque personne.
+	 */
+	@Test
+	@DisplayName("Get persons, medical and firestation informations for a specific address")
+	void test_getPersonsFirestationAndMedicalRecordByAddress() {
+		//Arrange
+		StringBuilder expected = new StringBuilder();
+		expected.append("John Doe phone=1-1111 age=5 firestation=1 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1]<br>");
+		expected.append("Mike Doe phone=1-1111 age=15 firestation=1 medications=[fakeMedic1, fakeMedic2, fakeMedic3] allergies=[]<br>");
+		expected.append("Jack Doe phone=1-1111 age=35 firestation=1 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1, fakeAllergy2]<br>");
+		
+		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);
+		when(firestationRepositoryMock.getByAddress("adress1")).thenReturn(1);
+		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
+
+		//Act
+		String result = SafetynetalertsServiceCUT.getPersonsFirestationAndMedicalRecordByAddress("adress1");
 
 		//Assert
 		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
