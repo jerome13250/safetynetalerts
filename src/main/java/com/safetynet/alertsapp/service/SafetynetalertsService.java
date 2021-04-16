@@ -85,6 +85,7 @@ public class SafetynetalertsService {
 					else {
 						numberOfChildren++;
 					}
+					break; //jumping out of loop
 				}
 			}
 		}
@@ -143,6 +144,7 @@ public class SafetynetalertsService {
 					else {
 						numberOfChildren++;
 					}
+					break; //jumping out of loop
 				}
 			}
 		}
@@ -187,6 +189,8 @@ public class SafetynetalertsService {
 					
 					reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
 					reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
+				
+					break; //jumping out of loop
 				}
 			}
 		}
@@ -253,6 +257,7 @@ public class SafetynetalertsService {
 					result.append(" medications=" + med.getMedications().toString());
 					result.append(" allergies=" + med.getAllergies().toString());
 					result.append("<br>");
+					break; //jumping out of loop
 				}
 			}
 		}

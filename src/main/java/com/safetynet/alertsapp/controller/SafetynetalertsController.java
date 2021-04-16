@@ -37,5 +37,10 @@ public class SafetynetalertsController {
 		return safetynetalertsService.getPhoneNumbersForStationNumber(firestation);
 	}
 	
+	//http://localhost:8080/fire?address=<address>
+	@GetMapping("/fire")
+	public String getPersonsFirestationAndMedicalRecordByAddress(@RequestParam(required=true) String address) {
+		return safetynetalertsService.getPersonsFirestationAndMedicalRecordByAddress(address);
+	}
 	
 }

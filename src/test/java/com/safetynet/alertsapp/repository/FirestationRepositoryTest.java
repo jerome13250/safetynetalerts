@@ -174,8 +174,8 @@ class FirestationRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("Test testgetByStationnumber")
-	void testgetByStationnumber()  throws Exception {
+	@DisplayName("Test getByStationnumber")
+	void testGetByStationnumber()  throws Exception {
 		//Arrange
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000)
@@ -188,4 +188,54 @@ class FirestationRepositoryTest {
 		assertEquals(1,objectList.size(),"Expected list size is 3");
 		assertEquals(expectedList,objectList,"Returned list must one Firestation");
 	}
+	
+	@Test
+	@DisplayName("Test getByAddress")
+	void testGetByAddress() throws Exception {
+		//Arrange
+		int expected = 1000;
+
+		//Act
+		int result = firestationRepositoryCUT.getByAddress("adress1");
+
+		//Assert
+		assertEquals(expected,result,"Returned value must be 1000");
+	}
+	
+	
+	@Test
+	@DisplayName("Test getByAddress, address not found")
+	void testGetByAddressNotFound() throws Exception {
+		//Arrange
+		int expected = -1;
+
+		//Act
+		int result = firestationRepositoryCUT.getByAddress("adressUnknown");
+
+		//Assert
+		assertEquals(expected,result,"Returned value must be -1");
+	}
+	
+	@Test
+	@DisplayName("Test getByAddress, more than 1 firestation found")
+	void testGetByAddressMultipleFirestationForAddress() throws Exception {
+		//Arrange
+		List<Firestation> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress1", 2000), //this should not exist
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+	
+		firestationRepositoryCUT.setFirestationList(dataInitialList);
+		
+		int expected = -1;
+
+		//Act
+		int result = firestationRepositoryCUT.getByAddress("adress1");
+
+		//Assert
+		assertEquals(expected,result,"Returned value must be -1");
+	}
+	
 }

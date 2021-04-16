@@ -24,7 +24,13 @@ public class SafetynetalertsControllerTest {
 	private SafetynetalertsService safetynetalertsService;
 
 	@Test
-	public void testGetPersonsByFirestationId() throws Exception {
+	public void testGetPersonsByStationnumberMap() throws Exception {
+		mockMvc.perform(get("/firestationMap?stationNumber=3"))
+		.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void testGetPersonsByStationnumberString() throws Exception {
 		mockMvc.perform(get("/firestation?stationNumber=3"))
 		.andExpect(status().isOk());
 	}
@@ -32,6 +38,18 @@ public class SafetynetalertsControllerTest {
 	@Test
 	public void testGetChildrenByAddressAndListOtherFamilyMembers() throws Exception {
 		mockMvc.perform(get("/childAlert?address=adress1"))
+		.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void testGetPhoneNumbersForStationNumber() throws Exception {
+		mockMvc.perform(get("/phoneAlert?firestation=1"))
+		.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void testGetPersonsFirestationAndMedicalRecordByAddress() throws Exception {
+		mockMvc.perform(get("/fire?address=testAddress"))
 		.andExpect(status().isOk());
 	}
 
