@@ -34,17 +34,39 @@ public class PersonRepository {
 				"persons",
 				Person.class);
 	}
-	
+
 	protected void setPersonList(List<Person> personList) {
 		this.personList = personList;
 	}
-	
+
 	public List<Person> getAll(){
 		return personList;
 	}
-	
+
 	public List<Person> getByAddress(String address) {
 		return personList.stream().filter(person->person.getAddress().equals(address)).collect(Collectors.toList());
+	}
+
+	public Person getByFirstnameLastname(String firstname, String lastname) {
+
+		List<Person> result = personList.stream().filter(person->
+		(person.getFirstName().equals(firstname) &&
+				person.getLastName().equals(lastname))).collect(Collectors.toList());
+
+		if (result.size()==1) {
+			return result.get(0);
+		}
+		else {
+			logger.error("Found {} persons for {} {}",result.size(), firstname, lastname );
+			throw new IllegalStateException ("Found "+result.size()+" persons for " +
+					" " + firstname+" "+ lastname + ", but was expecting 1 Person." );
+		}	
+	}
+
+	public List<Person> getByLastname(String lastname) {
+
+		return personList.stream().filter(person->
+		person.getLastName().equals(lastname)).collect(Collectors.toList());
 	}
 
 	public void add(Person person) {
@@ -68,12 +90,11 @@ public class PersonRepository {
 
 	public boolean delete(String firstName, String lastName) {
 		return personList.removeIf(person-> 
-			( 
+		( 
 				person.getFirstName().equals(firstName) &&
 				person.getLastName().equals(lastName)
-			));
+				));
 	}
 
-	
 
 }

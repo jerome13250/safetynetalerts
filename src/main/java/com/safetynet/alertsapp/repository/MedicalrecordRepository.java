@@ -1,7 +1,10 @@
 package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -33,14 +36,30 @@ public class MedicalrecordRepository {
 				"medicalrecords",
 				Medicalrecord.class);
 	}
-	
+
 	protected void setMedicalrecordList(List<Medicalrecord> medicalrecordList) {
 		this.medicalrecordList = medicalrecordList;
-		
 	}
 
 	public List<Medicalrecord> getAll(){
 		return medicalrecordList;
+	}
+
+	public Medicalrecord getByFirstnameAndLastName(String firstname, String lastname){
+
+		List<Medicalrecord> result = 
+				medicalrecordList.stream().filter(med -> 
+				(med.getFirstName().equals(firstname) && med.getLastName().equals(lastname)))
+				.collect(Collectors.toList());
+
+		if (result.size()==1) {
+			return result.get(0);
+		}
+		else {
+			logger.error("Found {} Medicalrecords for {} {}",result.size(), firstname, lastname );
+			throw new IllegalStateException ("Found "+result.size()+" Medicalrecords for "+result.size()+
+					" "+ firstname+" "+ lastname + ", but was expecting 1 Medicalrecord." );
+		}	
 	}
 
 	public void add(Medicalrecord medicalrecord) {
@@ -62,10 +81,10 @@ public class MedicalrecordRepository {
 
 	public boolean delete(String firstName, String lastName) {
 		return medicalrecordList.removeIf(medicalrecord-> 
-			( 
+		( 
 				medicalrecord.getFirstName().equals(firstName) &&
 				medicalrecord.getLastName().equals(lastName)
-			));
+				));
 	}
 
 

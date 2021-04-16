@@ -2,6 +2,7 @@ package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -127,7 +128,7 @@ class MedicalrecordRepositoryTest {
 	void testAdd_3medicalrecords_addOneMore()  throws Exception {
 		//Arrange
 		LocalDate date2021April1 = LocalDate.of(2021, 4, 1);
-		
+
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
 				new Medicalrecord(
@@ -339,6 +340,58 @@ class MedicalrecordRepositoryTest {
 		assertEquals(3,objectList.size(),"Expected list size is 3");
 		assertFalse(result,"Expected result to be failed : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, no record removed");
+	}
+	
+	@Test
+	@DisplayName("Test GetByFirstnameAndLastName")
+	void testGetByFirstnameAndLastName() throws Exception {
+		//Arrange
+		Medicalrecord expected = new Medicalrecord("John","Doe",date1984March6th,
+			new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+			new ArrayList<> (Arrays.asList("fakeAllergy1"))
+		);
+
+		//Act
+		Medicalrecord result = medicalrecordRepositoryCUT.getByFirstnameAndLastName("John", "Doe");
+
+		//Assert
+		assertEquals(expected,result,"Returned Medical record must be same as expected");
+	}
+	
+	@Test
+	@DisplayName("Test GetByFirstnameAndLastName, IllegalStateException: no medical record found")
+	void testGetByFirstnameAndLastName_IllegalStateExceptionNotFound() throws Exception {
+		//Arrange
+		//Act + Assert
+		assertThrows(IllegalStateException.class, () -> medicalrecordRepositoryCUT.getByFirstnameAndLastName("John", "Unknown"));
+	}
+	
+	@Test
+	@DisplayName("Test GetByFirstnameAndLastName, IllegalStateException: more than 1 medical record found")
+	void testGetByFirstnameAndLastName_IllegalStateExceptionMreThanOne() throws Exception {
+		//Arrange
+		List<Medicalrecord> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Medicalrecord("John","Doe",	date1984March6th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1"))
+						),
+				new Medicalrecord("John","Doe",	date1984March6th,
+						new ArrayList<>(),
+						new ArrayList<>()
+						),
+				new Medicalrecord("Mike", "Hill", date1990December15th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2", "fakeMedic3")),
+						new ArrayList<>()
+						),
+				new Medicalrecord("Jack", "Steel", date1928February28th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
+						)
+				));
+		medicalrecordRepositoryCUT.setMedicalrecordList(dataInitialList);
+		
+		//Act + Assert
+		assertThrows(IllegalStateException.class, () -> medicalrecordRepositoryCUT.getByFirstnameAndLastName("John", "Doe"));
 	}
 	
 }

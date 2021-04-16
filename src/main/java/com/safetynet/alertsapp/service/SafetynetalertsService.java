@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
 import com.safetynet.alertsapp.repository.FirestationRepository;
@@ -75,25 +76,20 @@ public class SafetynetalertsService {
 		int numberOfadults = 0;
 		int numberOfChildren = 0;
 		for (Map<String,Object> persondataMap : personsForStationnumber) {
-			for (Medicalrecord med : medicalrecordRepository.getAll()) {
-				if( persondataMap.get("firstName").equals(med.getFirstName()) && 
-						persondataMap.get("lastName").equals(med.getLastName()) ) {
 
-					if (calculateAge(med.getBirthdate()) >=18 ) {
-						numberOfadults++;
-					}
-					else {
-						numberOfChildren++;
-					}
-					break; //jumping out of loop
-				}
+			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+					(String)persondataMap.get("firstName"),
+					(String)persondataMap.get("lastName"));
+			if (calculateAge(med.getBirthdate()) >=18 ) {
+				numberOfadults++;
+			}
+			else {
+				numberOfChildren++;
 			}
 		}
 		reportPersons.put("numberOfadults", numberOfadults);
 		reportPersons.put("numberOfChildren", numberOfChildren);
-
 		return reportPersons;
-
 	}
 
 	/**
@@ -134,19 +130,15 @@ public class SafetynetalertsService {
 		int numberOfadults = 0;
 		int numberOfChildren = 0;
 		for (Person p : personsForStationnumber) {
-			for (Medicalrecord med : medicalrecordRepository.getAll()) {
-				if( p.getFirstName().equals(med.getFirstName()) && 
-						p.getLastName().equals(med.getLastName()) ) {
-
-					if (calculateAge(med.getBirthdate()) >=18 ) {
-						numberOfadults++;
-					}
-					else {
-						numberOfChildren++;
-					}
-					break; //jumping out of loop
-				}
+			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+					p.getFirstName(),
+					p.getLastName());
+			if (calculateAge(med.getBirthdate()) >=18 ) {
+				numberOfadults++;
 			}
+			else {
+				numberOfChildren++;
+			}			
 		}
 		reportPersons.append("numberOfAdults: " + numberOfadults  + "<br>");
 		reportPersons.append("numberOfChildren: " + numberOfChildren);
@@ -165,53 +157,51 @@ public class SafetynetalertsService {
 	public String getChildrenByAddressAndListOtherFamilyMembers(String address) {
 		//This will contain all the data :
 		StringBuilder reportChildAndOtherFamilyMembers = new StringBuilder();
-		
+
 		//Get All children at a specific address:
 		List<Person> personListForAddress = personRepository.getByAddress(address);
-		
+
 		for(Person p : personListForAddress) {
-			for (Medicalrecord med : medicalrecordRepository.getAll()) {
-				if(p.getFirstName().equals(med.getFirstName()) && 
-						p.getLastName().equals(med.getLastName()) &&
-								(calculateAge(med.getBirthdate())<18)  ) {
-					
-					String child = p.getFirstName() + " " + p.getLastName() + " age=" + calculateAge(med.getBirthdate());
-					logger.debug("child: {}",child );
-					reportChildAndOtherFamilyMembers.append(child);
-					
-					String otherMembersFamily = 
-					personListForAddress.stream().filter(person->(
-							!person.getFirstName().equals(p.getFirstName()) ||
-									!person.getLastName().equals(p.getLastName())))
-					.map(person->person.getFirstName() + " " + person.getLastName())
-					.collect(Collectors.joining (","));
-					logger.debug("otherMembersFamily: {}",otherMembersFamily );
-					
-					reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
-					reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
-				
-					break; //jumping out of loop
-				}
+			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+					p.getFirstName(),
+					p.getLastName());
+
+			if(calculateAge(med.getBirthdate())<18) {
+
+				String child = p.getFirstName() + " " + p.getLastName() + " age=" + calculateAge(med.getBirthdate());
+				logger.debug("child: {}",child );
+				reportChildAndOtherFamilyMembers.append(child);
+
+				String otherMembersFamily = 
+						personListForAddress.stream().filter(person->(
+								!person.getFirstName().equals(p.getFirstName()) ||
+								!person.getLastName().equals(p.getLastName())))
+						.map(person->person.getFirstName() + " " + person.getLastName())
+						.collect(Collectors.joining (","));
+				logger.debug("otherMembersFamily: {}",otherMembersFamily );
+
+				reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
+				reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
+
 			}
 		}
 		return reportChildAndOtherFamilyMembers.toString();
 	}
-	
+
 	/**
 	 * Finds the phone number of people under a specific firestation number 
 	 * @param stationNumber
 	 * @return the list of phone numbers
 	 */
-
 	public String getPhoneNumbersForStationNumber(int stationNumber) {
-		
+
 		//This will contain the phone numbers, HashSet to avoid doubles :
 		Set<String> phoneNumbersSet = new HashSet<>();
-		
+
 		//Get all addresses with stationNumber:
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
 		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
-		
+
 		for (Person p: personRepository.getAll() ) {
 			logger.trace("Person p: {}", p);
 			if (adressesByStationnumber.contains(p.getAddress())) {
@@ -220,7 +210,7 @@ public class SafetynetalertsService {
 		}
 		return String.join("<br>", phoneNumbersSet);
 	}
-	
+
 	/**
 	 * Finds the list of persons living at a specific address with following informations:
 	 * <ul>
@@ -236,35 +226,73 @@ public class SafetynetalertsService {
 	 * @param address of persons
 	 * @return the string with all required informations
 	 */
-
 	public String getPersonsFirestationAndMedicalRecordByAddress(String address) {
-	
+
 		StringBuilder result = new StringBuilder();
-		
+
 		List<Person> personList = personRepository.getByAddress(address);
 		int firestationNumber = firestationRepository.getByAddress(address);
 		//TODO : if -1 throw BusinessException
-		List<Medicalrecord> medicalrecordList = medicalrecordRepository.getAll();
-		
+
 		for(Person p: personList) {
-			for(Medicalrecord med : medicalrecordList) {
-				if(p.getFirstName().equals(med.getFirstName()) &&
-						p.getLastName().equals(med.getLastName())) {
+			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+					p.getFirstName(),
+					p.getLastName());
+			//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
+			result.append(p.getFirstName() + " " + p.getLastName() + " phone=" + p.getPhone());
+			result.append(" age=" + calculateAge(med.getBirthdate()));
+			result.append(" firestation=" + firestationNumber);
+			result.append(" medications=" + med.getMedications().toString());
+			result.append(" allergies=" + med.getAllergies().toString());
+			result.append("<br>");
+
+		}
+
+		return result.toString();
+	}
+
+	/**
+	 * Finds persons grouped by firestation number and address with following infos:
+	 * <ul>
+	 * <li>firstname</li>
+	 * <li>name</li>
+	 * <li>phone</li>
+	 * <li>age</li>
+	 * <li>medications</li>
+	 * <li>allergies</li>
+	 * </ul>
+	 *  
+	 * @param listFirestations list of all firestations required
+	 * @return the string with all required informations
+	 */
+
+	public String getAddressesListOfPersonsPerStationNumberList(List<Integer> firestationNumberList) {
+
+		//This will contain the data :
+		StringBuilder result = new StringBuilder();
+		
+		for(Integer i : firestationNumberList) {
+			result.append("FIRESTATION NUMBER: " + i + "<br>");
+			List<Firestation> firestationList = firestationRepository.getByStationnumber(i);
+			for(Firestation f : firestationList) {
+				result.append("address: " + f.getAddress() + "<br>");
+				List<Person> personList = personRepository.getByAddress(f.getAddress());
+				for (Person p : personList) {
+					Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+							p.getFirstName(),
+							p.getLastName());
 					//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
 					result.append(p.getFirstName() + " " + p.getLastName() + " phone=" + p.getPhone());
 					result.append(" age=" + calculateAge(med.getBirthdate()));
-					result.append(" firestation=" + firestationNumber);
 					result.append(" medications=" + med.getMedications().toString());
 					result.append(" allergies=" + med.getAllergies().toString());
 					result.append("<br>");
-					break; //jumping out of loop
 				}
 			}
 		}
-		
-		
 		return result.toString();
 	}
+
 
 
 

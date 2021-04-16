@@ -53,4 +53,10 @@ public class SafetynetalertsControllerTest {
 		.andExpect(status().isOk());
 	}
 
+	//http://localhost:8080/flood/stations?stations=2,3
+	@Test
+	public void testGetPersonsAndMedicalRecordByStationNumberAndAddresses() throws Exception {
+		mockMvc.perform(get("/flood/stations?stations=2,3"))
+		.andExpect(status().isOk());
+	}
 }
