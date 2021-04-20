@@ -5,6 +5,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -26,6 +31,7 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 public class SafetynetalertsService {
 
 	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsService.class);
+	ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
 	FirestationRepository firestationRepository;
@@ -42,17 +48,20 @@ public class SafetynetalertsService {
 	}
 
 	/**
-	 * returns a Map object containing following keys: "persons", "numberOfadults", "numberOfchildren"
+	 * returns informations for a station number: "persons", "numberOfadults", "numberOfchildren"
 	 * 
 	 * @param stationNumber
-	 * @return containing key="persons" / value=List of persons 
+	 * @return JSON node containing key="persons" / value=List of persons 
 	 * + key="numberOfadults" / value=numberOfAdults"
 	 * + key="numberOfchildren" / value=numberOfchildren"
 	 */
-	public Map<String,Object> getPersonsByStationnumberMap(int stationNumber) {
+	public JsonNode getPersonsByStationnumber(int stationNumber) {
 
-		//This will contain all the data :
-		Map<String,Object> reportPersons = new HashMap<>();
+		//This will contain the data :
+		ObjectNode result = mapper.createObjectNode();
+		ArrayNode persons = result.putArray("persons");
+		int numberOfadults = 0;
+		int numberOfChildren = 0;
 
 		//Get all addresses with stationNumber:
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
@@ -61,90 +70,29 @@ public class SafetynetalertsService {
 		for (Person p: personRepository.getAll() ) {
 			logger.debug("Person p: {}", p);
 			if (adressesByStationnumber.contains(p.getAddress())) {
-				//Create Hashmap that contains only needed informations: Prénom, nom, adresse, numéro de téléphone.
-				Map<String,Object> persondataMap = new HashMap<>();
-				persondataMap.put("firstName", p.getFirstName());
-				persondataMap.put("lastName", p.getLastName());
-				persondataMap.put("address", p.getAddress());
-				persondataMap.put("phone", p.getPhone());
-				personsForStationnumber.add(persondataMap);
+				//Create Node that contains only needed informations: Prénom, nom, adresse, numéro de téléphone.
+				ObjectNode person = persons.addObject();
+				person.put("firstName", p.getFirstName());
+				person.put("lastName", p.getLastName());
+				person.put("address", p.getAddress());
+				person.put("phone", p.getPhone());
+
+				//use loop to compute children/adults:
+				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+						p.getFirstName(),
+						p.getLastName());
+				if (calculateAge(med.getBirthdate()) >=18 ) {
+					numberOfadults++;
+				}
+				else {
+					numberOfChildren++;
+				}
 			}
 		}
-		reportPersons.put("persons", personsForStationnumber);
+		result.put("adults", numberOfadults);
+		result.put("children", numberOfChildren);
 
-		//Get numberOfadults and numberOfChildren:
-		int numberOfadults = 0;
-		int numberOfChildren = 0;
-		for (Map<String,Object> persondataMap : personsForStationnumber) {
-
-			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
-					(String)persondataMap.get("firstName"),
-					(String)persondataMap.get("lastName"));
-			if (calculateAge(med.getBirthdate()) >=18 ) {
-				numberOfadults++;
-			}
-			else {
-				numberOfChildren++;
-			}
-		}
-		reportPersons.put("numberOfadults", numberOfadults);
-		reportPersons.put("numberOfChildren", numberOfChildren);
-		return reportPersons;
-	}
-
-	/**
-	 * returns a String object containing following informations on a specific firestation:
-	 * <ul>
-	 * <li>List of persons : firstname, lastname, address, phone</li
-	 * <li>numberOfadults</li>
-	 * <li>numberOfchildren</li>
-	 * 
-	 * @param stationNumber
-	 * @return containing key="persons" / value=List of persons 
-	 * + key="numberOfadults" / value=numberOfAdults"
-	 * + key="numberOfchildren" / value=numberOfchildren"
-	 */
-	public String getPersonsByStationnumberString(int stationNumber) {
-
-		//This will contain all the data :
-		StringBuilder reportPersons = new StringBuilder();
-
-		logger.debug("firestationRepository.getByStationnumber(stationNumber): {}",firestationRepository.getByStationnumber(stationNumber) );
-		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
-		logger.debug("adressesByStationnumber: {}",adressesByStationnumber );
-		List<Person> personsForStationnumber = new ArrayList<>();
-		for (Person p: personRepository.getAll() ) {
-			if (adressesByStationnumber.contains(p.getAddress())) {
-				//Prénom, nom, adresse, numéro de téléphone.
-				reportPersons.append("firstName: " + p.getFirstName() + " / ");
-				reportPersons.append("lastName: " + p.getLastName() + " / ");
-				reportPersons.append("address: " + p.getAddress() + " / ");
-				reportPersons.append("phone: " + p.getPhone() + "<br>");
-
-				//Save the person list:
-				personsForStationnumber.add(p);
-			}
-		}
-
-		//Get numberOfadults and numberOfChildren:
-		int numberOfadults = 0;
-		int numberOfChildren = 0;
-		for (Person p : personsForStationnumber) {
-			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
-					p.getFirstName(),
-					p.getLastName());
-			if (calculateAge(med.getBirthdate()) >=18 ) {
-				numberOfadults++;
-			}
-			else {
-				numberOfChildren++;
-			}			
-		}
-		reportPersons.append("numberOfAdults: " + numberOfadults  + "<br>");
-		reportPersons.append("numberOfChildren: " + numberOfChildren);
-
-		return reportPersons.toString();
-
+		return result;
 	}
 
 	/**
@@ -154,38 +102,35 @@ public class SafetynetalertsService {
 	 * @param address
 	 * @return containing all the informations
 	 */
-	public String getChildrenByAddressAndListOtherFamilyMembers(String address) {
-		//This will contain all the data :
-		StringBuilder reportChildAndOtherFamilyMembers = new StringBuilder();
+	public JsonNode getChildrenByAddressAndListOtherFamilyMembers(String address) {
+		//This will contain the data :
+		ArrayNode result = mapper.createArrayNode();
 
 		//Get All children at a specific address:
 		List<Person> personListForAddress = personRepository.getByAddress(address);
-
 		for(Person p : personListForAddress) {
 			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 					p.getFirstName(),
 					p.getLastName());
 
 			if(calculateAge(med.getBirthdate())<18) {
+				ObjectNode person = result.addObject();
+				person.put("firstName", p.getFirstName());
+				person.put("lastName", p.getLastName());
+				person.put("age", calculateAge(med.getBirthdate()));
 
-				String child = p.getFirstName() + " " + p.getLastName() + " age=" + calculateAge(med.getBirthdate());
-				logger.debug("child: {}",child );
-				reportChildAndOtherFamilyMembers.append(child);
-
-				String otherMembersFamily = 
-						personListForAddress.stream().filter(person->(
-								!person.getFirstName().equals(p.getFirstName()) ||
-								!person.getLastName().equals(p.getLastName())))
-						.map(person->person.getFirstName() + " " + person.getLastName())
-						.collect(Collectors.joining (","));
-				logger.debug("otherMembersFamily: {}",otherMembersFamily );
-
-				reportChildAndOtherFamilyMembers.append(", familyMembers: " + otherMembersFamily);
-				reportChildAndOtherFamilyMembers.append("<br>"); //next line for browser display
-
+				ArrayNode family = person.putArray("family");
+				personListForAddress.stream().filter(p1->(
+						!p1.getFirstName().equals(p.getFirstName()) ||
+						!p1.getLastName().equals(p.getLastName()))
+						).forEach(p2->{
+							ObjectNode familyMember = family.addObject();
+							familyMember.put("firstName", p2.getFirstName());
+							familyMember.put("lastName", p2.getLastName());
+						});
 			}
 		}
-		return reportChildAndOtherFamilyMembers.toString();
+		return result;
 	}
 
 	/**
@@ -193,7 +138,7 @@ public class SafetynetalertsService {
 	 * @param stationNumber
 	 * @return the list of phone numbers
 	 */
-	public String getPhoneNumbersForStationNumber(int stationNumber) {
+	public JsonNode getPhoneNumbersForStationNumber(int stationNumber) {
 
 		//This will contain the phone numbers, HashSet to avoid doubles :
 		Set<String> phoneNumbersSet = new HashSet<>();
@@ -202,13 +147,19 @@ public class SafetynetalertsService {
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
 		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
 
+		ArrayNode result = mapper.createArrayNode();
+
 		for (Person p: personRepository.getAll() ) {
 			logger.trace("Person p: {}", p);
 			if (adressesByStationnumber.contains(p.getAddress())) {
 				phoneNumbersSet.add(p.getPhone());
 			}
 		}
-		return String.join("<br>", phoneNumbersSet);
+
+		//hasSet to json:
+		phoneNumbersSet.stream().forEach(s-> result.addObject().put("phone",s));
+
+		return result;
 	}
 
 	/**
@@ -226,9 +177,9 @@ public class SafetynetalertsService {
 	 * @param address of persons
 	 * @return the string with all required informations
 	 */
-	public String getPersonsFirestationAndMedicalRecordByAddress(String address) {
-
-		StringBuilder result = new StringBuilder();
+	public JsonNode getPersonsFirestationAndMedicalRecordByAddress(String address) {
+		//This will contain the data :
+		ArrayNode result = mapper.createArrayNode();
 
 		List<Person> personList = personRepository.getByAddress(address);
 		int firestationNumber = firestationRepository.getByAddress(address);
@@ -239,16 +190,15 @@ public class SafetynetalertsService {
 					p.getFirstName(),
 					p.getLastName());
 			//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
-			result.append(p.getFirstName() + " " + p.getLastName() + " phone=" + p.getPhone());
-			result.append(" age=" + calculateAge(med.getBirthdate()));
-			result.append(" firestation=" + firestationNumber);
-			result.append(" medications=" + med.getMedications().toString());
-			result.append(" allergies=" + med.getAllergies().toString());
-			result.append("<br>");
-
+			ObjectNode obj = result.addObject().put("firstname", p.getFirstName()).put("lastname", p.getLastName()).put("phone", p.getPhone())
+					.put("age", calculateAge(med.getBirthdate())).put("firestation", firestationNumber);
+			ArrayNode medications = obj.putArray("medications");
+			med.getMedications().stream().forEach(m->medications.addObject().put("medication",m));
+			ArrayNode allergies = obj.putArray("allergies");
+			med.getAllergies().stream().forEach(a->allergies.addObject().put("allergy",a));
 		}
 
-		return result.toString();
+		return result;
 	}
 
 	/**
@@ -265,32 +215,85 @@ public class SafetynetalertsService {
 	 * @param listFirestations list of all firestations required
 	 * @return the string with all required informations
 	 */
+	public JsonNode getAddressesListOfPersonsPerStationNumberList(List<Integer> firestationNumberList) {
+		//TODO:
 
-	public String getAddressesListOfPersonsPerStationNumberList(List<Integer> firestationNumberList) {
 
 		//This will contain the data :
-		StringBuilder result = new StringBuilder();
-		
+		ArrayNode result = mapper.createArrayNode();
+
 		for(Integer i : firestationNumberList) {
-			result.append("FIRESTATION NUMBER: " + i + "<br>");
+			ObjectNode firestationObjectNode = result.addObject();
+			firestationObjectNode.put("stationnumber", i);
+			ArrayNode addressesArray = firestationObjectNode.putArray("addresses");
+			
 			List<Firestation> firestationList = firestationRepository.getByStationnumber(i);
 			for(Firestation f : firestationList) {
-				result.append("address: " + f.getAddress() + "<br>");
+				ObjectNode addressNode = addressesArray.addObject();
+				addressNode.put("address", f.getAddress());
 				List<Person> personList = personRepository.getByAddress(f.getAddress());
+				ArrayNode personArray = addressNode.putArray("persons");
 				for (Person p : personList) {
 					Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 							p.getFirstName(),
 							p.getLastName());
 					//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
-					result.append(p.getFirstName() + " " + p.getLastName() + " phone=" + p.getPhone());
-					result.append(" age=" + calculateAge(med.getBirthdate()));
-					result.append(" medications=" + med.getMedications().toString());
-					result.append(" allergies=" + med.getAllergies().toString());
-					result.append("<br>");
+					ObjectNode personNode = personArray.addObject().put("firstname",p.getFirstName()).put("lastname",p.getLastName())
+							.put("phone",p.getPhone()).put("age",calculateAge(med.getBirthdate()));
+					ArrayNode medications = personNode.putArray("medications");
+					med.getMedications().forEach(m->medications.addObject().put("medication",m));
+					ArrayNode allergies = personNode.putArray("allergies");
+					med.getAllergies().forEach(a->allergies.addObject().put("allergy",a));
 				}
 			}
 		}
-		return result.toString();
+		return result;
+	}
+
+	public JsonNode getPersonInfoByFirstNameAndLastName(String firstname, String lastname) {
+
+		//This will contain the data :
+		ArrayNode result = mapper.createArrayNode();
+
+		Person person = personRepository.getByFirstnameLastname(firstname, lastname);
+		if (person!=null) {
+			for (Person p: personRepository.getByLastname(person.getLastName())) {
+				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+						p.getFirstName(),
+						p.getLastName());
+				ObjectNode personNode = result.addObject().put("firstname",p.getFirstName()).put("lastname",p.getLastName())
+						.put("address",p.getAddress()).put("email",p.getEmail()).put("age",calculateAge(med.getBirthdate()));
+				ArrayNode medicationsArray = personNode.putArray("medications");
+				med.getMedications().forEach(m->medicationsArray.addObject().put("medication",m));
+				ArrayNode allergiesArray = personNode.putArray("allergies");
+				med.getAllergies().forEach(a->allergiesArray.addObject().put("allergy",a));
+				
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param string the city required
+	 * @return with all phones
+	 */
+	public JsonNode getPhonesInCity(String city) {
+
+		//to remove doubles we use HashSet:
+		Set<String> phoneSet = new HashSet<>();
+		for(Person p: personRepository.getByCity(city)) {
+			phoneSet.add(p.getPhone());
+		}
+
+		//generate JSON:
+		ArrayNode phonesArray = mapper.createArrayNode();
+		for(String s: phoneSet) {
+			ObjectNode phone = mapper.createObjectNode().put("phone", s);
+			phonesArray.add(phone);
+		}
+
+		return phonesArray;
 	}
 
 

@@ -15,7 +15,7 @@ import com.safetynet.alertsapp.service.SafetynetalertsService;
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
 //It auto-configures MockMvc instance as well.
 @WebMvcTest(controllers = SafetynetalertsController.class)  // we are asking to initialize only one web controller
-public class SafetynetalertsControllerTest {
+class SafetynetalertsControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -24,39 +24,47 @@ public class SafetynetalertsControllerTest {
 	private SafetynetalertsService safetynetalertsService;
 
 	@Test
-	public void testGetPersonsByStationnumberMap() throws Exception {
-		mockMvc.perform(get("/firestationMap?stationNumber=3"))
-		.andExpect(status().isOk());
-	}
-	
-	@Test
-	public void testGetPersonsByStationnumberString() throws Exception {
+	void testGetPersonsByStationnumberString() throws Exception {
 		mockMvc.perform(get("/firestation?stationNumber=3"))
 		.andExpect(status().isOk());
 	}
-	
+
 	@Test
-	public void testGetChildrenByAddressAndListOtherFamilyMembers() throws Exception {
+	void testGetChildrenByAddressAndListOtherFamilyMembers() throws Exception {
 		mockMvc.perform(get("/childAlert?address=adress1"))
 		.andExpect(status().isOk());
 	}
-	
+
 	@Test
-	public void testGetPhoneNumbersForStationNumber() throws Exception {
+	void testGetPhoneNumbersForStationNumber() throws Exception {
 		mockMvc.perform(get("/phoneAlert?firestation=1"))
 		.andExpect(status().isOk());
 	}
-	
+
 	@Test
-	public void testGetPersonsFirestationAndMedicalRecordByAddress() throws Exception {
+	void testGetPersonsFirestationAndMedicalRecordByAddress() throws Exception {
 		mockMvc.perform(get("/fire?address=testAddress"))
 		.andExpect(status().isOk());
 	}
 
 	//http://localhost:8080/flood/stations?stations=2,3
 	@Test
-	public void testGetPersonsAndMedicalRecordByStationNumberAndAddresses() throws Exception {
+	void testGetPersonsAndMedicalRecordByStationNumberAndAddresses() throws Exception {
 		mockMvc.perform(get("/flood/stations?stations=2,3"))
+		.andExpect(status().isOk());
+	}
+
+	//http://localhost:8080/personInfo?firstName=<firstName>&lastName=<lastName>
+	@Test
+	void testgetPersonInfoByFirstNameAndLastName() throws Exception {
+		mockMvc.perform(get("/personInfo?firstName=John&lastName=Doe"))
+		.andExpect(status().isOk());
+	}
+	
+	//http://localhost:8080/communityEmail?city=<city>
+	@Test
+	void testgetPhonesInCity() throws Exception {
+		mockMvc.perform(get("/communityEmail?city=Gotham"))
 		.andExpect(status().isOk());
 	}
 }

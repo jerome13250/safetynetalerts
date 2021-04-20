@@ -24,6 +24,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -35,6 +39,7 @@ import com.safetynet.alertsapp.repository.PersonRepository;
 class SafetynetalertsServiceTest {
 
 	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceTest.class);
+	ObjectMapper mapper = new ObjectMapper();
 
 	static List<Firestation> firestationInitialList;
 	static List<Firestation> firestationAdressesForStationNumber1;
@@ -51,6 +56,7 @@ class SafetynetalertsServiceTest {
 	static List<Person> personListForAddress1;
 	static List<Person> personListForAddress2;
 	static List<Person> personListForAddress3;
+	static List<Person> personListForGotham;
 	static Person personJohnDoe;
 
 	static LocalDate dateNow = LocalDate.now(); 
@@ -82,15 +88,15 @@ class SafetynetalertsServiceTest {
 		dateFor80YearsOld = dateNow.minusYears(80);
 
 		firestationInitialList = new ArrayList<>(Arrays.asList(
-				new Firestation("adress1", 1),
-				new Firestation("adress2", 1), 
-				new Firestation("adress3", 2),
-				new Firestation("adress4", 3)));
+				new Firestation("address1", 1),
+				new Firestation("address2", 1), 
+				new Firestation("address3", 2),
+				new Firestation("address4", 3)));
 		firestationAdressesForStationNumber1 = new ArrayList<>(Arrays.asList(
-				new Firestation("adress1", 1),
-				new Firestation("adress2", 1)));
+				new Firestation("address1", 1),
+				new Firestation("address2", 1)));
 		firestationAdressesForStationNumber2 = new ArrayList<>(Arrays.asList(
-				new Firestation("adress3", 2)));
+				new Firestation("address3", 2)));
 
 		medicalrecordJohnDoe = new Medicalrecord("John", "Doe", dateFor5YearsOld,
 				new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2")),
@@ -112,21 +118,27 @@ class SafetynetalertsServiceTest {
 
 
 		personInitialList = new ArrayList<>(
-				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "adress1", "Gotham", "johndoe@mail.com"),
-						new Person("Mike", "Doe", "1-1111", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
-						new Person("Jack", "Doe", "1-1111", 12345, "adress1", "Gotham", "jackdoe@mail.com"),
-						new Person("Jason", "Young", "2-2222", 78965, "adress2", "New-York", "jasonyoung@mail.com"),
-						new Person("Mike", "Old", "3-3333", 95175, "adress3", "Los Angeles", "mikeold@mail.com"),
-						new Person("Clark", "Kent", "4-4444", 99999, "adress4", "Metropolis", "superman@mail.com")));
+				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
+						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
+						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com"),
+						new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com"),
+						new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com"),
+						new Person("Clark", "Kent", "4-4444", 99999, "address4", "Metropolis", "superman@mail.com")));
 		personListForAddress1 = new ArrayList<>(
-				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "adress1", "Gotham", "johndoe@mail.com"),
-						new Person("Mike", "Doe", "1-1111", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
-						new Person("Jack", "Doe", "1-1111", 12345, "adress1", "Gotham", "jackdoe@mail.com")));
+				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
+						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
+						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com")));
 		personListForAddress2 = new ArrayList<>(
-				Arrays.asList(new Person("Jason", "Young", "2-2222", 78965, "adress2", "New-York", "jasonyoung@mail.com")));
+				Arrays.asList(new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com")));
 		personListForAddress3 = new ArrayList<>(
-				Arrays.asList(new Person("Mike", "Old", "3-3333", 95175, "adress3", "Los Angeles", "mikeold@mail.com")));
-		personJohnDoe = new Person("John", "Doe", "1-1111", 12345, "adress1", "Gotham", "johndoe@mail.com");
+				Arrays.asList(new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com")));
+		personJohnDoe = new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com");
+		personListForGotham = new ArrayList<>(
+				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
+						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
+						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com"),
+						new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com")
+						));
 	}
 
 	/**
@@ -136,58 +148,29 @@ class SafetynetalertsServiceTest {
 	 * @param objects contains the Map values
 	 * @return created with the 2 arrays
 	 */
-	private Map<String, Object> createMapFromArray(String[] keys , String[] objects) {
-		Map<String, Object> m = new HashMap<>();
+	private ObjectNode createObjectNodeFromArray(String[] keys , String[] values) {
+		ObjectNode node = mapper.createObjectNode();
 		for (int i = 0; i < keys.length; i++) {
-			m.put(keys[i], objects[i]);
+			node.put(keys[i], values[i]);
 		}
-
-		return m;
-	}
-
-	@Test
-	@DisplayName("Get Persons By Stationnumber + Number of adults and children, MAP Version")
-	void test_getPersonByStationnumberMap() {
-		//Arrange
-		Map<String,Object> expectedMap = new HashMap<>();
-		//List of Hashmap that contains Person "class-like" (limited to some parameters)
-		List<Map<String,Object>> persondataMapList = new ArrayList<>();
-		//Persons au format Hashmap: Prénom, nom, adresse, numéro de téléphone.
-		String[] keys = {"firstName","lastName","address","phone"};
-		persondataMapList.add(createMapFromArray(keys,new String[] {"John","Doe","adress1","1-1111"}));
-		persondataMapList.add(createMapFromArray(keys,new String[] {"Mike","Doe","adress1","1-1111"}));
-		persondataMapList.add(createMapFromArray(keys,new String[] {"Jack","Doe","adress1","1-1111"}));
-		persondataMapList.add(createMapFromArray(keys,new String[] {"Jason","Young","adress2","2-2222"}));
-		expectedMap.put("persons", persondataMapList);
-		//décompte du nombre d'adultes et du nombre d'enfants
-		expectedMap.put("numberOfadults", 2);
-		expectedMap.put("numberOfChildren", 2);
-
-		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jason","Young")).thenReturn(medicalrecordJasonYoung);
-		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
-
-		//Act
-		Map<String,Object> resultMap = SafetynetalertsServiceCUT.getPersonsByStationnumberMap(1);
-
-		//Assert
-		assertEquals(expectedMap,resultMap,"The 2 maps must have the dame data");
+		return node;
 	}
 
 	@Test
 	@DisplayName("Get Persons By Stationnumber + Number of adults and children")
-	void test_getPersonByStationnumberString() {
+	void test_getPersonByStationnumber() {
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("firstName: John / lastName: Doe / address: adress1 / phone: 1-1111<br>");
-		expected.append("firstName: Mike / lastName: Doe / address: adress1 / phone: 1-1111<br>");
-		expected.append("firstName: Jack / lastName: Doe / address: adress1 / phone: 1-1111<br>");
-		expected.append("firstName: Jason / lastName: Young / address: adress2 / phone: 2-2222<br>");
-		expected.append("numberOfAdults: 2<br>");
-		expected.append("numberOfChildren: 2");
+		ObjectNode expected = mapper.createObjectNode();
+		ArrayNode persons = expected.putArray("persons");
+		//Persons au format: Prénom, nom, addresse, numéro de téléphone.
+		String[] keys = {"firstName","lastName","address","phone"};
+		persons.add(createObjectNodeFromArray(keys,new String[] {"John","Doe","address1","1-1111"}));
+		persons.add(createObjectNodeFromArray(keys,new String[] {"Mike","Doe","address1","1-1111"}));
+		persons.add(createObjectNodeFromArray(keys,new String[] {"Jack","Doe","address1","1-1111"}));
+		persons.add(createObjectNodeFromArray(keys,new String[] {"Jason","Young","address2","2-2222"}));
+		//décompte du nombre d'adultes et du nombre d'enfants
+		expected.put("adults", 2);
+		expected.put("children", 2);
 
 		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
@@ -197,53 +180,61 @@ class SafetynetalertsServiceTest {
 		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
 
 		//Act
-		String result = SafetynetalertsServiceCUT.getPersonsByStationnumberString(1);
+		JsonNode result = SafetynetalertsServiceCUT.getPersonsByStationnumber(1);
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 json must have the dame data");
 	}
 
 	@Test
 	@DisplayName("Get Children By Address + List of other family members")
 	void test_getChildrenByAddressAndListOtherFamilyMembers() {
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("John Doe age=5, familyMembers: Mike Doe,Jack Doe<br>");
-		expected.append("Mike Doe age=15, familyMembers: John Doe,Jack Doe<br>");
+		ArrayNode expected = mapper.createArrayNode();
+		ObjectNode person1 = expected.addObject();
+		person1.put("firstName", "John").put("lastName", "Doe").put("age", 5);
+		ArrayNode family1 = person1.putArray("family");
+		family1.addObject().put("firstName", "Mike").put("lastName", "Doe");
+		family1.addObject().put("firstName", "Jack").put("lastName", "Doe");
+		ObjectNode person2 = expected.addObject();
+		person2.put("firstName", "Mike").put("lastName", "Doe").put("age", 15);
+		ArrayNode family2 = person2.putArray("family");
+		family2.addObject().put("firstName", "John").put("lastName", "Doe");
+		family2.addObject().put("firstName", "Jack").put("lastName", "Doe");
 
-		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
+		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
 
 		//Act
-		String result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("adress1");
+		JsonNode result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("address1");
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 String must have the dame data");
 	}
 
 	@Test
 	@DisplayName("Get phone numbers for a specific firestation number")
 	void test_getPhoneNumbersForStationNumber() {
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("1-1111<br>");
-		expected.append("2-2222");
+		ArrayNode expected = mapper.createArrayNode();
+		expected.addObject().put("phone", "1-1111");
+		expected.addObject().put("phone", "2-2222");
 
 		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
 		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
 
 		//Act
-		String result = SafetynetalertsServiceCUT.getPhoneNumbersForStationNumber(1);
+		JsonNode result = SafetynetalertsServiceCUT.getPhoneNumbersForStationNumber(1);
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 Json must have the dame data");
 	}
 
 	/**
 	 * http://localhost:8080/fire?address=<address>Cette url doit retourner la liste des habitants vivant
-	 *  à l’adresse donnée ainsi que le numéro de la casernede pompiers la desservant.
+	 *  à l’addresse donnée ainsi que le numéro de la casernede pompiers la desservant.
 	 *  La liste doit inclure le nom, le numéro de téléphone, l'âge et les antécédents
 	 *  médicaux (médicaments, posologie et allergies) de chaque personne.
 	 */
@@ -251,45 +242,111 @@ class SafetynetalertsServiceTest {
 	@DisplayName("Get persons, medical and firestation informations for a specific address")
 	void test_getPersonsFirestationAndMedicalRecordByAddress() {
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("John Doe phone=1-1111 age=5 firestation=1 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1]<br>");
-		expected.append("Mike Doe phone=1-1111 age=15 firestation=1 medications=[fakeMedic1, fakeMedic2, fakeMedic3] allergies=[]<br>");
-		expected.append("Jack Doe phone=1-1111 age=35 firestation=1 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1, fakeAllergy2]<br>");
+		ArrayNode expected = mapper.createArrayNode();
+		//John Doe
+		ObjectNode p1 = expected.addObject().put("firstname","John").put("lastname","Doe").put("phone","1-1111").put("age",5).put("firestation",1);
+		ArrayNode med1 = p1.putArray("medications");
+		med1.addObject().put("medication","fakeMedic1");
+		med1.addObject().put("medication","fakeMedic2");
+		ArrayNode allergy1 = p1.putArray("allergies");
+		allergy1.addObject().put("allergy","fakeAllergy1");
+		//Mike Doe
+		ObjectNode p2 = expected.addObject().put("firstname","Mike").put("lastname","Doe").put("phone","1-1111").put("age",15).put("firestation",1);
+		ArrayNode med2 = p2.putArray("medications");
+		med2.addObject().put("medication","fakeMedic1");
+		med2.addObject().put("medication","fakeMedic2");
+		med2.addObject().put("medication","fakeMedic3");
+		ArrayNode allergy2 = p2.putArray("allergies");
+		//Jack Doe
+		ObjectNode p3 = expected.addObject().put("firstname","Jack").put("lastname","Doe").put("phone","1-1111").put("age",35).put("firestation",1);
+		ArrayNode med3 = p3.putArray("medications");
+		med3.addObject().put("medication","fakeMedic1");
+		med3.addObject().put("medication","fakeMedic2");
+		ArrayNode allergy3 = p3.putArray("allergies");
+		allergy3.addObject().put("allergy","fakeAllergy1");
+		allergy3.addObject().put("allergy","fakeAllergy2");
 
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
-		when(firestationRepositoryMock.getByAddress("adress1")).thenReturn(1);
-		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
+		when(firestationRepositoryMock.getByAddress("address1")).thenReturn(1);
+		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 
 		//Act
-		String result = SafetynetalertsServiceCUT.getPersonsFirestationAndMedicalRecordByAddress("adress1");
+		JsonNode result = SafetynetalertsServiceCUT.getPersonsFirestationAndMedicalRecordByAddress("address1");
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 String must have the dame data");
 	}
 
 	/**
 	 * http://localhost:8080/flood/stations?stations=<a list of station_numbers>Cette url doit retourner une liste
-	 *  de tous les foyers desservis par la caserne. Cette liste doit regrouper les personnes par adresse. Elle doit
+	 *  de tous les foyers desservis par la caserne. Cette liste doit regrouper les personnes par addresse. Elle doit
 	 *   aussi inclure le nom, le numéro de téléphone et l'âge des habitants, etfaire figurer leurs antécédents médicaux
 	 *    (médicaments, posologie et allergies) à côté de chaque nom.
 	 */
 	@Test
 	@DisplayName("Get addresses, list of persons per station_number")
-	void test_getPersonsAndMedicalRecordByStationNumberAndAddresses() {
+	void test_getAddressesListOfPersonsPerStationNumberList() {
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("FIRESTATION NUMBER: 1<br>");
-		expected.append("address: adress1<br>");
-		expected.append("John Doe phone=1-1111 age=5 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1]<br>");
-		expected.append("Mike Doe phone=1-1111 age=15 medications=[fakeMedic1, fakeMedic2, fakeMedic3] allergies=[]<br>");
-		expected.append("Jack Doe phone=1-1111 age=35 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1, fakeAllergy2]<br>");
-		expected.append("address: adress2<br>");
-		expected.append("Jason Young phone=2-2222 age=19 medications=[] allergies=[]<br>");
-		expected.append("FIRESTATION NUMBER: 2<br>");
-		expected.append("address: adress3<br>");
-		expected.append("Mike Old phone=3-3333 age=80 medications=[fakeMedic1, fakeMedic2, fakeMedic3] allergies=[fakeAllergy1, fakeAllergy2]<br>");
+		ArrayNode expected = mapper.createArrayNode();
+		//Firestation 1
+		ObjectNode firestation1 = expected.addObject();
+		firestation1.put("stationnumber", 1);
+		ArrayNode addressesList1 = firestation1.putArray("addresses");
+		//Firestation 1 / address 1
+		ObjectNode address1ForList1 = addressesList1.addObject();
+		address1ForList1.put("address", "address1");
+		ArrayNode personList1 = address1ForList1.putArray("persons");
+		//John Doe
+		ObjectNode address1p1 = personList1.addObject().put("firstname","John").put("lastname","Doe").put("phone","1-1111").put("age",5);
+		ArrayNode address1med1 = address1p1.putArray("medications");
+		address1med1.addObject().put("medication","fakeMedic1");
+		address1med1.addObject().put("medication","fakeMedic2");
+		ArrayNode address1allergy1 = address1p1.putArray("allergies");
+		address1allergy1.addObject().put("allergy","fakeAllergy1");
+		//Mike Doe
+		ObjectNode address1p2 = personList1.addObject().put("firstname","Mike").put("lastname","Doe").put("phone","1-1111").put("age",15);
+		ArrayNode address1med2 = address1p2.putArray("medications");
+		address1med2.addObject().put("medication","fakeMedic1");
+		address1med2.addObject().put("medication","fakeMedic2");
+		address1med2.addObject().put("medication","fakeMedic3");
+		ArrayNode address1allergy2 = address1p2.putArray("allergies");
+		//Jack Doe
+		ObjectNode address1p3 = personList1.addObject().put("firstname","Jack").put("lastname","Doe").put("phone","1-1111").put("age",35);
+		ArrayNode address1med3 = address1p3.putArray("medications");
+		address1med3.addObject().put("medication","fakeMedic1");
+		address1med3.addObject().put("medication","fakeMedic2");
+		ArrayNode address1allergy3 = address1p3.putArray("allergies");
+		address1allergy3.addObject().put("allergy","fakeAllergy1");
+		address1allergy3.addObject().put("allergy","fakeAllergy2");
+
+		//Firestation 1 / address 2
+		ObjectNode address2ForList1 = addressesList1.addObject();
+		address2ForList1.put("address", "address2");
+		ArrayNode personList2 = address2ForList1.putArray("persons");
+		//Jason Young
+		ObjectNode address2p1 = personList2.addObject().put("firstname","Jason").put("lastname","Young").put("phone","2-2222").put("age",19);
+		ArrayNode address2med1 = address2p1.putArray("medications");
+		ArrayNode address2allergy1 = address2p1.putArray("allergies");
+
+		//Firestation 2
+		ObjectNode firestation2 = expected.addObject();
+		firestation2.put("stationnumber", 2);
+		ArrayNode addressesList2 = firestation2.putArray("addresses");
+		//Firestation 2 / address 3
+		ObjectNode address3ForList2 = addressesList2.addObject();
+		address3ForList2.put("address", "address3");
+		ArrayNode personList3 = address3ForList2.putArray("persons");
+		//Mike Old
+		ObjectNode address3p1 = personList3.addObject().put("firstname","Mike").put("lastname","Old").put("phone","3-3333").put("age",80);
+		ArrayNode address3med1 = address3p1.putArray("medications");
+		address3med1.addObject().put("medication","fakeMedic1");
+		address3med1.addObject().put("medication","fakeMedic2");
+		address3med1.addObject().put("medication","fakeMedic3");
+		ArrayNode address3allergy1 = address3p1.putArray("allergies");
+		address3allergy1.addObject().put("allergy","fakeAllergy1");
+		address3allergy1.addObject().put("allergy","fakeAllergy2");
 
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
@@ -300,45 +357,94 @@ class SafetynetalertsServiceTest {
 		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
 		when(firestationRepositoryMock.getByStationnumber(2)).thenReturn(firestationAdressesForStationNumber2);
 
-		when(personRepositoryMock.getByAddress("adress1")).thenReturn(personListForAddress1);
-		when(personRepositoryMock.getByAddress("adress2")).thenReturn(personListForAddress2);
-		when(personRepositoryMock.getByAddress("adress3")).thenReturn(personListForAddress3);
+		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
+		when(personRepositoryMock.getByAddress("address2")).thenReturn(personListForAddress2);
+		when(personRepositoryMock.getByAddress("address3")).thenReturn(personListForAddress3);
 
 		//Act
 		List<Integer> listFirestations = Arrays.asList(1,2);
-		String result = SafetynetalertsServiceCUT.getAddressesListOfPersonsPerStationNumberList(listFirestations);
+		JsonNode result = SafetynetalertsServiceCUT.getAddressesListOfPersonsPerStationNumberList(listFirestations);
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 String must have the dame data");
 	}
 
 	/*
 	 * http://localhost:8080/personInfo?firstName=<firstName>&lastName=<lastName>
-	 * Cette url doit retourner le nom, l'adresse, l'âge, l'adresse mail et les antécédents médicaux
+	 * Cette url doit retourner le nom, l'addresse, l'âge, l'addresse mail et les antécédents médicaux
 	 *  (médicaments,posologie, allergies) de chaque habitant. Si plusieurs personnes portent le même
 	 *   nom, elles doivent toutes apparaître.
 	 */
+	@Test
+	@DisplayName("Get a person info, display persons with same name")
 	void test_getPersonInfoByFirstNameAndLastName() {
 
 		//Arrange
-		StringBuilder expected = new StringBuilder();
-		expected.append("John Doe phone=1-1111 age=5 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1]<br>");
-		expected.append("Mike Doe phone=1-1111 age=15 medications=[fakeMedic1, fakeMedic2, fakeMedic3] allergies=[]<br>");
-		expected.append("Jack Doe phone=1-1111 age=35 medications=[fakeMedic1, fakeMedic2] allergies=[fakeAllergy1, fakeAllergy2]<br>");
+		ArrayNode expected = mapper.createArrayNode();
+		//John Doe
+		ObjectNode p1 = expected.addObject().put("firstname","John").put("lastname","Doe").put("address", "address1")
+				.put("email","johndoe@mail.com").put("age",5);
+		ArrayNode med1 = p1.putArray("medications");
+		med1.addObject().put("medication","fakeMedic1");
+		med1.addObject().put("medication","fakeMedic2");
+		ArrayNode allergy1 = p1.putArray("allergies");
+		allergy1.addObject().put("allergy","fakeAllergy1");
+		//Mike Doe
+		ObjectNode address1p2 = expected.addObject().put("firstname","Mike").put("lastname","Doe").put("address", "address1")
+				.put("email","mikedoe@mail.com").put("age",15);
+		ArrayNode med2 = address1p2.putArray("medications");
+		med2.addObject().put("medication","fakeMedic1");
+		med2.addObject().put("medication","fakeMedic2");
+		med2.addObject().put("medication","fakeMedic3");
+		ArrayNode allergy2 = address1p2.putArray("allergies");
+		//Jack Doe
+		ObjectNode p3 = expected.addObject().put("firstname","Jack").put("lastname","Doe").put("address", "address1")
+				.put("email","jackdoe@mail.com").put("age",35);
+		ArrayNode med3 = p3.putArray("medications");
+		med3.addObject().put("medication","fakeMedic1");
+		med3.addObject().put("medication","fakeMedic2");
+		ArrayNode allergy3 = p3.putArray("allergies");
+		allergy3.addObject().put("allergy","fakeAllergy1");
+		allergy3.addObject().put("allergy","fakeAllergy2");
 
+		
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
-
 		when(personRepositoryMock.getByFirstnameLastname("John", "Doe")).thenReturn(personJohnDoe);
 		when(personRepositoryMock.getByLastname("Doe")).thenReturn(personListForAddress1);
 
 		//Act
-		String result = SafetynetalertsServiceCUT.getPersonInfoByFirstNameAndLastName("John", "Doe");
+		JsonNode result = SafetynetalertsServiceCUT.getPersonInfoByFirstNameAndLastName("John", "Doe");
 
 		//Assert
-		assertEquals(expected.toString(),result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 String must have the dame data");
 
+	}
+
+	/**
+	 * http://localhost:8080/communityEmail?city=<city>
+	 * Cette url doit retourner les addresses mail de tous les habitants de la ville.
+	 */
+	@Test
+	@DisplayName("Get all phones number for a city")
+	void test_getPhonesInCity() {
+		//Arrange
+		ObjectMapper mapper = new ObjectMapper();
+		ArrayNode expected = mapper.createArrayNode();
+		ObjectNode phone1 = mapper.createObjectNode();
+		phone1.put("phone","1-1111");
+		ObjectNode phone2 = mapper.createObjectNode();
+		phone2.put("phone","2-2222");
+		expected.add(phone1).add(phone2);
+
+		when(personRepositoryMock.getByCity("Gotham")).thenReturn(personListForGotham);
+
+		//Act
+		JsonNode result = SafetynetalertsServiceCUT.getPhonesInCity("Gotham");
+
+		//Assert
+		assertEquals(expected,result,"The 2 JSON must have the same data");
 	}
 }
 

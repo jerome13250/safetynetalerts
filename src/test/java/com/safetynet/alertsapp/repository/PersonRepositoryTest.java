@@ -2,6 +2,8 @@ package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -137,7 +139,7 @@ public class PersonRepositoryTest {
 		assertFalse(result,"Expected result to be failure : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as initial List");
 	}
-	
+
 	@Test
 	@DisplayName("3 objects Person + delete one")
 	void testDelete_3persons_deleteOne()  throws Exception {
@@ -176,7 +178,7 @@ public class PersonRepositoryTest {
 		assertFalse(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
-	
+
 	@Test
 	@DisplayName("3 objects Person + try delete inexistant one")
 	void testgetByAddress()  throws Exception {
@@ -193,5 +195,82 @@ public class PersonRepositoryTest {
 		assertEquals(2,objectList.size(),"Expected list size is 3");
 		assertEquals(expectedList,objectList,"Returned list must be mockedList, filtered on address1");
 	}
+
+	@Test
+	@DisplayName("Test get by firstname and lastname")
+	void testgetByFirstnameLastname()  throws Exception {
+		//Arrange
+		Person expected = new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com");
+
+		//Act
+		Person result = personRepositoryCUT.getByFirstnameLastname("Matt","Damon");
+		//Assert
+		assertEquals(expected,result,"Returned person must be same as mocked");
+	}
 	
+	@Test
+	@DisplayName("Test get by unknown firstname and lastname, must return null")
+	void testgetByUnknownFirstnameLastnameMustReturnNull()  throws Exception {
+		//Arrange
+		
+		//Act
+		Person unknownFirstName = personRepositoryCUT.getByFirstnameLastname("Unknown","Damon");
+		Person unknownLastName = personRepositoryCUT.getByFirstnameLastname("Matt","Unknown");
+		Person unknownBoth = personRepositoryCUT.getByFirstnameLastname("Unknown","Unknown");
+		//Assert
+		assertNull(unknownFirstName,"Unknown person must return null");
+		assertNull(unknownLastName,"Unknown person must return null");
+		assertNull(unknownBoth,"Unknown person must return null");
+	}
+	
+	@Test
+	@DisplayName("Test get by firstname and lastname, return more than one entry is error")
+	void testgetByUnknownFirstnameLastname_IllegalStateException()  throws Exception {
+		//Arrange
+		List<Person> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
+				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com"),
+				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
+				));
+		personRepositoryCUT.setPersonList(dataInitialList);
+		
+		//Act-Assert
+		assertThrows(IllegalStateException.class,()->personRepositoryCUT.getByFirstnameLastname("Matt","Damon"));
+	}
+
+	@Test
+	@DisplayName("Test get by city")
+	void testgetByCity()   throws Exception {
+		//Arrange
+		List<Person> expected = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com")
+				));
+		//Act
+		List<Person> result = personRepositoryCUT.getByCity("Gotham");
+		//Assert
+		assertEquals(expected,result,"Returned person must be same as mocked");
+	}
+
+	@Test
+	@DisplayName("Test get by lastname")
+	void testgetByLastname()   throws Exception {
+		//Arrange
+		List<Person> expected = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com")
+				));
+		//Act
+		List<Person> result = personRepositoryCUT.getByLastname("Doe");
+		//Assert
+		assertEquals(expected,result,"Returned person must be same as mocked");
+	}
+
 }
+
+
+
+
+
+

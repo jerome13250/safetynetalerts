@@ -23,7 +23,7 @@ public class PersonRepository {
 	@Autowired
 	private JsonFileMapper jsonFileMapper;
 
-	//Cannot use constructor, must use @PostConstruct to access to jsonFileMapper :
+	//Cannot call loadJsonDataFromFile in constructor, must use @PostConstruct to access to jsonFileMapper :
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
 	@PostConstruct
@@ -46,9 +46,12 @@ public class PersonRepository {
 	public List<Person> getByAddress(String address) {
 		return personList.stream().filter(person->person.getAddress().equals(address)).collect(Collectors.toList());
 	}
+	
+	public List<Person> getByCity(String city) {
+		return personList.stream().filter(person->person.getCity().equals(city)).collect(Collectors.toList());
+	}
 
 	public Person getByFirstnameLastname(String firstname, String lastname) {
-
 		List<Person> result = personList.stream().filter(person->
 		(person.getFirstName().equals(firstname) &&
 				person.getLastName().equals(lastname))).collect(Collectors.toList());
@@ -56,7 +59,10 @@ public class PersonRepository {
 		if (result.size()==1) {
 			return result.get(0);
 		}
-		else {
+		else if (result.isEmpty()) { //not found is not an error
+			return null;
+		}
+		else {//this is to test case doubles : error
 			logger.error("Found {} persons for {} {}",result.size(), firstname, lastname );
 			throw new IllegalStateException ("Found "+result.size()+" persons for " +
 					" " + firstname+" "+ lastname + ", but was expecting 1 Person." );
@@ -64,7 +70,6 @@ public class PersonRepository {
 	}
 
 	public List<Person> getByLastname(String lastname) {
-
 		return personList.stream().filter(person->
 		person.getLastName().equals(lastname)).collect(Collectors.toList());
 	}
