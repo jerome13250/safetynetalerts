@@ -1,19 +1,13 @@
 package com.safetynet.alertsapp.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,30 +35,30 @@ class SafetynetalertsServiceTest {
 	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceTest.class);
 	ObjectMapper mapper = new ObjectMapper();
 
-	static List<Firestation> firestationInitialList;
-	static List<Firestation> firestationAdressesForStationNumber1;
-	static List<Firestation> firestationAdressesForStationNumber2;
+	List<Firestation> firestationInitialList;
+	List<Firestation> firestationAdressesForStationNumber1;
+	List<Firestation> firestationAdressesForStationNumber2;
 	//MedicalRecord
-	static List<Medicalrecord> medicalrecordInitialList;
-	static Medicalrecord medicalrecordJohnDoe;
-	static Medicalrecord medicalrecordMikeDoe;
-	static Medicalrecord medicalrecordJackDoe;
-	static Medicalrecord medicalrecordJasonYoung;
-	static Medicalrecord medicalrecordMikeOld;
+	List<Medicalrecord> medicalrecordInitialList;
+	Medicalrecord medicalrecordJohnDoe;
+	Medicalrecord medicalrecordMikeDoe;
+	Medicalrecord medicalrecordJackDoe;
+	Medicalrecord medicalrecordJasonYoung;
+	Medicalrecord medicalrecordMikeOld;
 	//Person
-	static List<Person> personInitialList;
-	static List<Person> personListForAddress1;
-	static List<Person> personListForAddress2;
-	static List<Person> personListForAddress3;
-	static List<Person> personListForGotham;
-	static Person personJohnDoe;
+	List<Person> personInitialList;
+	List<Person> personListForAddress1;
+	List<Person> personListForAddress2;
+	List<Person> personListForAddress3;
+	List<Person> personListForGotham;
+	Person personJohnDoe;
 
-	static LocalDate dateNow = LocalDate.now(); 
-	static LocalDate dateFor5YearsOld;
-	static LocalDate dateFor15YearsOld;
-	static LocalDate dateFor19YearsOld;
-	static LocalDate dateFor35YearsOld;
-	static LocalDate dateFor80YearsOld;
+	final LocalDate dateNow = LocalDate.now(); 
+	LocalDate dateFor5YearsOld;
+	LocalDate dateFor15YearsOld;
+	LocalDate dateFor19YearsOld;
+	LocalDate dateFor35YearsOld;
+	LocalDate dateFor80YearsOld;
 
 	@InjectMocks
 	SafetynetalertsService SafetynetalertsServiceCUT;
@@ -78,8 +72,8 @@ class SafetynetalertsServiceTest {
 	@Mock
 	PersonRepository personRepositoryMock;
 
-	@BeforeAll
-	static void initializeData() {
+	@BeforeEach
+	void initializeData() {
 		// create Dates for specific age
 		dateFor5YearsOld = dateNow.minusYears(5);
 		dateFor15YearsOld = dateNow.minusYears(15);

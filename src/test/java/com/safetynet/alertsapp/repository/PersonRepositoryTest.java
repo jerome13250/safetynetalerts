@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Person;
 
@@ -97,18 +98,49 @@ public class PersonRepositoryTest {
 	}
 
 	@Test
+	@DisplayName("Test add incomplete Person")
+	void testAdd_incompletePerson()  throws Exception {
+		//Arrange
+		List<Person> expectedList = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
+				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")));
+
+		Person incompletePerson1 = new Person();
+		Person incompletePerson2 = new Person(null,"doe","phone", 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson3 = new Person("john",null,"phone", 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson4 = new Person("john","doe",null, 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson5 = new Person("john","doe","phone", null, "address", "city", "fake@mail.com");
+		Person incompletePerson6 = new Person("john","doe","phone", 12345, null, "city", "fake@mail.com");
+		Person incompletePerson7 = new Person("john","doe","phone", 12345, "address", null, "fake@mail.com");
+		Person incompletePerson8 = new Person("john","doe","phone", 12345, "address", "city", null);
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson1));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson2));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson3));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson4));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson5));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson6));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson7));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.add(incompletePerson8));
+		
+		assertEquals(expectedList,personRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+
+	@Test
 	@DisplayName("3 objects Person + update one")
 	void testUpdate_3persons_updateOne()  throws Exception {
 		//Arrange
 		List<Person> expectedList = new ArrayList<> (Arrays.asList(
 				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
 				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
-				new Person("Matt","Damon","1-0000", 0, "adress0", "Nowhere", "mattdamon@updated.com")
+				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				));
 
 		//Act
 		boolean result = personRepositoryCUT.update(
-				new Person("Matt","Damon","1-0000", 0, "adress0", "Nowhere", "mattdamon@updated.com")
+				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				);
 		List<Person> objectList = personRepositoryCUT.getAll();
 
@@ -130,7 +162,7 @@ public class PersonRepositoryTest {
 
 		//Act
 		boolean result = personRepositoryCUT.update(
-				new Person("unknown","guy","0", 0, "none", "no city", "unknown@mail.com")
+				new Person("unknown","unknown","0", 0, "none", "no city", "unknown@mail.com")
 				);
 		List<Person> objectList = personRepositoryCUT.getAll();
 
@@ -140,6 +172,37 @@ public class PersonRepositoryTest {
 		assertEquals(expectedList,objectList,"Returned list must be same as initial List");
 	}
 
+	@Test
+	@DisplayName("Test update incomplete Person")
+	void testUpdate_incompletePerson()  throws Exception {
+		//Arrange
+		List<Person> expectedList = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
+				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")));
+
+		Person incompletePerson1 = new Person();
+		Person incompletePerson2 = new Person(null,"doe","phone", 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson3 = new Person("john",null,"phone", 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson4 = new Person("john","doe",null, 12345, "address", "city", "fake@mail.com");
+		Person incompletePerson5 = new Person("john","doe","phone", null, "address", "city", "fake@mail.com");
+		Person incompletePerson6 = new Person("john","doe","phone", 12345, null, "city", "fake@mail.com");
+		Person incompletePerson7 = new Person("john","doe","phone", 12345, "address", null, "fake@mail.com");
+		Person incompletePerson8 = new Person("john","doe","phone", 12345, "address", "city", null);
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson1));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson2));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson3));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson4));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson5));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson6));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson7));
+		assertThrows(BusinessResourceException.class, ()->personRepositoryCUT.update(incompletePerson8));
+		
+		assertEquals(expectedList,personRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+	
 	@Test
 	@DisplayName("3 objects Person + delete one")
 	void testDelete_3persons_deleteOne()  throws Exception {
@@ -207,12 +270,12 @@ public class PersonRepositoryTest {
 		//Assert
 		assertEquals(expected,result,"Returned person must be same as mocked");
 	}
-	
+
 	@Test
 	@DisplayName("Test get by unknown firstname and lastname, must return null")
 	void testgetByUnknownFirstnameLastnameMustReturnNull()  throws Exception {
 		//Arrange
-		
+
 		//Act
 		Person unknownFirstName = personRepositoryCUT.getByFirstnameLastname("Unknown","Damon");
 		Person unknownLastName = personRepositoryCUT.getByFirstnameLastname("Matt","Unknown");
@@ -222,7 +285,7 @@ public class PersonRepositoryTest {
 		assertNull(unknownLastName,"Unknown person must return null");
 		assertNull(unknownBoth,"Unknown person must return null");
 	}
-	
+
 	@Test
 	@DisplayName("Test get by firstname and lastname, return more than one entry is error")
 	void testgetByUnknownFirstnameLastname_IllegalStateException()  throws Exception {
@@ -234,7 +297,7 @@ public class PersonRepositoryTest {
 				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
 				));
 		personRepositoryCUT.setPersonList(dataInitialList);
-		
+
 		//Act-Assert
 		assertThrows(IllegalStateException.class,()->personRepositoryCUT.getByFirstnameLastname("Matt","Damon"));
 	}
@@ -268,9 +331,4 @@ public class PersonRepositoryTest {
 	}
 
 }
-
-
-
-
-
 
