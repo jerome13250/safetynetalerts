@@ -11,8 +11,10 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
@@ -65,8 +67,12 @@ public class MedicalrecordRepository {
 		}	
 	}
 
-	public void add(Medicalrecord medicalrecord) {
-		medicalrecordList.add(medicalrecord);
+	public boolean add(Medicalrecord medicalrecord) {
+		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
+				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
+			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
+		}
+		return medicalrecordList.add(medicalrecord);
 	}
 
 	public boolean update(Medicalrecord medicalrecord) {

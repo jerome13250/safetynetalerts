@@ -2,6 +2,7 @@ package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -359,11 +360,13 @@ class MedicalrecordRepositoryTest {
 	}
 	
 	@Test
-	@DisplayName("Test GetByFirstnameAndLastName, IllegalStateException: no medical record found")
+	@DisplayName("Test GetByFirstnameAndLastName, no medical record found, must return null")
 	void testGetByFirstnameAndLastName_IllegalStateExceptionNotFound() throws Exception {
 		//Arrange
-		//Act + Assert
-		assertThrows(IllegalStateException.class, () -> medicalrecordRepositoryCUT.getByFirstnameAndLastName("John", "Unknown"));
+		//Act
+		Medicalrecord result = medicalrecordRepositoryCUT.getByFirstnameAndLastName("John", "Unknown");
+		//Assert
+		assertNull(result,"no medical record found, must return null");
 	}
 	
 	@Test
