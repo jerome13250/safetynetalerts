@@ -14,12 +14,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -50,7 +52,7 @@ public class SafetynetalertsService {
 	/**
 	 * returns informations for a station number: "persons", "numberOfadults", "numberOfchildren"
 	 * 
-	 * @param stationNumber
+	 * @param stationNumber the stationnumber required
 	 * @return JSON node containing key="persons" / value=List of persons 
 	 * + key="numberOfadults" / value=numberOfAdults"
 	 * + key="numberOfchildren" / value=numberOfchildren"
@@ -65,7 +67,6 @@ public class SafetynetalertsService {
 
 		//Get all addresses with stationNumber:
 		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
-		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
 		List<Map<String,Object>> personsForStationnumber = new ArrayList<>();
 		for (Person p: personRepository.getAll() ) {
 			logger.debug("Person p: {}", p);
@@ -99,7 +100,7 @@ public class SafetynetalertsService {
 	 * returns the children list (firstname, name, age) living at a specified address.
 	 * For each child, provides a list of other family members. 
 	 * If no child lives at this address, return an empty String.
-	 * @param address
+	 * @param address the required address
 	 * @return containing all the informations
 	 */
 	public JsonNode getChildrenByAddressAndListOtherFamilyMembers(String address) {
@@ -135,7 +136,7 @@ public class SafetynetalertsService {
 
 	/**
 	 * Finds the phone number of people under a specific firestation number 
-	 * @param stationNumber
+	 * @param stationNumber the required stationNumber
 	 * @return the list of phone numbers
 	 */
 	public JsonNode getPhoneNumbersForStationNumber(int stationNumber) {
@@ -178,27 +179,48 @@ public class SafetynetalertsService {
 	 * @return the string with all required informations
 	 */
 	public JsonNode getPersonsFirestationAndMedicalRecordByAddress(String address) {
-		//This will contain the data :
-		ArrayNode result = mapper.createArrayNode();
+		try{
+			//This will contain the data :
+			ArrayNode result = mapper.createArrayNode();
 
-		List<Person> personList = personRepository.getByAddress(address);
-		int firestationNumber = firestationRepository.getByAddress(address);
-		//TODO : if -1 throw BusinessException
+			List<Person> personList = personRepository.getByAddress(address);
+			Integer firestationNumber = firestationRepository.getByAddress(address);
 
-		for(Person p: personList) {
-			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
-					p.getFirstName(),
-					p.getLastName());
-			//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
-			ObjectNode obj = result.addObject().put("firstname", p.getFirstName()).put("lastname", p.getLastName()).put("phone", p.getPhone())
-					.put("age", calculateAge(med.getBirthdate())).put("firestation", firestationNumber);
-			ArrayNode medications = obj.putArray("medications");
-			med.getMedications().stream().forEach(m->medications.addObject().put("medication",m));
-			ArrayNode allergies = obj.putArray("allergies");
-			med.getAllergies().stream().forEach(a->allergies.addObject().put("allergy",a));
+			if(firestationNumber == null) {
+				logger.error("Address unknown: {}",address);
+				throw new BusinessResourceException("GetInfosPerAddress", "Address unknown: "+address, HttpStatus.NOT_FOUND);
+			} 
+
+			for(Person p: personList) {
+				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
+						p.getFirstName(),
+						p.getLastName());
+				if(med == null) {
+					logger.error("Medicalrecord missing for person: {} {}", p.getFirstName(),p.getLastName());
+					throw new BusinessResourceException("GetInfosPerAddress", "Medicalrecord missing for person: " 
+							+ p.getFirstName() + " " + p.getLastName(), HttpStatus.NOT_FOUND);
+				}
+
+				//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
+				ObjectNode obj = result.addObject().put("firstname", p.getFirstName()).put("lastname", p.getLastName()).put("phone", p.getPhone())
+						.put("age", calculateAge(med.getBirthdate())).put("firestation", firestationNumber);
+				ArrayNode medications = obj.putArray("medications");
+				med.getMedications().stream().forEach(m->medications.addObject().put("medication",m));
+				ArrayNode allergies = obj.putArray("allergies");
+				med.getAllergies().stream().forEach(a->allergies.addObject().put("allergy",a));
+			}
+
+			return result;
+
+		}
+		catch (BusinessResourceException e) {
+			throw e;
+		}
+		catch(Exception ex){
+			logger.error("Technical error getting informations", ex);
+			throw new BusinessResourceException("GetInfosPerAddress", "Technical error getting information for address: "+address, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return result;
 	}
 
 	/**
@@ -212,13 +234,10 @@ public class SafetynetalertsService {
 	 * <li>allergies</li>
 	 * </ul>
 	 *  
-	 * @param listFirestations list of all firestations required
+	 * @param firestationNumberList list of all firestations required
 	 * @return the string with all required informations
 	 */
 	public JsonNode getAddressesListOfPersonsPerStationNumberList(List<Integer> firestationNumberList) {
-		//TODO:
-
-
 		//This will contain the data :
 		ArrayNode result = mapper.createArrayNode();
 
@@ -226,7 +245,7 @@ public class SafetynetalertsService {
 			ObjectNode firestationObjectNode = result.addObject();
 			firestationObjectNode.put("stationnumber", i);
 			ArrayNode addressesArray = firestationObjectNode.putArray("addresses");
-			
+
 			List<Firestation> firestationList = firestationRepository.getByStationnumber(i);
 			for(Firestation f : firestationList) {
 				ObjectNode addressNode = addressesArray.addObject();
@@ -267,15 +286,15 @@ public class SafetynetalertsService {
 				med.getMedications().forEach(m->medicationsArray.addObject().put("medication",m));
 				ArrayNode allergiesArray = personNode.putArray("allergies");
 				med.getAllergies().forEach(a->allergiesArray.addObject().put("allergy",a));
-				
+
 			}
 		}
 		return result;
 	}
 
 	/**
-	 * 
-	 * @param string the city required
+	 * Search and return all phones for a city
+	 * @param city the city required
 	 * @return with all phones
 	 */
 	public JsonNode getPhonesInCity(String city) {

@@ -2,6 +2,8 @@ package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Firestation;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,14 +90,37 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		firestationRepositoryCUT.add(new Firestation("adress4", 444));
+		boolean result = firestationRepositoryCUT.add(new Firestation("adress4", 444));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
+		assertTrue(result,"The operation must be success");
 		assertEquals(4,objectList.size(),"Expected list size is 4");
 		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
 	}
 
+	@Test
+	@DisplayName("Test add incomplete Firestation")
+	void testAdd_incompleteFirestation()  throws Exception {
+		//Arrange
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)));
+
+		Firestation incompleteFirestation1 = new Firestation();
+		Firestation incompleteFirestation2 = new Firestation(null,1);
+		Firestation incompleteFirestation3 = new Firestation("address",null);
+		
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.add(incompleteFirestation1));
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.add(incompleteFirestation2));
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.add(incompleteFirestation3));
+		
+		assertEquals(expectedList,firestationRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+	
 	@Test
 	@DisplayName("3 objects Firestation + update one")
 	void testUpdate_3firestations_updateOne()  throws Exception {
@@ -135,8 +162,30 @@ class FirestationRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("3 objects Firestation + delete one")
-	void testDelete_3firestations_deleteOne()  throws Exception {
+	@DisplayName("Test update incomplete Firestation")
+	void testUpdate_incompleteFirestation()  throws Exception {
+		//Arrange
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)));
+
+		Firestation incompleteFirestation1 = new Firestation();
+		Firestation incompleteFirestation2 = new Firestation(null,1);
+		Firestation incompleteFirestation3 = new Firestation("address",null);
+		
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.update(incompleteFirestation1));
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.update(incompleteFirestation2));
+		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.update(incompleteFirestation3));
+		
+		assertEquals(expectedList,firestationRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+	
+	@Test
+	@DisplayName("3 objects Firestation + delete one by address")
+	void testDeleteByAddress_3firestations_deleteOne()  throws Exception {
 		//Arrange
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress2", 12345),
@@ -144,7 +193,7 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		boolean result = firestationRepositoryCUT.delete("adress1");
+		boolean result = firestationRepositoryCUT.deleteByAddress("adress1");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
@@ -154,8 +203,8 @@ class FirestationRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("3 objects Firestation + try delete inexistant one")
-	void testDelete_3firestations_tryDeleteInexistantOne()  throws Exception {
+	@DisplayName("3 objects Firestation + try delete inexistant one by address")
+	void testDeleteByAddress_3firestations_tryDeleteInexistantOne()  throws Exception {
 		//Arrange
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
@@ -164,15 +213,62 @@ class FirestationRepositoryTest {
 				));
 
 		//Act
-		boolean result = firestationRepositoryCUT.delete("adressUnknown");
+		boolean result = firestationRepositoryCUT.deleteByAddress("adressUnknown");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be successful : true");
+		assertFalse(result,"Expected result to be failed : result must be false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
 
+	@Test
+	@DisplayName("3 objects Firestation + delete one by station")
+	void testDeleteByStation_4firestations_deleteTwo()  throws Exception {
+		//Arrange
+		List<Firestation> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333),
+				new Firestation("adress4", 1000)
+				));
+		firestationRepositoryCUT.setFirestationList(dataInitialList);
+		
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+
+		//Act
+		boolean result = firestationRepositoryCUT.deleteByStation(1000);
+		List<Firestation> objectList = firestationRepositoryCUT.getAll();
+
+		//Assert
+		assertEquals(2,objectList.size(),"Expected list size is 2");
+		assertTrue(result,"Expected result to be successful : true");
+		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation 1000 must be removed");
+	}
+
+	@Test
+	@DisplayName("3 objects Firestation + try delete inexistant one")
+	void testDeleteByStation_3firestations_tryDeleteInexistantOne()  throws Exception {
+		//Arrange
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+
+		//Act
+		boolean result = firestationRepositoryCUT.deleteByStation(1);
+		List<Firestation> objectList = firestationRepositoryCUT.getAll();
+
+		//Assert
+		assertEquals(3,objectList.size(),"Expected list size is 3");
+		assertFalse(result,"Expected result to be failed : result must be false");
+		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
+	}
+	
 	@Test
 	@DisplayName("Test getByStationnumber")
 	void testGetByStationnumber()  throws Exception {
@@ -201,19 +297,17 @@ class FirestationRepositoryTest {
 		//Assert
 		assertEquals(expected,result,"Returned value must be 1000");
 	}
-	
-	
+		
 	@Test
 	@DisplayName("Test getByAddress, address not found")
 	void testGetByAddressNotFound() throws Exception {
 		//Arrange
-		int expected = -1;
-
+		
 		//Act
-		int result = firestationRepositoryCUT.getByAddress("adressUnknown");
+		Integer result = firestationRepositoryCUT.getByAddress("adressUnknown");
 
 		//Assert
-		assertEquals(expected,result,"Returned value must be -1");
+		assertNull(result,"Returned value must be null");
 	}
 	
 	@Test
@@ -231,11 +325,9 @@ class FirestationRepositoryTest {
 		
 		int expected = -1;
 
-		//Act
-		int result = firestationRepositoryCUT.getByAddress("adress1");
-
-		//Assert
-		assertEquals(expected,result,"Returned value must be -1");
+		//Act-Assert
+		assertThrows(IllegalStateException.class,()->firestationRepositoryCUT.getByAddress("adress1"));
+		
 	}
 	
 }

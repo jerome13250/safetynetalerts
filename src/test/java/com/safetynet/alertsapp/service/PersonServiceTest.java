@@ -54,7 +54,7 @@ public class PersonServiceTest {
 		Person result = personServiceCUT.savePerson(personToSave);
 
 		//Assert
-		assertNotNull(personSaved);
+		assertNotNull(result);
 		assertEquals(personToSave,result);
 		verify(personRepositoryMock, times(1)).add(any(Person.class));
 
@@ -176,7 +176,7 @@ public class PersonServiceTest {
 	}
 	
 	@Test
-	@DisplayName("Delete Person: fail case cause an unexpected exception occured")
+	@DisplayName("Delete Person: fail case cause UnsupportedOperationException occured")
 	void testDeletePerson_nothingDeleted_Exception() throws Exception {
 		//Arrange
 		when(personRepositoryMock.delete("John", "Doe")).thenThrow(UnsupportedOperationException.class);

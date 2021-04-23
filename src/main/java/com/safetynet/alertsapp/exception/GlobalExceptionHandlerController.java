@@ -1,4 +1,4 @@
-package com.safetynet.alertsapp.controller;
+package com.safetynet.alertsapp.exception;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,11 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.exception.BusinessResourceExceptionDTO;
-
-@ControllerAdvice(basePackages = {"com.safetynet.alertsapp"} ) //TODO: ?????
+//TODO: ?????
+@ControllerAdvice(basePackages = {"com.safetynet.alertsapp"} ) 
 public class GlobalExceptionHandlerController extends ResponseEntityExceptionHandler{
 
 	@InitBinder

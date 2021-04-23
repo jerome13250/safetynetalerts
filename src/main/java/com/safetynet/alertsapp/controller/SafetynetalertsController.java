@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,42 +21,49 @@ public class SafetynetalertsController {
 	private SafetynetalertsService safetynetalertsService;
 
 	@GetMapping("/firestation")
-	public JsonNode getPersonsByStationnumber(@RequestParam(required=true) Integer stationNumber) {
-		return safetynetalertsService.getPersonsByStationnumber(stationNumber);
+	public ResponseEntity<JsonNode> getPersonsByStationnumber(@RequestParam(required=true) Integer stationNumber) {
+		JsonNode jsonNode = safetynetalertsService.getPersonsByStationnumber(stationNumber);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	@GetMapping("/childAlert")
-	public JsonNode getChildrenByAddressAndListOtherFamilyMembers(@RequestParam(required=true) String address) {
-		return safetynetalertsService.getChildrenByAddressAndListOtherFamilyMembers(address);
+	public ResponseEntity<JsonNode> getChildrenByAddressAndListOtherFamilyMembers(@RequestParam(required=true) String address) {
+		JsonNode jsonNode = safetynetalertsService.getChildrenByAddressAndListOtherFamilyMembers(address);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	@GetMapping("/phoneAlert")
-	public JsonNode getPhoneNumbersForStationNumber(@RequestParam(required=true) Integer firestation) {
-		return safetynetalertsService.getPhoneNumbersForStationNumber(firestation);
+	public ResponseEntity<JsonNode> getPhoneNumbersForStationNumber(@RequestParam(required=true) Integer firestation) {
+		JsonNode jsonNode = safetynetalertsService.getPhoneNumbersForStationNumber(firestation);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	//http://localhost:8080/fire?address=<address>
 	@GetMapping("/fire")
-	public JsonNode getPersonsFirestationAndMedicalRecordByAddress(@RequestParam(required=true) String address) {
-		return safetynetalertsService.getPersonsFirestationAndMedicalRecordByAddress(address);
+	public ResponseEntity<JsonNode> getPersonsFirestationAndMedicalRecordByAddress(@RequestParam(required=true) String address) {
+		JsonNode jsonNode = safetynetalertsService.getPersonsFirestationAndMedicalRecordByAddress(address);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	//http://localhost:8080/flood/stations?stations=<a list of station_numbers>
 	@GetMapping("/flood/stations")
-	public JsonNode getPersonsAndMedicalRecordByStationNumberAndAddresses(@RequestParam(required=true) List<Integer> stations) {
-		return safetynetalertsService.getAddressesListOfPersonsPerStationNumberList(stations);
+	public ResponseEntity<JsonNode> getPersonsAndMedicalRecordByStationNumberAndAddresses(@RequestParam(required=true) List<Integer> stations) {
+		JsonNode jsonNode = safetynetalertsService.getAddressesListOfPersonsPerStationNumberList(stations);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	//http://localhost:8080/personInfo?firstName=<firstName>&lastName=<lastName>
 	@GetMapping("/personInfo")
-	public JsonNode getPersonInfoByFirstNameAndLastName(@RequestParam(required=true) String firstName, @RequestParam(required=true) String lastName ) {
-		return safetynetalertsService.getPersonInfoByFirstNameAndLastName(firstName, lastName);
+	public ResponseEntity<JsonNode> getPersonInfoByFirstNameAndLastName(@RequestParam(required=true) String firstName, @RequestParam(required=true) String lastName ) {
+		JsonNode jsonNode = safetynetalertsService.getPersonInfoByFirstNameAndLastName(firstName, lastName);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 	//http://localhost:8080/communityEmail?city=<city>
 	@GetMapping("/communityEmail")
-	public JsonNode getPhonesInCity(@RequestParam(required=true) String city ) {
-		return safetynetalertsService.getPhonesInCity(city);
+	public ResponseEntity<JsonNode> getPhonesInCity(@RequestParam(required=true) String city ) {
+		JsonNode jsonNode = safetynetalertsService.getPhonesInCity(city);
+		return new ResponseEntity<>(jsonNode, HttpStatus.OK);
 	}
 
 }

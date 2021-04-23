@@ -55,6 +55,9 @@ public class MedicalrecordRepository {
 		if (result.size()==1) {
 			return result.get(0);
 		}
+		else if (result.isEmpty()) {
+			return null;
+		}
 		else {
 			logger.error("Found {} Medicalrecords for {} {}",result.size(), firstname, lastname );
 			throw new IllegalStateException ("Found "+result.size()+" Medicalrecords for "+result.size()+
