@@ -330,8 +330,16 @@ public class SafetynetalertsService {
 
 
 
+	public List<Firestation> getAllFirestation() {
+		return firestationRepository.getAll();
+	}
 
-
-
+	public List<Medicalrecord> getAllMedicalrecord() {
+		return medicalrecordRepository.getAll();
+	}
+	
+	public List<Person> getAllPerson() {
+		return personRepository.getAll();
+	}
 
 }

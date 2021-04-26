@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Medicalrecord;
@@ -25,6 +26,10 @@ public class MedicalrecordRepository {
 	@Autowired
 	private JsonFileMapper jsonFileMapper;
 
+	//Custom property to read the json file path in application.properties
+	@Autowired
+	private CustomProperties props;
+	
 	//Cannot use constructor, must use @PostConstruct to access to jsonFileMapper :
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
@@ -32,7 +37,7 @@ public class MedicalrecordRepository {
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
 		medicalrecordList = jsonFileMapper.map(
-				Paths.get("json/data.json").toFile(),
+				Paths.get(props.getJsonfile()).toFile(),
 				"medicalrecords",
 				Medicalrecord.class);
 	}

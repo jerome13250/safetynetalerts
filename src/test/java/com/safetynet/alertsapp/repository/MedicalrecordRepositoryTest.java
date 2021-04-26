@@ -5,17 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,9 +23,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
-import com.safetynet.alertsapp.model.Medicalrecord;
+import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +41,10 @@ class MedicalrecordRepositoryTest {
 
 	@Mock
 	private JsonFileMapper jsonFileMapperMock;
+	
+	@Mock
+	private CustomProperties customPropertiesMock;
+	
 
 	@BeforeEach
 	void initializeList() {
@@ -95,8 +99,9 @@ class MedicalrecordRepositoryTest {
 						new ArrayList<>()
 						)
 				));
+		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.map(
-				Paths.get("json/data.json").toFile(),
+				Paths.get("thejsonfile.json").toFile(),
 				"medicalrecords",
 				Medicalrecord.class))
 		.thenReturn(mockedList);

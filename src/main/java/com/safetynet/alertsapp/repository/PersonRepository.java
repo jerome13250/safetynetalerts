@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Person;
@@ -25,6 +26,10 @@ public class PersonRepository {
 	@Autowired
 	private JsonFileMapper jsonFileMapper;
 
+	//Custom property to read the json file path in application.properties
+	@Autowired
+	private CustomProperties props;
+
 	//Cannot call loadJsonDataFromFile in constructor, must use @PostConstruct to access to jsonFileMapper :
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
@@ -32,7 +37,7 @@ public class PersonRepository {
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
 		personList = jsonFileMapper.map(
-				Paths.get("json/data.json").toFile(),
+				Paths.get(props.getJsonfile()).toFile(),
 				"persons",
 				Person.class);
 	}
@@ -48,11 +53,11 @@ public class PersonRepository {
 	public List<Person> getByAddress(String address) {
 		return personList.stream().filter(person->person.getAddress().equals(address)).collect(Collectors.toList());
 	}
-	
+
 	public List<Person> getByCity(String city) {
 		return personList.stream().filter(person->person.getCity().equals(city)).collect(Collectors.toList());
 	}
-	
+
 	/**
 	 * Find person for a specific firstname/lastname combination.
 	 * @param firstname of the person required
@@ -78,7 +83,7 @@ public class PersonRepository {
 			logger.error("Found {} persons for {} {} , but was expecting 1.",result.size(), firstname, lastname );
 			throw new IllegalStateException("Found "+result.size()+" persons for " +
 					" " + firstname+" "+ lastname + ", but was expecting 1 Person.");
-			
+
 		}	
 	}
 
@@ -90,7 +95,7 @@ public class PersonRepository {
 	public boolean add(Person person) throws BusinessResourceException {
 		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
 				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
-						null == person.getZip() ) {//donnees incompletes
+				null == person.getZip() ) {//donnees incompletes
 			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
 		return personList.add(person);
@@ -99,7 +104,7 @@ public class PersonRepository {
 	public boolean update(Person person) {
 		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
 				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
-						null == person.getZip() ) {//donnees incompletes
+				null == person.getZip() ) {//donnees incompletes
 			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
 		for (Person p : personList) {
@@ -115,7 +120,7 @@ public class PersonRepository {
 		}
 		return false; //update failed, firstname+lastname not found
 	}
-	
+
 	/*This would be for PATCH partial update
 	public boolean patch(Person person) {
 		for (Person p : personList) {
@@ -131,7 +136,7 @@ public class PersonRepository {
 		}
 		return false; //update failed, firstname+lastname not found
 	}
-	*/
+	 */
 
 	public boolean delete(String firstName, String lastName) {
 		return personList.removeIf(person-> 

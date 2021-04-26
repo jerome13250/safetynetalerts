@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Firestation;
@@ -35,6 +36,9 @@ class FirestationRepositoryTest {
 	@Mock
 	private JsonFileMapper jsonFileMapperMock;
 
+	@Mock
+	private CustomProperties customPropertiesMock;
+	
 	@BeforeEach
 	void initializeData() {
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
@@ -56,9 +60,9 @@ class FirestationRepositoryTest {
 				new Firestation("adress100", 10),
 				new Firestation("adress200", 20)
 				));
-		
+		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.map(
-				Paths.get("json/data.json").toFile(),
+				Paths.get("thejsonfile.json").toFile(),
 				"firestations",
 				Firestation.class))
 		.thenReturn(mockedList);

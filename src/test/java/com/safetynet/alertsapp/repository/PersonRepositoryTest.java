@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
 import com.safetynet.alertsapp.model.Person;
@@ -32,6 +33,9 @@ public class PersonRepositoryTest {
 
 	@Mock
 	private JsonFileMapper jsonFileMapperMock;
+	
+	@Mock
+	private CustomProperties customPropertiesMock;
 
 	@BeforeEach
 	void initializeData() {
@@ -54,8 +58,9 @@ public class PersonRepositoryTest {
 				new Person("Michael","Knight","2", 666, "adress11", "Miami", "michaelknight@mail.com")
 				));
 
+		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.map(
-				Paths.get("json/data.json").toFile(),
+				Paths.get("thejsonfile.json").toFile(),
 				"persons",
 				Person.class))
 		.thenReturn(mockedList);
