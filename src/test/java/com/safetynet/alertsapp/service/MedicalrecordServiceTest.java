@@ -175,7 +175,7 @@ class MedicalrecordServiceTest {
 				new ArrayList<> (Arrays.asList("fakeMedic1")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
 				);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Unknown")).thenReturn(null); //Medicalrecord does not exist in data
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe")).thenReturn(null); //Medicalrecord does not exist in data
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated));

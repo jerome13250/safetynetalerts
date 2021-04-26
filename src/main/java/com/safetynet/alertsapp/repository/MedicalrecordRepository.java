@@ -1,9 +1,7 @@
 package com.safetynet.alertsapp.repository;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -76,6 +74,10 @@ public class MedicalrecordRepository {
 	}
 
 	public boolean update(Medicalrecord medicalrecord) {
+		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
+				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
+			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
+		}
 		for (Medicalrecord f : medicalrecordList) {
 			if (f.getFirstName().equals(medicalrecord.getFirstName()) &&
 					f.getLastName().equals(medicalrecord.getLastName())) {

@@ -1,7 +1,6 @@
 package com.safetynet.alertsapp.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.service.SafetynetalertsService;
 
 @RestController

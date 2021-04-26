@@ -3,11 +3,8 @@ package com.safetynet.alertsapp.service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,13 +41,15 @@ public class SafetynetalertsService {
 	@Autowired
 	PersonRepository personRepository;
 
-	private int calculateAge(LocalDate birthdate) {
+	private Integer calculateAge(LocalDate birthdate) {
 		Period p = Period.between(birthdate, LocalDate.now());
 		return p.getYears();
 	}
 
 	/**
 	 * returns informations for a station number: "persons", "numberOfadults", "numberOfchildren"
+	 * <p><b>NOTE</b>: If a medicalRecord is missing for a person, we use a default medicalrecord with today as birthdate, hence he
+	 * is considered as child by default</p>
 	 * 
 	 * @param stationNumber the stationnumber required
 	 * @return JSON node containing key="persons" / value=List of persons 
@@ -64,11 +63,10 @@ public class SafetynetalertsService {
 		ArrayNode persons = result.putArray("persons");
 		int numberOfadults = 0;
 		int numberOfChildren = 0;
-
+ 
 		//Get all addresses with stationNumber:
-		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
-		List<Map<String,Object>> personsForStationnumber = new ArrayList<>();
-		for (Person p: personRepository.getAll() ) {
+		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(Firestation::getAddress).collect(Collectors.toList());
+		for (Person p: personRepository.getAll() ) { 
 			logger.debug("Person p: {}", p);
 			if (adressesByStationnumber.contains(p.getAddress())) {
 				//Create Node that contains only needed informations: Prénom, nom, adresse, numéro de téléphone.
@@ -82,6 +80,12 @@ public class SafetynetalertsService {
 				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 						p.getFirstName(),
 						p.getLastName());
+				//On gere le cas Medicalrecord==NULL en creant un Medicalrecord par defaut, cela evite un envoi 
+				//d'erreur empechant toute requete GET si un seul enregistrement est incomplet.
+				if (med==null) {
+					med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
+				}
+				
 				if (calculateAge(med.getBirthdate()) >=18 ) {
 					numberOfadults++;
 				}
@@ -113,7 +117,13 @@ public class SafetynetalertsService {
 			Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 					p.getFirstName(),
 					p.getLastName());
-
+			//On gere le cas Medicalrecord==NULL en creant un Medicalrecord par defaut, cela evite un envoi 
+			//d'erreur empechant toute requete GET si un seul enregistrement est incomplet.
+			if (med==null) {
+				med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
+			}
+			
+			
 			if(calculateAge(med.getBirthdate())<18) {
 				ObjectNode person = result.addObject();
 				person.put("firstName", p.getFirstName());
@@ -145,10 +155,8 @@ public class SafetynetalertsService {
 		Set<String> phoneNumbersSet = new HashSet<>();
 
 		//Get all addresses with stationNumber:
-		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(f->f.getAddress()).collect(Collectors.toList());
+		List<String> adressesByStationnumber = firestationRepository.getByStationnumber(stationNumber).stream().map(Firestation::getAddress).collect(Collectors.toList());
 		logger.debug("adressesByStationnumber: {}",adressesByStationnumber);
-
-		ArrayNode result = mapper.createArrayNode();
 
 		for (Person p: personRepository.getAll() ) {
 			logger.trace("Person p: {}", p);
@@ -158,6 +166,7 @@ public class SafetynetalertsService {
 		}
 
 		//hasSet to json:
+		ArrayNode result = mapper.createArrayNode();
 		phoneNumbersSet.stream().forEach(s-> result.addObject().put("phone",s));
 
 		return result;
@@ -179,26 +188,28 @@ public class SafetynetalertsService {
 	 * @return the string with all required informations
 	 */
 	public JsonNode getPersonsFirestationAndMedicalRecordByAddress(String address) {
-		try{
 			//This will contain the data :
 			ArrayNode result = mapper.createArrayNode();
 
 			List<Person> personList = personRepository.getByAddress(address);
 			Integer firestationNumber = firestationRepository.getByAddress(address);
-
+			
+			//deactivate exception: in this get, it is authorized to return a firestation=null
+			/*
 			if(firestationNumber == null) {
 				logger.error("Address unknown: {}",address);
 				throw new BusinessResourceException("GetInfosPerAddress", "Address unknown: "+address, HttpStatus.NOT_FOUND);
 			} 
+			*/
 
 			for(Person p: personList) {
 				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 						p.getFirstName(),
 						p.getLastName());
-				if(med == null) {
-					logger.error("Medicalrecord missing for person: {} {}", p.getFirstName(),p.getLastName());
-					throw new BusinessResourceException("GetInfosPerAddress", "Medicalrecord missing for person: " 
-							+ p.getFirstName() + " " + p.getLastName(), HttpStatus.NOT_FOUND);
+				//On gere le cas Medicalrecord==NULL en creant un Medicalrecord par defaut, cela evite un envoi 
+				//d'erreur empechant toute requete GET si un seul enregistrement est incomplet.
+				if (med==null) {
+					med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
 				}
 
 				//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
@@ -211,16 +222,6 @@ public class SafetynetalertsService {
 			}
 
 			return result;
-
-		}
-		catch (BusinessResourceException e) {
-			throw e;
-		}
-		catch(Exception ex){
-			logger.error("Technical error getting informations", ex);
-			throw new BusinessResourceException("GetInfosPerAddress", "Technical error getting information for address: "+address, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
 	}
 
 	/**
@@ -256,6 +257,12 @@ public class SafetynetalertsService {
 					Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 							p.getFirstName(),
 							p.getLastName());
+					//On gere le cas Medicalrecord==NULL en creant un Medicalrecord par defaut, cela evite un envoi 
+					//d'erreur empechant toute requete GET si un seul enregistrement est incomplet.
+					if (med==null) {
+						med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
+					}
+					
 					//"Jack Doe phone=1-1111 age=35 firestation=1 medications=fakeMedic1,fakeMedic2, allergies=fakeAllergy1,fakeAllergy2"
 					ObjectNode personNode = personArray.addObject().put("firstname",p.getFirstName()).put("lastname",p.getLastName())
 							.put("phone",p.getPhone()).put("age",calculateAge(med.getBirthdate()));
@@ -280,6 +287,12 @@ public class SafetynetalertsService {
 				Medicalrecord med = medicalrecordRepository.getByFirstnameAndLastName(
 						p.getFirstName(),
 						p.getLastName());
+				//On gere le cas Medicalrecord==NULL en creant un Medicalrecord par defaut, cela evite un envoi 
+				//d'erreur empechant toute requete GET si un seul enregistrement est incomplet.
+				if (med==null) {
+					med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
+				}
+				
 				ObjectNode personNode = result.addObject().put("firstname",p.getFirstName()).put("lastname",p.getLastName())
 						.put("address",p.getAddress()).put("email",p.getEmail()).put("age",calculateAge(med.getBirthdate()));
 				ArrayNode medicationsArray = personNode.putArray("medications");

@@ -35,7 +35,7 @@ public class FirestationService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating or updating firestation", ex);
+			logger.error("Technical error creating firestation", ex);
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating firestation: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

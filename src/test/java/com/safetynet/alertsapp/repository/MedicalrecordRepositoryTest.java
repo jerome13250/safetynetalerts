@@ -24,7 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @ExtendWith(MockitoExtension.class)
@@ -179,6 +181,39 @@ class MedicalrecordRepositoryTest {
 	}
 
 	@Test
+	@DisplayName("Test add incomplete Medicalrecord")
+	void testAdd_incompleteMedicalrecord()  throws Exception {
+		//Arrange
+		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
+				new Medicalrecord("John","Doe",date1984March6th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1"))),
+				new Medicalrecord("Mike","Hill",date1990December15th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2", "fakeMedic3")),
+						new ArrayList<>()),
+				new Medicalrecord("Jack","Steel",date1928February28th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2")))));
+
+		Medicalrecord incompleteMedicalrecord1 = new Medicalrecord();
+		Medicalrecord incompleteMedicalrecord2 = new Medicalrecord(null,"Doe",date1984March6th,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord3 = new Medicalrecord("John",null,date1984March6th,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord4 = new Medicalrecord("John","Doe",null,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord5 = new Medicalrecord("John","Doe",date1984March6th,null,new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord6 = new Medicalrecord("John","Doe",date1984March6th,new ArrayList<>(),null);
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord1));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord2));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord3));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord4));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord5));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.add(incompleteMedicalrecord6));
+		
+		assertEquals(expectedList,medicalrecordRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+	
+	@Test
 	@DisplayName("3 objects Medicalrecord, update one")
 	void testUpdate_3medicalrecords_updateOne()  throws Exception {
 		//Arrange
@@ -226,6 +261,39 @@ class MedicalrecordRepositoryTest {
 		assertEquals(expectedList,objectList,"Returned list must be same as expected List with 1 record modified");
 	}
 
+	@Test
+	@DisplayName("Test update incomplete Medicalrecord")
+	void testUpdate_incompleteMedicalrecord()  throws Exception {
+		//Arrange
+		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
+				new Medicalrecord("John","Doe",date1984March6th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1"))),
+				new Medicalrecord("Mike","Hill",date1990December15th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2", "fakeMedic3")),
+						new ArrayList<>()),
+				new Medicalrecord("Jack","Steel",date1928February28th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2")))));
+
+		Medicalrecord incompleteMedicalrecord1 = new Medicalrecord();
+		Medicalrecord incompleteMedicalrecord2 = new Medicalrecord(null,"Doe",date1984March6th,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord3 = new Medicalrecord("John",null,date1984March6th,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord4 = new Medicalrecord("John","Doe",null,new ArrayList<>(),new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord5 = new Medicalrecord("John","Doe",date1984March6th,null,new ArrayList<>());
+		Medicalrecord incompleteMedicalrecord6 = new Medicalrecord("John","Doe",date1984March6th,new ArrayList<>(),null);
+		//Act-Assert
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord1));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord2));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord3));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord4));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord5));
+		assertThrows(BusinessResourceException.class, ()->medicalrecordRepositoryCUT.update(incompleteMedicalrecord6));
+		
+		assertEquals(expectedList,medicalrecordRepositoryCUT.getAll(),"Returned list must be same as initial List");
+		
+	}
+	
 	@Test
 	@DisplayName("3 objects Medicalrecord, try update inexistant one")
 	void testUpdate_3medicalrecords_tryUpdateInexistantOne()  throws Exception {

@@ -52,6 +52,12 @@ class SafetynetalertsServiceTest {
 	List<Person> personListForAddress3;
 	List<Person> personListForGotham;
 	Person personJohnDoe;
+	Person personMikeDoe;
+	Person personJackDoe;
+	Person personJasonYoung;
+	Person personMikeOld;
+	Person personClarkKent;
+	Person NoMedicalRecordDoe;
 
 	final LocalDate dateNow = LocalDate.now(); 
 	LocalDate dateFor5YearsOld;
@@ -110,29 +116,26 @@ class SafetynetalertsServiceTest {
 		medicalrecordInitialList = new ArrayList<>(
 				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe,medicalrecordJasonYoung,medicalrecordMikeOld));
 
+		personJohnDoe = new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com");
+		personMikeDoe = new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com");
+		personJackDoe = new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com");
+		NoMedicalRecordDoe = new Person("NoMedicalRecord", "Doe", "0-0000", 78965, "address1", "Gotham", "nomedicalrecorddoe@mail.com");
+		personJasonYoung = new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com");
+		personMikeOld = new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com");
+		personClarkKent = new Person("Clark", "Kent", "4-4444", 99999, "address4", "Metropolis", "superman@mail.com");
+
 
 		personInitialList = new ArrayList<>(
-				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
-						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
-						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com"),
-						new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com"),
-						new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com"),
-						new Person("Clark", "Kent", "4-4444", 99999, "address4", "Metropolis", "superman@mail.com")));
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe,personJasonYoung,personMikeOld,personClarkKent));
 		personListForAddress1 = new ArrayList<>(
-				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
-						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
-						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com")));
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe));
 		personListForAddress2 = new ArrayList<>(
-				Arrays.asList(new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com")));
+				Arrays.asList(personJasonYoung));
 		personListForAddress3 = new ArrayList<>(
-				Arrays.asList(new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com")));
-		personJohnDoe = new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com");
+				Arrays.asList(personMikeOld));
 		personListForGotham = new ArrayList<>(
-				Arrays.asList(new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com"),
-						new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com"),
-						new Person("Jack", "Doe", "1-1111", 12345, "address1", "Gotham", "jackdoe@mail.com"),
-						new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com")
-						));
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,personJasonYoung,NoMedicalRecordDoe));
+
 	}
 
 	/**
@@ -161,16 +164,20 @@ class SafetynetalertsServiceTest {
 		persons.add(createObjectNodeFromArray(keys,new String[] {"John","Doe","address1","1-1111"}));
 		persons.add(createObjectNodeFromArray(keys,new String[] {"Mike","Doe","address1","1-1111"}));
 		persons.add(createObjectNodeFromArray(keys,new String[] {"Jack","Doe","address1","1-1111"}));
+		persons.add(createObjectNodeFromArray(keys,new String[] {"NoMedicalRecord","Doe","address1","0-0000"}));
 		persons.add(createObjectNodeFromArray(keys,new String[] {"Jason","Young","address2","2-2222"}));
+
 		//décompte du nombre d'adultes et du nombre d'enfants
 		expected.put("adults", 2);
-		expected.put("children", 2);
+		expected.put("children", 3); //NoMedicalRecord doe has no medicalrecord so age is considered as 0
 
 		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jason","Young")).thenReturn(medicalrecordJasonYoung);
+
 		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
 
 		//Act
@@ -190,16 +197,25 @@ class SafetynetalertsServiceTest {
 		ArrayNode family1 = person1.putArray("family");
 		family1.addObject().put("firstName", "Mike").put("lastName", "Doe");
 		family1.addObject().put("firstName", "Jack").put("lastName", "Doe");
+		family1.addObject().put("firstName", "NoMedicalRecord").put("lastName", "Doe");
 		ObjectNode person2 = expected.addObject();
 		person2.put("firstName", "Mike").put("lastName", "Doe").put("age", 15);
 		ArrayNode family2 = person2.putArray("family");
 		family2.addObject().put("firstName", "John").put("lastName", "Doe");
 		family2.addObject().put("firstName", "Jack").put("lastName", "Doe");
+		family2.addObject().put("firstName", "NoMedicalRecord").put("lastName", "Doe");
+		ObjectNode person3 = expected.addObject(); //No medical record => age=0
+		person3.put("firstName", "NoMedicalRecord").put("lastName", "Doe").put("age", 0);
+		ArrayNode family3 = person3.putArray("family");
+		family3.addObject().put("firstName", "John").put("lastName", "Doe");
+		family3.addObject().put("firstName", "Mike").put("lastName", "Doe");
+		family3.addObject().put("firstName", "Jack").put("lastName", "Doe");
 
 		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
 
 		//Act
 		JsonNode result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("address1");
@@ -214,6 +230,7 @@ class SafetynetalertsServiceTest {
 		//Arrange
 		ArrayNode expected = mapper.createArrayNode();
 		expected.addObject().put("phone", "1-1111");
+		expected.addObject().put("phone", "0-0000");
 		expected.addObject().put("phone", "2-2222");
 
 		when(firestationRepositoryMock.getByStationnumber(1)).thenReturn(firestationAdressesForStationNumber1);
@@ -259,10 +276,16 @@ class SafetynetalertsServiceTest {
 		ArrayNode allergy3 = p3.putArray("allergies");
 		allergy3.addObject().put("allergy","fakeAllergy1");
 		allergy3.addObject().put("allergy","fakeAllergy2");
+		//NoMedicalRecord Doe
+		ObjectNode p4 = expected.addObject().put("firstname","NoMedicalRecord").put("lastname","Doe").put("phone","0-0000").put("age",0).put("firestation",1);
+		ArrayNode med4 = p4.putArray("medications");
+		ArrayNode allergy4 = p4.putArray("allergies");
+
 
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
 		when(firestationRepositoryMock.getByAddress("address1")).thenReturn(1);
 		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 
@@ -270,7 +293,7 @@ class SafetynetalertsServiceTest {
 		JsonNode result = SafetynetalertsServiceCUT.getPersonsFirestationAndMedicalRecordByAddress("address1");
 
 		//Assert
-		assertEquals(expected,result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 String must have the same data");
 	}
 
 	/**
@@ -314,6 +337,10 @@ class SafetynetalertsServiceTest {
 		ArrayNode address1allergy3 = address1p3.putArray("allergies");
 		address1allergy3.addObject().put("allergy","fakeAllergy1");
 		address1allergy3.addObject().put("allergy","fakeAllergy2");
+		//NoMedicalRecord Doe
+		ObjectNode address1p4 = personList1.addObject().put("firstname","NoMedicalRecord").put("lastname","Doe").put("phone","0-0000").put("age",0);
+		ArrayNode address1med4 = address1p4.putArray("medications");
+		ArrayNode address1allergy4 = address1p4.putArray("allergies");
 
 		//Firestation 1 / address 2
 		ObjectNode address2ForList1 = addressesList1.addObject();
@@ -345,6 +372,7 @@ class SafetynetalertsServiceTest {
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jason","Young")).thenReturn(medicalrecordJasonYoung);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Old")).thenReturn(medicalrecordMikeOld);
 
@@ -400,8 +428,13 @@ class SafetynetalertsServiceTest {
 		ArrayNode allergy3 = p3.putArray("allergies");
 		allergy3.addObject().put("allergy","fakeAllergy1");
 		allergy3.addObject().put("allergy","fakeAllergy2");
+		//NoMedicalRecord Doe
+		ObjectNode p4 = expected.addObject().put("firstname","NoMedicalRecord").put("lastname","Doe").put("address", "address1")
+				.put("email","nomedicalrecorddoe@mail.com").put("age",0);
+		ArrayNode med4 = p4.putArray("medications");
+		ArrayNode allergy4 = p4.putArray("allergies");
 
-		
+
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
@@ -426,11 +459,12 @@ class SafetynetalertsServiceTest {
 		//Arrange
 		ObjectMapper mapper = new ObjectMapper();
 		ArrayNode expected = mapper.createArrayNode();
-		ObjectNode phone1 = mapper.createObjectNode();
+		ObjectNode phone1 = expected.addObject();
 		phone1.put("phone","1-1111");
-		ObjectNode phone2 = mapper.createObjectNode();
+		ObjectNode phone0 = expected.addObject();
+		phone0.put("phone","0-0000");
+		ObjectNode phone2 = expected.addObject();
 		phone2.put("phone","2-2222");
-		expected.add(phone1).add(phone2);
 
 		when(personRepositoryMock.getByCity("Gotham")).thenReturn(personListForGotham);
 
