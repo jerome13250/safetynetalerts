@@ -22,7 +22,7 @@ public class HealthCheck implements HealthIndicator {
 		if (safetynetalertsService.getAllFirestation().size()==0 || 
 				safetynetalertsService.getAllMedicalrecord().size()==0 ||
 				safetynetalertsService.getAllPerson().size()==0) {
-			return Health.down().withDetail("Cause", "Data has not been loaded correctly from json file").build();
+			return Health.down().withDetail("Cause", "Data has not been loaded from json file").build();
 		}
 
 		return Health.up().build();
