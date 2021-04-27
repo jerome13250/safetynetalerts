@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-//TODO: ?????
+
 @ControllerAdvice(basePackages = {"com.safetynet.alertsapp"} ) 
 public class GlobalExceptionHandlerController extends ResponseEntityExceptionHandler{
 

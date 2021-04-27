@@ -1,7 +1,5 @@
 package com.safetynet.alertsapp.service;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +28,13 @@ public class FirestationService {
 			} 
 
 			firestationRepository.add(firestation);
-			Firestation result = new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
-			return result;
+			return new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating firestation", ex);
+			logger.error("Technical error creating firestation {} {}", firestation.getAddress(), firestation.getStation());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating firestation: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -59,7 +56,7 @@ public class FirestationService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error updating firestation", ex);
+			logger.error("Technical error updating firestation {} {}", firestation.getAddress(), firestation.getStation());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -74,6 +71,7 @@ public class FirestationService {
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
+			logger.error("Error deleting firestation: address={}",address);
 			throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: address="+address, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
@@ -88,6 +86,7 @@ public class FirestationService {
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
+			logger.error("Error deleting firestation: station={}",station);
 			throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: station="+station, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}

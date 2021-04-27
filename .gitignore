@@ -37,4 +37,5 @@ build/
 /doc
 
 ## Log file
+safetynetalerts-app.log
 safetynetalerts-app.log*

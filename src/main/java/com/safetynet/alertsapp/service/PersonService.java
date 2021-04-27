@@ -28,14 +28,13 @@ public class PersonService {
 			} 
 
 			personRepository.add(person);
-			Person result = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
-			return result;
+			return personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating or updating person", ex);
+			logger.error("Technical error creating person {} {}", person.getFirstName(), person.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -50,14 +49,13 @@ public class PersonService {
 			} 
 			
 			personRepository.update(person);
-			Person result = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
-			return result;
+			return personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating or updating person", ex);
+			logger.error("Technical error updating person {} {}", person.getFirstName(), person.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -72,6 +70,7 @@ public class PersonService {
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
+			logger.error("Technical error deleting person {} {}", firstname, lastname);
 			throw new BusinessResourceException("DeletePersonError", "Error deleting person: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}

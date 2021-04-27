@@ -28,14 +28,13 @@ public class MedicalrecordService {
 			} 
 
 			medicalrecordRepository.add(medicalrecord);
-			Medicalrecord result = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
-			return result;
+			return medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating or updating medicalrecord", ex);
+			logger.error("Technical error creating medicalrecord  {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating medicalrecord: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -50,14 +49,13 @@ public class MedicalrecordService {
 			} 
 			
 			medicalrecordRepository.update(medicalrecord);
-			Medicalrecord result = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
-			return result;
+			return medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating or updating medicalrecord", ex);
+			logger.error("Technical error updating medicalrecord {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating medicalrecord: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -72,6 +70,7 @@ public class MedicalrecordService {
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
+			logger.error("Technical error deleting medicalrecord {} {}", firstname, lastname);
 			throw new BusinessResourceException("DeleteMedicalrecordError", "Error deleting medicalrecord: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
