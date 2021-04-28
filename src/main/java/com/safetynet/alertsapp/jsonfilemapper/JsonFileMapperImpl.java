@@ -34,7 +34,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 
 	
 	/**
-	 * Method to map from JSON file with safetynet alerts format to Java Objects
+	 * Method to deserialize from JSON file (safetynet alerts format) to Java Objects
 	 * 
 	 * @param <T> the java Object type that is linked to the objectNodeName (Person, Firestation,...)
 	 * @param jsonSource the path to the JSON file.
@@ -47,7 +47,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 	 */
 
 	@Override
-	public <T> List<T> map(File jsonSource, String objectNodeNameString, Class<T> classType) {
+	public <T> List<T> deserialize(File jsonSource, String objectNodeNameString, Class<T> classType) {
 
 		logger.debug("JsonFileMapper loadJsonDataFromFile launched");
 		

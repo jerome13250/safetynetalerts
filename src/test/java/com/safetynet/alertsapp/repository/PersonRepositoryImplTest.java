@@ -59,7 +59,7 @@ public class PersonRepositoryImplTest {
 				));
 
 		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
-		when(jsonFileMapperMock.map(
+		when(jsonFileMapperMock.deserialize(
 				Paths.get("thejsonfile.json").toFile(),
 				"persons",
 				Person.class))

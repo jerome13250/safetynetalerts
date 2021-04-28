@@ -55,7 +55,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Firestation> objectList = jsonFileMapperCUT.map(new File(""), "firestations", Firestation.class);
+		List<Firestation> objectList = jsonFileMapperCUT.deserialize(new File(""), "firestations", Firestation.class);
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
@@ -81,7 +81,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Person> objectList = jsonFileMapperCUT.map(new File(""), "persons", Person.class);
+		List<Person> objectList = jsonFileMapperCUT.deserialize(new File(""), "persons", Person.class);
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
@@ -111,7 +111,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 2");
@@ -141,7 +141,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -163,7 +163,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(0,objectList.size(),"Expected list size is 0");		
@@ -180,7 +180,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -195,7 +195,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(JsonParseException.class);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -209,7 +209,7 @@ class JsonFileMapperImplTest {
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(IOException.class);
 
 		//Act
-		List<Medicalrecord> objectList = jsonFileMapperCUT.map(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
 
 		//Assert
 		assertEquals(0,objectList.size(),"Expected list size is 0");

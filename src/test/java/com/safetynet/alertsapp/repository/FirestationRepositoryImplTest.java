@@ -61,7 +61,7 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress200", 20)
 				));
 		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
-		when(jsonFileMapperMock.map(
+		when(jsonFileMapperMock.deserialize(
 				Paths.get("thejsonfile.json").toFile(),
 				"firestations",
 				Firestation.class))

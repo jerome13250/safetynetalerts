@@ -41,7 +41,7 @@ public class FirestationRepositoryImpl implements IFirestationRepository {
 	@PostConstruct
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling @PostConstruct loadJsonDataFromFile()");
-		firestationList = jsonFileMapper.map(
+		firestationList = jsonFileMapper.deserialize(
 				Paths.get(props.getJsonfile()).toFile(),
 				"firestations",
 				Firestation.class);

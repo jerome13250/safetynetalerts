@@ -36,7 +36,7 @@ public class PersonRepositoryImpl implements IPersonRepository {
 	@PostConstruct
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
-		personList = jsonFileMapper.map(
+		personList = jsonFileMapper.deserialize(
 				Paths.get(props.getJsonfile()).toFile(),
 				"persons",
 				Person.class);

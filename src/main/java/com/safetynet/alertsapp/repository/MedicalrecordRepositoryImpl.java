@@ -36,7 +36,7 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 	@PostConstruct
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
-		medicalrecordList = jsonFileMapper.map(
+		medicalrecordList = jsonFileMapper.deserialize(
 				Paths.get(props.getJsonfile()).toFile(),
 				"medicalrecords",
 				Medicalrecord.class);

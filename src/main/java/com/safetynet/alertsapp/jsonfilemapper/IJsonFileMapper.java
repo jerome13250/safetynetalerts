@@ -18,6 +18,6 @@ public interface IJsonFileMapper {
 	 *   
 	 */
 
-	<T> List<T> map(File jsonSource, String objectNodeNameString, Class<T> classType);
+	<T> List<T> deserialize(File jsonSource, String objectNodeNameString, Class<T> classType);
 
 }

@@ -100,7 +100,7 @@ class MedicalrecordRepositoryImplTest {
 						)
 				));
 		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
-		when(jsonFileMapperMock.map(
+		when(jsonFileMapperMock.deserialize(
 				Paths.get("thejsonfile.json").toFile(),
 				"medicalrecords",
 				Medicalrecord.class))
