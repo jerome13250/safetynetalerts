@@ -324,11 +324,8 @@ public class SafetynetalertsService {
 			ObjectNode phone = mapper.createObjectNode().put("phone", s);
 			phonesArray.add(phone);
 		}
-
 		return phonesArray;
 	}
-
-
 
 	public List<Firestation> getAllFirestation() {
 		return firestationRepository.getAll();

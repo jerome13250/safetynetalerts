@@ -474,6 +474,57 @@ class SafetynetalertsServiceTest {
 		//Assert
 		assertEquals(expected,result,"The 2 JSON must have the same data");
 	}
+	
+	@Test
+	@DisplayName("test getAllFirestation")
+	void test_getAllFirestation() {
+		//Arrange
+		List<Firestation> expected = new ArrayList<>(Arrays.asList(
+				new Firestation("address1", 1),
+				new Firestation("address2", 1), 
+				new Firestation("address3", 2),
+				new Firestation("address4", 3)));
+
+		when(firestationRepositoryMock.getAll()).thenReturn(firestationInitialList);
+
+		//Act
+		List<Firestation> result = SafetynetalertsServiceCUT.getAllFirestation();
+
+		//Assert
+		assertEquals(expected,result,"The 2 List must have the same data");
+	}
+	
+	@Test
+	@DisplayName("test getAllPerson")
+	void test_getAllPerson() {
+		//Arrange
+		List<Person> expected = new ArrayList<>(
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe,personJasonYoung,personMikeOld,personClarkKent));
+		when(personRepositoryMock.getAll()).thenReturn(personInitialList);
+
+		//Act
+		List<Person> result = SafetynetalertsServiceCUT.getAllPerson();
+
+		//Assert
+		assertEquals(expected,result,"The 2 List must have the same data");
+	}
+	
+	@Test
+	@DisplayName("test getAllMedicalrecord")
+	void test_getAllMedicalrecord() {
+		//Arrange
+		List<Medicalrecord> expected = new ArrayList<>(
+				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe,medicalrecordJasonYoung,medicalrecordMikeOld));
+		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);
+
+		//Act
+		List<Medicalrecord> result = SafetynetalertsServiceCUT.getAllMedicalrecord();
+
+		//Assert
+		assertEquals(expected,result,"The 2 List must have the same data");
+	}
+	
+	
 }
 
 
