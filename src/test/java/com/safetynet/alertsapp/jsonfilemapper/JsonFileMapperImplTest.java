@@ -29,12 +29,12 @@ import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
 
 @ExtendWith(MockitoExtension.class)
-class JsonFileMapperTest {
+class JsonFileMapperImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(JsonFileMapperTest.class);
+	private final Logger logger = LoggerFactory.getLogger(JsonFileMapperImplTest.class);
 
 	@InjectMocks
-	JsonFileMapper jsonFileMapperCUT;
+	JsonFileMapperImpl jsonFileMapperCUT;
 
 	@Mock
 	ObjectMapper objectMapperMock;

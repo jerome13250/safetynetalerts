@@ -29,7 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Medicalrecord;
-import com.safetynet.alertsapp.service.MedicalrecordService;
+import com.safetynet.alertsapp.service.MedicalrecordServiceImpl;
 
 //@WebMvcTest annotation is used for Spring MVC tests. 
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
@@ -41,7 +41,7 @@ public class MedicalrecordControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private MedicalrecordService medicalrecordService;
+	private MedicalrecordServiceImpl medicalrecordService;
 
 	private ObjectMapper objectMapper;
 	private Medicalrecord medicalrecord;

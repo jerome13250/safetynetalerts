@@ -8,16 +8,17 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
-import com.safetynet.alertsapp.repository.FirestationRepository;
+import com.safetynet.alertsapp.repository.IFirestationRepository;
 
 @Service
-public class FirestationService {
+public class FirestationServiceImpl implements IFireStationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(FirestationService.class);
+	private static final Logger logger = LoggerFactory.getLogger(FirestationServiceImpl.class);
 
 	@Autowired
-	FirestationRepository firestationRepository;
+	IFirestationRepository firestationRepository;
 
+	@Override
 	public Firestation saveFirestation(Firestation firestation) throws BusinessResourceException{
 		try{
 			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
@@ -39,6 +40,7 @@ public class FirestationService {
 		}
 	}
 	
+	@Override
 	public Firestation updateFirestation(Firestation firestation) throws BusinessResourceException{
 		try{
 			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
@@ -61,6 +63,7 @@ public class FirestationService {
 		}
 	}
 
+	@Override
 	public void deleteFirestationByAddress(String address) {
 		try{
 			boolean successDelete = firestationRepository.deleteByAddress(address);
@@ -76,6 +79,7 @@ public class FirestationService {
 		}		
 	}
 
+	@Override
 	public void deleteFirestationByStation(Integer station) {
 		try{
 			boolean successDelete = firestationRepository.deleteByStation(station);

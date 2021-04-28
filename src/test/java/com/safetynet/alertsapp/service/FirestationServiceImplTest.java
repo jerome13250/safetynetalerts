@@ -26,18 +26,18 @@ import org.slf4j.LoggerFactory;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
-import com.safetynet.alertsapp.repository.FirestationRepository;
+import com.safetynet.alertsapp.repository.IFirestationRepository;
 
 @ExtendWith(MockitoExtension.class)
-class FirestationServiceTest {
+class FirestationServiceImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(FirestationServiceTest.class);
+	private final Logger logger = LoggerFactory.getLogger(FirestationServiceImplTest.class);
 
 	@InjectMocks
-	FirestationService firestationServiceCUT;
+	FirestationServiceImpl firestationServiceCUT;
 
 	@Mock
-	FirestationRepository firestationRepositoryMock;
+	IFirestationRepository firestationRepositoryMock;
 
 	@Test
 	@DisplayName("Save Firestation: success case")

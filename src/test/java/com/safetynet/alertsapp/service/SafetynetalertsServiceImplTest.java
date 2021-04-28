@@ -25,14 +25,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
-import com.safetynet.alertsapp.repository.FirestationRepository;
-import com.safetynet.alertsapp.repository.MedicalrecordRepository;
-import com.safetynet.alertsapp.repository.PersonRepository;
+import com.safetynet.alertsapp.repository.IFirestationRepository;
+import com.safetynet.alertsapp.repository.IMedicalrecordRepository;
+import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @ExtendWith(MockitoExtension.class)
-class SafetynetalertsServiceTest {
+class SafetynetalertsServiceImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceTest.class);
+	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceImplTest.class);
 	ObjectMapper mapper = new ObjectMapper();
 
 	List<Firestation> firestationInitialList;
@@ -67,16 +67,16 @@ class SafetynetalertsServiceTest {
 	LocalDate dateFor80YearsOld;
 
 	@InjectMocks
-	SafetynetalertsService SafetynetalertsServiceCUT;
+	SafetynetalertsServiceImpl SafetynetalertsServiceCUT;
 
 	@Mock
-	FirestationRepository firestationRepositoryMock;
+	IFirestationRepository firestationRepositoryMock;
 
 	@Mock
-	MedicalrecordRepository medicalrecordRepositoryMock;
+	IMedicalrecordRepository medicalrecordRepositoryMock;
 
 	@Mock
-	PersonRepository personRepositoryMock;
+	IPersonRepository personRepositoryMock;
 
 	@BeforeEach
 	void initializeData() {

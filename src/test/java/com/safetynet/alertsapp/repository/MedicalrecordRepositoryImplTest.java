@@ -25,22 +25,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @ExtendWith(MockitoExtension.class)
-class MedicalrecordRepositoryTest {
+class MedicalrecordRepositoryImplTest {
 
 	static LocalDate date1984March6th = LocalDate.of(1984, 3, 6);
 	static LocalDate date1990December15th = LocalDate.of(1990, 12, 15);
 	static LocalDate date1928February28th = LocalDate.of(1928, 2, 28);
 
 	@InjectMocks
-	MedicalrecordRepository medicalrecordRepositoryCUT;
+	MedicalrecordRepositoryImpl medicalrecordRepositoryCUT;
 
 	@Mock
-	private JsonFileMapper jsonFileMapperMock;
+	private JsonFileMapperImpl jsonFileMapperMock;
 	
 	@Mock
 	private CustomProperties customPropertiesMock;

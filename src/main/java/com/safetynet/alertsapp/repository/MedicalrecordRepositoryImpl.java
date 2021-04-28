@@ -14,17 +14,17 @@ import org.springframework.stereotype.Repository;
 
 import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @Repository
-public class MedicalrecordRepository {
+public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 
-	private final Logger logger = LoggerFactory.getLogger(MedicalrecordRepository.class);
+	private final Logger logger = LoggerFactory.getLogger(MedicalrecordRepositoryImpl.class);
 	private List<Medicalrecord> medicalrecordList;
 
 	@Autowired
-	private JsonFileMapper jsonFileMapper;
+	private IJsonFileMapper jsonFileMapper;
 
 	//Custom property to read the json file path in application.properties
 	@Autowired
@@ -46,10 +46,12 @@ public class MedicalrecordRepository {
 		this.medicalrecordList = medicalrecordList;
 	}
 
+	@Override
 	public List<Medicalrecord> getAll(){
 		return medicalrecordList;
 	}
 
+	@Override
 	public Medicalrecord getByFirstnameAndLastName(String firstname, String lastname){
 
 		List<Medicalrecord> result = 
@@ -70,6 +72,7 @@ public class MedicalrecordRepository {
 		}	
 	}
 
+	@Override
 	public boolean add(Medicalrecord medicalrecord) {
 		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
 				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
@@ -78,6 +81,7 @@ public class MedicalrecordRepository {
 		return medicalrecordList.add(medicalrecord);
 	}
 
+	@Override
 	public boolean update(Medicalrecord medicalrecord) {
 		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
 				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
@@ -95,6 +99,7 @@ public class MedicalrecordRepository {
 		return false; //update failed, firstname+lastname not found
 	}
 
+	@Override
 	public boolean delete(String firstName, String lastName) {
 		return medicalrecordList.removeIf(medicalrecord-> 
 		( 

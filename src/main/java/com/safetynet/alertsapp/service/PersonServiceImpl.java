@@ -8,16 +8,17 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Person;
-import com.safetynet.alertsapp.repository.PersonRepository;
+import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @Service
-public class PersonService {
+public class PersonServiceImpl implements IPersonService {
 
-	private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
+	private static final Logger logger = LoggerFactory.getLogger(PersonServiceImpl.class);
 
 	@Autowired
-	PersonRepository personRepository;
+	IPersonRepository personRepository;
 
+	@Override
 	public Person savePerson(Person person) throws BusinessResourceException{
 		try{
 			Person personFromDB = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
@@ -39,6 +40,7 @@ public class PersonService {
 		}
 	}
 	
+	@Override
 	public Person updatePerson(Person person) throws BusinessResourceException{
 		try{
 			Person personFromDB = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
@@ -60,6 +62,7 @@ public class PersonService {
 		}
 	}
 
+	@Override
 	public void deletePerson(String firstname, String lastname) {
 		try{
 			boolean successDelete = personRepository.delete(firstname, lastname);

@@ -27,18 +27,18 @@ import org.slf4j.LoggerFactory;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Medicalrecord;
-import com.safetynet.alertsapp.repository.MedicalrecordRepository;
+import com.safetynet.alertsapp.repository.IMedicalrecordRepository;
 
 @ExtendWith(MockitoExtension.class)
-class MedicalrecordServiceTest {
+class MedicalrecordServiceImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(MedicalrecordServiceTest.class);
+	private final Logger logger = LoggerFactory.getLogger(MedicalrecordServiceImplTest.class);
 
 	@InjectMocks
-	MedicalrecordService medicalrecordServiceCUT;
+	MedicalrecordServiceImpl medicalrecordServiceCUT;
 
 	@Mock
-	MedicalrecordRepository medicalrecordRepositoryMock;
+	IMedicalrecordRepository medicalrecordRepositoryMock;
 
 	@Test
 	@DisplayName("Save Medicalrecord: success case")

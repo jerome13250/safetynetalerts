@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
-import com.safetynet.alertsapp.service.FirestationService;
+import com.safetynet.alertsapp.service.IFireStationService;
 
 //@RestController contains @ResponseBody:
 //@ResponseBody annotation tells a controller that the object returned is automatically
@@ -25,7 +25,7 @@ public class FirestationController {
 	private static final Logger logger = LoggerFactory.getLogger(FirestationController.class);
 	
 	@Autowired
-	private FirestationService firestationService;
+	private IFireStationService firestationService;
 	
 	@PostMapping("/firestation")
 	//the @RequestBody annotation maps the HttpRequest body to a transfer or domain object,

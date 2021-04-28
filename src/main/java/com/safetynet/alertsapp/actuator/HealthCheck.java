@@ -5,16 +5,16 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import com.safetynet.alertsapp.service.FirestationService;
-import com.safetynet.alertsapp.service.MedicalrecordService;
-import com.safetynet.alertsapp.service.PersonService;
-import com.safetynet.alertsapp.service.SafetynetalertsService;
+import com.safetynet.alertsapp.service.FirestationServiceImpl;
+import com.safetynet.alertsapp.service.ISafetynetalertsService;
+import com.safetynet.alertsapp.service.MedicalrecordServiceImpl;
+import com.safetynet.alertsapp.service.PersonServiceImpl;
 
 @Component
 public class HealthCheck implements HealthIndicator {
 
 	@Autowired
-	SafetynetalertsService safetynetalertsService;
+	ISafetynetalertsService safetynetalertsService;
 	
 	@Override
 	public Health health() {

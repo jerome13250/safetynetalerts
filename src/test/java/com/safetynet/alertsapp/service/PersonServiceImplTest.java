@@ -26,18 +26,18 @@ import org.slf4j.LoggerFactory;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Person;
-import com.safetynet.alertsapp.repository.PersonRepository;
+import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class PersonServiceTest {
+public class PersonServiceImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(PersonServiceTest.class);
+	private final Logger logger = LoggerFactory.getLogger(PersonServiceImplTest.class);
 
 	@InjectMocks
-	PersonService personServiceCUT;
+	PersonServiceImpl personServiceCUT;
 
 	@Mock
-	PersonRepository personRepositoryMock;
+	IPersonRepository personRepositoryMock;
 
 	@Test
 	@DisplayName("Save Person: success case")

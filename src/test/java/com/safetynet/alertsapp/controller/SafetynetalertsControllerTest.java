@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.safetynet.alertsapp.service.SafetynetalertsService;
+import com.safetynet.alertsapp.service.ISafetynetalertsService;
 
 //@WebMvcTest annotation is used for Spring MVC tests. 
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
@@ -21,7 +21,7 @@ class SafetynetalertsControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private SafetynetalertsService safetynetalertsService;
+	private ISafetynetalertsService safetynetalertsService;
 
 	@Test
 	void testGetPersonsByStationnumberString() throws Exception {

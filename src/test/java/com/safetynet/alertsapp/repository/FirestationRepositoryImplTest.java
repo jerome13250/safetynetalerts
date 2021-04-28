@@ -22,19 +22,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Firestation;
 
 @ExtendWith(MockitoExtension.class)
-class FirestationRepositoryTest {
+class FirestationRepositoryImplTest {
 
 
 	@InjectMocks
-	FirestationRepository firestationRepositoryCUT;
+	FirestationRepositoryImpl firestationRepositoryCUT;
 
 	@Mock
-	private JsonFileMapper jsonFileMapperMock;
+	private JsonFileMapperImpl jsonFileMapperMock;
 
 	@Mock
 	private CustomProperties customPropertiesMock;

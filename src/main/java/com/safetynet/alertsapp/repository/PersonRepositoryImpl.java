@@ -14,17 +14,17 @@ import org.springframework.stereotype.Repository;
 
 import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Person;
 
 @Repository
-public class PersonRepository {
+public class PersonRepositoryImpl implements IPersonRepository {
 
-	private final Logger logger = LoggerFactory.getLogger(PersonRepository.class);
+	private final Logger logger = LoggerFactory.getLogger(PersonRepositoryImpl.class);
 	private List<Person> personList;
 
 	@Autowired
-	private JsonFileMapper jsonFileMapper;
+	private IJsonFileMapper jsonFileMapper;
 
 	//Custom property to read the json file path in application.properties
 	@Autowired
@@ -46,14 +46,17 @@ public class PersonRepository {
 		this.personList = personList;
 	}
 
+	@Override
 	public List<Person> getAll(){
 		return personList;
 	}
 
+	@Override
 	public List<Person> getByAddress(String address) {
 		return personList.stream().filter(person->person.getAddress().equals(address)).collect(Collectors.toList());
 	}
 
+	@Override
 	public List<Person> getByCity(String city) {
 		return personList.stream().filter(person->person.getCity().equals(city)).collect(Collectors.toList());
 	}
@@ -67,6 +70,7 @@ public class PersonRepository {
 	 * @throws IllegalStateException if the data contains more than 1 entry with first+lastname 
 	 * since they are used as primary keys
 	 */
+	@Override
 	public Person getByFirstnameLastname(String firstname, String lastname) throws IllegalStateException {
 
 		List<Person> result = personList.stream().filter(person->
@@ -87,11 +91,13 @@ public class PersonRepository {
 		}	
 	}
 
+	@Override
 	public List<Person> getByLastname(String lastname) {
 		return personList.stream().filter(person->
 		person.getLastName().equals(lastname)).collect(Collectors.toList());
 	}
 
+	@Override
 	public boolean add(Person person) throws BusinessResourceException {
 		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
 				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
@@ -101,6 +107,7 @@ public class PersonRepository {
 		return personList.add(person);
 	}
 
+	@Override
 	public boolean update(Person person) {
 		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
 				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
@@ -138,6 +145,7 @@ public class PersonRepository {
 	}
 	 */
 
+	@Override
 	public boolean delete(String firstName, String lastName) {
 		return personList.removeIf(person-> 
 		( 

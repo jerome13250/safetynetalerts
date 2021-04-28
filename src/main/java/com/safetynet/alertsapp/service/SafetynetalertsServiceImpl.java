@@ -22,24 +22,24 @@ import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
-import com.safetynet.alertsapp.repository.FirestationRepository;
-import com.safetynet.alertsapp.repository.MedicalrecordRepository;
-import com.safetynet.alertsapp.repository.PersonRepository;
+import com.safetynet.alertsapp.repository.IFirestationRepository;
+import com.safetynet.alertsapp.repository.IMedicalrecordRepository;
+import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @Service
-public class SafetynetalertsService {
+public class SafetynetalertsServiceImpl implements ISafetynetalertsService {
 
-	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsService.class);
+	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceImpl.class);
 	ObjectMapper mapper = new ObjectMapper();
 
 	@Autowired
-	FirestationRepository firestationRepository;
+	IFirestationRepository firestationRepository;
 
 	@Autowired
-	MedicalrecordRepository medicalrecordRepository;
+	IMedicalrecordRepository medicalrecordRepository;
 
 	@Autowired
-	PersonRepository personRepository;
+	IPersonRepository personRepository;
 
 	private Integer calculateAge(LocalDate birthdate) {
 		Period p = Period.between(birthdate, LocalDate.now());
@@ -56,6 +56,7 @@ public class SafetynetalertsService {
 	 * + key="numberOfadults" / value=numberOfAdults"
 	 * + key="numberOfchildren" / value=numberOfchildren"
 	 */
+	@Override
 	public JsonNode getPersonsByStationnumber(int stationNumber) {
 
 		//This will contain the data :
@@ -107,6 +108,7 @@ public class SafetynetalertsService {
 	 * @param address the required address
 	 * @return containing all the informations
 	 */
+	@Override
 	public JsonNode getChildrenByAddressAndListOtherFamilyMembers(String address) {
 		//This will contain the data :
 		ArrayNode result = mapper.createArrayNode();
@@ -149,6 +151,7 @@ public class SafetynetalertsService {
 	 * @param stationNumber the required stationNumber
 	 * @return the list of phone numbers
 	 */
+	@Override
 	public JsonNode getPhoneNumbersForStationNumber(int stationNumber) {
 
 		//This will contain the phone numbers, HashSet to avoid doubles :
@@ -187,6 +190,7 @@ public class SafetynetalertsService {
 	 * @param address of persons
 	 * @return the string with all required informations
 	 */
+	@Override
 	public JsonNode getPersonsFirestationAndMedicalRecordByAddress(String address) {
 			//This will contain the data :
 			ArrayNode result = mapper.createArrayNode();
@@ -238,6 +242,7 @@ public class SafetynetalertsService {
 	 * @param firestationNumberList list of all firestations required
 	 * @return the string with all required informations
 	 */
+	@Override
 	public JsonNode getAddressesListOfPersonsPerStationNumberList(List<Integer> firestationNumberList) {
 		//This will contain the data :
 		ArrayNode result = mapper.createArrayNode();
@@ -276,6 +281,7 @@ public class SafetynetalertsService {
 		return result;
 	}
 
+	@Override
 	public JsonNode getPersonInfoByFirstNameAndLastName(String firstname, String lastname) {
 
 		//This will contain the data :
@@ -310,6 +316,7 @@ public class SafetynetalertsService {
 	 * @param city the city required
 	 * @return with all phones
 	 */
+	@Override
 	public JsonNode getPhonesInCity(String city) {
 
 		//to remove doubles we use HashSet:
@@ -327,14 +334,17 @@ public class SafetynetalertsService {
 		return phonesArray;
 	}
 
+	@Override
 	public List<Firestation> getAllFirestation() {
 		return firestationRepository.getAll();
 	}
 
+	@Override
 	public List<Medicalrecord> getAllMedicalrecord() {
 		return medicalrecordRepository.getAll();
 	}
 	
+	@Override
 	public List<Person> getAllPerson() {
 		return personRepository.getAll();
 	}

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
-import com.safetynet.alertsapp.service.FirestationService;
+import com.safetynet.alertsapp.service.FirestationServiceImpl;
 
 //@WebMvcTest annotation is used for Spring MVC tests. 
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
@@ -37,7 +37,7 @@ public class FirestationControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private FirestationService firestationService;
+	private FirestationServiceImpl firestationService;
 
 	private ObjectMapper objectMapper;
 	private Firestation firestation;

@@ -8,16 +8,17 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Medicalrecord;
-import com.safetynet.alertsapp.repository.MedicalrecordRepository;
+import com.safetynet.alertsapp.repository.IMedicalrecordRepository;
 
 @Service
-public class MedicalrecordService {
+public class MedicalrecordServiceImpl implements IMedicalrecordService {
 
-	private static final Logger logger = LoggerFactory.getLogger(MedicalrecordService.class);
+	private static final Logger logger = LoggerFactory.getLogger(MedicalrecordServiceImpl.class);
 
 	@Autowired
-	MedicalrecordRepository medicalrecordRepository;
+	IMedicalrecordRepository medicalrecordRepository;
 
+	@Override
 	public Medicalrecord saveMedicalrecord(Medicalrecord medicalrecord) throws BusinessResourceException{
 		try{
 			Medicalrecord medicalrecordFromDB = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
@@ -39,6 +40,7 @@ public class MedicalrecordService {
 		}
 	}
 	
+	@Override
 	public Medicalrecord updateMedicalrecord(Medicalrecord medicalrecord) throws BusinessResourceException{
 		try{
 			Medicalrecord medicalrecordFromDB = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
@@ -60,6 +62,7 @@ public class MedicalrecordService {
 		}
 	}
 
+	@Override
 	public void deleteMedicalrecord(String firstname, String lastname) {
 		try{
 			boolean successDelete = medicalrecordRepository.delete(firstname, lastname);

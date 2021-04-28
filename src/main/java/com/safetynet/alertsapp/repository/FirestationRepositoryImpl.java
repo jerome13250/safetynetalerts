@@ -15,22 +15,21 @@ import org.springframework.stereotype.Repository;
 
 import com.safetynet.alertsapp.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
-import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapper;
+import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Firestation;
-import com.safetynet.alertsapp.model.Person;
 
 /**
  * @author jerome
  *
  */
 @Repository
-public class FirestationRepository {
+public class FirestationRepositoryImpl implements IFirestationRepository {
 
-	private final Logger logger = LoggerFactory.getLogger(FirestationRepository.class);
+	private final Logger logger = LoggerFactory.getLogger(FirestationRepositoryImpl.class);
 	private List <Firestation> firestationList;
 
 	@Autowired
-	private JsonFileMapper jsonFileMapper;
+	private IJsonFileMapper jsonFileMapper;
 	
 	//Custom property to read the json file path in application.properties
 	@Autowired
@@ -52,10 +51,12 @@ public class FirestationRepository {
 		this.firestationList = firestationList;
 	}
 
+	@Override
 	public List<Firestation> getAll(){
 		return firestationList;
 	}
 
+	@Override
 	public List<Firestation> getByStationnumber(Integer stationNumber) {
 		List<Firestation> firestationByStationnumber = new ArrayList<>();
 		for (Firestation i: firestationList ) {
@@ -72,6 +73,7 @@ public class FirestationRepository {
 	 * @return firestation number for a specific address, <b>null if address is not found.</b>
 	 * @throws IllegalStateException if an address has more than 1 firestation number.
 	 */
+	@Override
 	public Integer getByAddress(String address) throws IllegalStateException {
 		List<Firestation> result = firestationList.stream().filter(f->f.getAddress().equals(address)).collect(Collectors.toList());
 		
@@ -89,6 +91,7 @@ public class FirestationRepository {
 	}
 	
 
+	@Override
 	public boolean add(Firestation firestation) {
 		if(null == firestation.getAddress() || null == firestation.getStation() ) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteFirestation", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
@@ -96,6 +99,7 @@ public class FirestationRepository {
 		return firestationList.add(firestation);
 	}
 
+	@Override
 	public boolean update(Firestation firestation) {
 		if(null == firestation.getAddress() || null == firestation.getStation() ) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteFirestation", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
@@ -110,10 +114,12 @@ public class FirestationRepository {
 		return false; //update failed, address not found
 	}
 
+	@Override
 	public boolean deleteByAddress(String address) {
 		return firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
 	}
 	
+	@Override
 	public boolean deleteByStation(Integer station) {
 		return firestationList.removeIf(firestation-> firestation.getStation().equals(station));
 	}

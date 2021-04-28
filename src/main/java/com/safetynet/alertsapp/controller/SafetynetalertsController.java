@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.safetynet.alertsapp.service.SafetynetalertsService;
+import com.safetynet.alertsapp.service.ISafetynetalertsService;
 
 @RestController
 public class SafetynetalertsController {
@@ -20,7 +20,7 @@ public class SafetynetalertsController {
 	private static final Logger logger = LoggerFactory.getLogger(SafetynetalertsController.class);
 	
 	@Autowired
-	private SafetynetalertsService safetynetalertsService;
+	private ISafetynetalertsService safetynetalertsService;
 
 	@GetMapping("/firestation")
 	public ResponseEntity<JsonNode> getPersonsByStationnumber(@RequestParam(required=true) Integer stationNumber) {
