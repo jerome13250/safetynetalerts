@@ -16,6 +16,7 @@
 	<description>SafetyNet Alerts with Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
+		<springfox.version>3.0.0</springfox.version>
 	</properties>
 
 	<dependencies>
@@ -37,6 +38,19 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- SWAGGER JSON API documentation for spring based applications -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-boot-starter</artifactId>
+			<version>${springfox.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-bean-validators</artifactId>
+			<version>${springfox.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -63,7 +77,7 @@
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>3.1.1</version>
 			</plugin>
-			
+
 			<!-- Run the JaCoCo ‘report’ goal during the Maven test phase -->
 			<plugin>
 				<groupId>org.jacoco</groupId>

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import com.safetynet.alertsapp.CustomProperties;
+import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Person;

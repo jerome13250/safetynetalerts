@@ -14,7 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.safetynet.alertsapp.service.ISafetynetalertsService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+
 @RestController
+@Api(value = "Safety Net Alerts GET data Controller")
 public class SafetynetalertsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SafetynetalertsController.class);
@@ -23,6 +28,7 @@ public class SafetynetalertsController {
 	private ISafetynetalertsService safetynetalertsService;
 
 	@GetMapping("/firestation")
+	@ApiOperation(value = "View a list of persons living in a specific firestation zone, also returns number of aduls and children", response = List.class)
 	public ResponseEntity<JsonNode> getPersonsByStationnumber(@RequestParam(required=true) Integer stationNumber) {
 		logger.info("GET /firestation called");
 		JsonNode jsonNode = safetynetalertsService.getPersonsByStationnumber(stationNumber);

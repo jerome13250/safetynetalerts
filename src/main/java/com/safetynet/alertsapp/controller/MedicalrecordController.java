@@ -46,7 +46,7 @@ public class MedicalrecordController {
 	}
 	
 	@DeleteMapping(value = "/medicalRecord")
-	public ResponseEntity<Void> deleteUser(@RequestParam(required = true) String firstname, @RequestParam(required = true) String lastname) 
+	public ResponseEntity<Void> deleteMedicalrecord(@RequestParam(required = true) String firstname, @RequestParam(required = true) String lastname) 
 			throws BusinessResourceException {
 		logger.info("DELETE /medicalRecord called");
 		medicalrecordService.deleteMedicalrecord(firstname,lastname);

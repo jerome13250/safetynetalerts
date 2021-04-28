@@ -55,7 +55,7 @@ public class FirestationController {
  	}
 	
 	@DeleteMapping(value = "/firestation", params = "station") // params parameter to filter by HTTP parameters
-	public ResponseEntity<Void> deleteUser(@RequestParam(required = true) Integer station) 
+	public ResponseEntity<Void> deleteFirestation(@RequestParam(required = true) Integer station) 
 			throws BusinessResourceException {
 		logger.info("DELETE /firestation?station called");
 		firestationService.deleteFirestationByStation(station);

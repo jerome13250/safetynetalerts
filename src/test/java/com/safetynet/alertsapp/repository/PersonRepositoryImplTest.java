@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.safetynet.alertsapp.CustomProperties;
+import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
 import com.safetynet.alertsapp.model.Person;

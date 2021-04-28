@@ -46,7 +46,7 @@ public class PersonController {
 	}
 	
 	@DeleteMapping(value = "/person")
-	public ResponseEntity<Void> deleteUser(@RequestParam(required = true) String firstname, @RequestParam(required = true) String lastname) 
+	public ResponseEntity<Void> deletePerson(@RequestParam(required = true) String firstname, @RequestParam(required = true) String lastname) 
 			throws BusinessResourceException {
 		logger.info("DELETE /person called");
 		personService.deletePerson(firstname,lastname);
