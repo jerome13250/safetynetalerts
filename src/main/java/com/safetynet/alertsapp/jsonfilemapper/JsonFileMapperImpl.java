@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.safetynet.alertsapp.config.CustomProperties;
 
 /**
  * This class uses Jackson to map from JSON file to Java Objects
@@ -32,6 +35,9 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 	@Autowired
 	private ObjectMapper objectMapper; //this is for mocking purpose
 
+	//Custom property to read the json file path in application.properties
+	@Autowired
+	private CustomProperties customProperties;
 	
 	/**
 	 * Method to deserialize from JSON file (safetynet alerts format) to Java Objects
@@ -45,18 +51,17 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 	 * @return a List with the required Object type.
 	 *   
 	 */
-
 	@Override
 	public <T> List<T> deserialize(File jsonSource, String objectNodeNameString, Class<T> classType) {
 
-		logger.debug("JsonFileMapper loadJsonDataFromFile launched");
+		logger.debug("JsonFileMapper deserialize launched");
 		
 		List<T> objectList = new ArrayList<>();
 		try {
-			JsonNode jsonNode = objectMapper.readTree(jsonSource);
+			JsonNode jsonNodeRoot = objectMapper.readTree(customProperties.getJsonfile());
 
-			//Get objects array under objectNodeName:
-			JsonNode jsonNodeObjectName = jsonNode.get(objectNodeNameString); //returns null if objectNodeName not found
+			//Get objects array under jsonNodeRoot:
+			JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
 			if (jsonNodeObjectName != null) {
 				String objectsJsonString = jsonNodeObjectName.toString();
 				logger.debug("objectsJsonString={}",objectsJsonString);
@@ -82,5 +87,44 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 		return objectList;
 	}
 	
-	
+	public <T> boolean serialize(File jsonSource, String objectNodeNameString, Class<T> classType, List<T> listToSave) {
+
+		logger.debug("JsonFileMapper serialize launched");
+
+		try {
+			JsonNode jsonNodeRoot = objectMapper.readTree(customProperties.getJsonfile());
+			ArrayNode arrayNodeObjectName;
+			
+			//Get object array under jsonNodeRoot:
+			JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
+			if (jsonNodeObjectName != null) {
+				//To update an existing node, need to cast it to ObjectNode:
+				arrayNodeObjectName = (ArrayNode) jsonNodeObjectName;
+				arrayNodeObjectName.removeAll();// clean all
+			}
+			else {
+				logger.debug("{} not found in json file.", objectNodeNameString);
+				arrayNodeObjectName = ((ObjectNode)jsonNodeRoot).putArray(objectNodeNameString);
+			}
+			//need a second step ObjectMapper because first one needs mock but not this one:
+			ObjectMapper objectMapperSecondStep = new ObjectMapper();
+			//setting date format for deserializing:
+			final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+			objectMapperSecondStep.setDateFormat(df);
+			
+			for(T elementToSave: listToSave) {
+				arrayNodeObjectName.add(objectMapperSecondStep.valueToTree(elementToSave));
+				logger.debug("elementToSave={}",elementToSave);
+			}
+			
+			//save data to file:
+			objectMapper.writeValue(jsonSource, jsonNodeRoot);
+			
+		} catch (Exception e) {
+			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 }
