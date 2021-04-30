@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
@@ -36,9 +37,6 @@ class FirestationRepositoryImplTest {
 	@Mock
 	private JsonFileMapperImpl jsonFileMapperMock;
 
-	@Mock
-	private CustomProperties customPropertiesMock;
-	
 	@BeforeEach
 	void initializeData() {
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
@@ -60,9 +58,7 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress100", 10),
 				new Firestation("adress200", 20)
 				));
-		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.deserialize(
-				Paths.get("thejsonfile.json").toFile(),
 				"firestations",
 				Firestation.class))
 		.thenReturn(mockedList);
@@ -82,6 +78,67 @@ class FirestationRepositoryImplTest {
 	}
 
 	@Test
+	@DisplayName("Test getByStationnumber")
+	void testGetByStationnumber()  throws Exception {
+		//Arrange
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000)
+				));
+
+		//Act
+		List<Firestation> objectList = firestationRepositoryCUT.getByStationnumber(1000);
+
+		//Assert
+		assertEquals(1,objectList.size(),"Expected list size is 3");
+		assertEquals(expectedList,objectList,"Returned list must one Firestation");
+	}
+	
+	@Test
+	@DisplayName("Test getByAddress")
+	void testGetByAddress() throws Exception {
+		//Arrange
+		int expected = 1000;
+
+		//Act
+		int result = firestationRepositoryCUT.getByAddress("adress1");
+
+		//Assert
+		assertEquals(expected,result,"Returned value must be 1000");
+	}
+		
+	@Test
+	@DisplayName("Test getByAddress, address not found")
+	void testGetByAddressNotFound() throws Exception {
+		//Arrange
+		
+		//Act
+		Integer result = firestationRepositoryCUT.getByAddress("adressUnknown");
+
+		//Assert
+		assertNull(result,"Returned value must be null");
+	}
+	
+	@Test
+	@DisplayName("Test getByAddress, more than 1 firestation found")
+	void testGetByAddressMultipleFirestationForAddress() throws Exception {
+		//Arrange
+		List<Firestation> dataInitialList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress1", 2000), //this should not exist
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+	
+		firestationRepositoryCUT.setFirestationList(dataInitialList);
+		
+		int expected = -1;
+
+		//Act-Assert
+		assertThrows(IllegalStateException.class,()->firestationRepositoryCUT.getByAddress("adress1"));
+		
+	}
+	
+	@Test
 	@DisplayName("3 objects Firestation + add one more")
 	void testAdd_3firestations_addOneMore()  throws Exception {
 		//Arrange
@@ -92,13 +149,38 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333),
 				new Firestation("adress4", 444)
 				));
-
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = firestationRepositoryCUT.add(new Firestation("adress4", 444));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertTrue(result,"The operation must be success");
+		assertEquals(4,objectList.size(),"Expected list size is 4");
+		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
+	}
+	
+	@Test
+	@DisplayName("3 objects Firestation + add one more, serialize failure")
+	void testAdd_3firestations_addOneMore_serializeFailure()  throws Exception {
+		//Arrange
+		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333),
+				new Firestation("adress4", 444)
+				));
+		//serialize fail:
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(false);
+		
+		//Act
+		boolean result = firestationRepositoryCUT.add(new Firestation("adress4", 444));
+		List<Firestation> objectList = firestationRepositoryCUT.getAll();
+
+		//Assert
+		assertFalse(result,"The operation is failed because of serialization");
 		assertEquals(4,objectList.size(),"Expected list size is 4");
 		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
 	}
@@ -115,7 +197,7 @@ class FirestationRepositoryImplTest {
 		Firestation incompleteFirestation1 = new Firestation();
 		Firestation incompleteFirestation2 = new Firestation(null,1);
 		Firestation incompleteFirestation3 = new Firestation("address",null);
-		
+				
 		//Act-Assert
 		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.add(incompleteFirestation1));
 		assertThrows(BusinessResourceException.class, ()->firestationRepositoryCUT.add(incompleteFirestation2));
@@ -135,6 +217,8 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = firestationRepositoryCUT.update(new Firestation("adress2", 1));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
@@ -196,6 +280,8 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = firestationRepositoryCUT.deleteByAddress("adress1");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
@@ -243,6 +329,8 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = firestationRepositoryCUT.deleteByStation(1000);
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
@@ -271,67 +359,6 @@ class FirestationRepositoryImplTest {
 		assertEquals(3,objectList.size(),"Expected list size is 3");
 		assertFalse(result,"Expected result to be failed : result must be false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
-	}
-	
-	@Test
-	@DisplayName("Test getByStationnumber")
-	void testGetByStationnumber()  throws Exception {
-		//Arrange
-		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000)
-				));
-
-		//Act
-		List<Firestation> objectList = firestationRepositoryCUT.getByStationnumber(1000);
-
-		//Assert
-		assertEquals(1,objectList.size(),"Expected list size is 3");
-		assertEquals(expectedList,objectList,"Returned list must one Firestation");
-	}
-	
-	@Test
-	@DisplayName("Test getByAddress")
-	void testGetByAddress() throws Exception {
-		//Arrange
-		int expected = 1000;
-
-		//Act
-		int result = firestationRepositoryCUT.getByAddress("adress1");
-
-		//Assert
-		assertEquals(expected,result,"Returned value must be 1000");
-	}
-		
-	@Test
-	@DisplayName("Test getByAddress, address not found")
-	void testGetByAddressNotFound() throws Exception {
-		//Arrange
-		
-		//Act
-		Integer result = firestationRepositoryCUT.getByAddress("adressUnknown");
-
-		//Assert
-		assertNull(result,"Returned value must be null");
-	}
-	
-	@Test
-	@DisplayName("Test getByAddress, more than 1 firestation found")
-	void testGetByAddressMultipleFirestationForAddress() throws Exception {
-		//Arrange
-		List<Firestation> dataInitialList = new ArrayList<> (Arrays.asList(
-				new Firestation("adress1", 1000),
-				new Firestation("adress1", 2000), //this should not exist
-				new Firestation("adress2", 12345),
-				new Firestation("adress3", 333)
-				));
-	
-		firestationRepositoryCUT.setFirestationList(dataInitialList);
-		
-		int expected = -1;
-
-		//Act-Assert
-		assertThrows(IllegalStateException.class,()->firestationRepositoryCUT.getByAddress("adress1"));
-		
 	}
 	
 }

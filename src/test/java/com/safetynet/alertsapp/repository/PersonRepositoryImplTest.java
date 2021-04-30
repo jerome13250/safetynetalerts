@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
@@ -26,16 +27,13 @@ import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
 import com.safetynet.alertsapp.model.Person;
 
 @ExtendWith(MockitoExtension.class)
-public class PersonRepositoryImplTest {
+class PersonRepositoryImplTest {
 
 	@InjectMocks
 	PersonRepositoryImpl personRepositoryCUT;
 
 	@Mock
 	private JsonFileMapperImpl jsonFileMapperMock;
-	
-	@Mock
-	private CustomProperties customPropertiesMock;
 
 	@BeforeEach
 	void initializeData() {
@@ -58,9 +56,7 @@ public class PersonRepositoryImplTest {
 				new Person("Michael","Knight","2", 666, "adress11", "Miami", "michaelknight@mail.com")
 				));
 
-		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.deserialize(
-				Paths.get("thejsonfile.json").toFile(),
 				"persons",
 				Person.class))
 		.thenReturn(mockedList);
@@ -143,6 +139,8 @@ public class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				));
 
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = personRepositoryCUT.update(
 				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
@@ -217,6 +215,8 @@ public class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
 				));
 
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = personRepositoryCUT.delete("Mike","Doe");
 		List<Person> objectList = personRepositoryCUT.getAll();

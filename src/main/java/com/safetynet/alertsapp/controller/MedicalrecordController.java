@@ -30,7 +30,7 @@ public class MedicalrecordController {
 	@PostMapping("/medicalRecord")
 	//the @RequestBody annotation maps the HttpRequest body to a transfer or domain object,
 	//enabling automatic deserialization of the inbound HttpRequest body onto a Java object.
-	public ResponseEntity<Medicalrecord> postMedicalrecord(@RequestBody Medicalrecord medicalrecord) {
+	public ResponseEntity<Medicalrecord> postMedicalrecord(@RequestBody Medicalrecord medicalrecord){
 		logger.info("POST /medicalRecord called");
 		Medicalrecord medicalrecordSaved = medicalrecordService.saveMedicalrecord(medicalrecord);	
 		logger.info("POST /medicalRecord response : CREATED");

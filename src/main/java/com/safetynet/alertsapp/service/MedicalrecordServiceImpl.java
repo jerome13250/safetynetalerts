@@ -24,7 +24,7 @@ public class MedicalrecordServiceImpl implements IMedicalrecordService {
 			Medicalrecord medicalrecordFromDB = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
 
 			if(medicalrecordFromDB != null) {
-				logger.error("Medicalrecord already exist: {} {}",medicalrecord.getFirstName(),medicalrecord.getLastName());
+				logger.debug("Medicalrecord already exist: {} {}",medicalrecord.getFirstName(),medicalrecord.getLastName());
 				throw new BusinessResourceException("SaveMedicalrecordError", "Medicalrecord already exist: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.CONFLICT);
 			} 
 
@@ -35,7 +35,7 @@ public class MedicalrecordServiceImpl implements IMedicalrecordService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating medicalrecord  {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
+			logger.debug("Technical error creating medicalrecord  {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating medicalrecord: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -46,7 +46,7 @@ public class MedicalrecordServiceImpl implements IMedicalrecordService {
 			Medicalrecord medicalrecordFromDB = medicalrecordRepository.getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
 
 			if(medicalrecordFromDB == null) {
-				logger.error("Medicalrecord does not exist: {} {}",medicalrecord.getFirstName(),medicalrecord.getLastName());
+				logger.debug("Medicalrecord does not exist: {} {}",medicalrecord.getFirstName(),medicalrecord.getLastName());
 				throw new BusinessResourceException("UpdateMedicalrecordError", "Medicalrecord does not exist: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
 			} 
 			
@@ -57,28 +57,25 @@ public class MedicalrecordServiceImpl implements IMedicalrecordService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error updating medicalrecord {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
+			logger.debug("Technical error updating medicalrecord {} {}", medicalrecord.getFirstName(), medicalrecord.getLastName());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating medicalrecord: "+medicalrecord.getFirstName()+" "+medicalrecord.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Override
-	public void deleteMedicalrecord(String firstname, String lastname) {
+	public void deleteMedicalrecord(String firstname, String lastname) throws BusinessResourceException{
 		try{
 			boolean successDelete = medicalrecordRepository.delete(firstname, lastname);
 			if (!successDelete) {
-				logger.error("Medicalrecord not found: {} {}",firstname,lastname);
+				logger.debug("Medicalrecord not found: {} {}",firstname,lastname);
 				throw new BusinessResourceException("DeleteMedicalrecordError", "Error deleting medicalrecord: "+firstname+" "+lastname, HttpStatus.NOT_FOUND);
 			}
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
-			logger.error("Technical error deleting medicalrecord {} {}", firstname, lastname);
+			logger.debug("Technical error deleting medicalrecord {} {}", firstname, lastname);
 			throw new BusinessResourceException("DeleteMedicalrecordError", "Error deleting medicalrecord: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
-
-
-
 
 }

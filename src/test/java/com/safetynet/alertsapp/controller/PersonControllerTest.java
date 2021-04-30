@@ -31,7 +31,7 @@ import com.safetynet.alertsapp.service.PersonServiceImpl;
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
 //It auto-configures MockMvc instance as well.
 @WebMvcTest(controllers = PersonController.class)  // we are asking to initialize only one web controller
-public class PersonControllerTest {
+class PersonControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;

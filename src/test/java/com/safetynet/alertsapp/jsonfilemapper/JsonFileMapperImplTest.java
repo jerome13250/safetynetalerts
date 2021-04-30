@@ -23,12 +23,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -45,6 +47,9 @@ class JsonFileMapperImplTest {
 
 	@Mock
 	ObjectMapper objectMapperMock;
+
+	@Mock
+	CustomProperties customPropertiesMock;
 
 	@BeforeEach
 	void init() {
@@ -71,10 +76,12 @@ class JsonFileMapperImplTest {
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
+
 		//ACT
-		List<Firestation> objectList = jsonFileMapperCUT.deserialize(new File(""), "firestations", Firestation.class);
+		List<Firestation> objectList = jsonFileMapperCUT.deserialize("firestations", Firestation.class);
 
 		//ASSERT
 		assertEquals(2,objectList.size(),"Expected list size is 2");
@@ -91,10 +98,12 @@ class JsonFileMapperImplTest {
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
+
 		//ACT
-		List<Person> objectList = jsonFileMapperCUT.deserialize(new File(""), "persons", Person.class);
+		List<Person> objectList = jsonFileMapperCUT.deserialize("persons", Person.class);
 
 		//ASSERT
 		assertEquals(2,objectList.size(),"Expected list size is 2");
@@ -115,9 +124,10 @@ class JsonFileMapperImplTest {
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize("medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(3,objectList.size(),"Expected list size is 2");
@@ -144,9 +154,10 @@ class JsonFileMapperImplTest {
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize("medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -164,10 +175,12 @@ class JsonFileMapperImplTest {
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
+
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize("medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(0,objectList.size(),"Expected list size is 0");		
@@ -181,10 +194,11 @@ class JsonFileMapperImplTest {
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize("medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -195,11 +209,11 @@ class JsonFileMapperImplTest {
 	@DisplayName("JsonParseException must return an empty List")
 	void testDeserializeObject_JsonParseException() throws Exception{
 		//ARRANGE
-		//JsonEOFException:
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(JsonParseException.class);
 
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize( "medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -209,11 +223,11 @@ class JsonFileMapperImplTest {
 	@DisplayName("IOException must return an empty List")
 	void testDeserializeObject_IOException() throws Exception{
 		//ARRANGE
-		//JsonEOFException:
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(IOException.class);
 
 		//ACT
-		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize(new File(""), "medicalrecords", Medicalrecord.class);
+		List<Medicalrecord> objectList = jsonFileMapperCUT.deserialize("medicalrecords", Medicalrecord.class);
 
 		//ASSERT
 		assertEquals(0,objectList.size(),"Expected list size is 0");
@@ -225,15 +239,14 @@ class JsonFileMapperImplTest {
 	void testSerializeObject_2firestations()  throws Exception {
 		//ARRANGE
 		jsonTestString = 
-				"{"
-						+ "\"firestations\": [\r\n"
-						+ "		{ \"address\":\"1509 Culver St\", \"station\":\"3\" },\r\n"
-						+ "		{ \"address\":\"29 15th St\", \"station\":\"2\" }\r\n"
-						+ "	]}";
-		
+				"{\"firestations\": [{\"address\":\"1509 Culver St\",\"station\":\"3\" },{\"address\":\"29 15th St\",\"station\":\"2\"}]}";
+
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
+		when(customPropertiesMock.getPersistance()).thenReturn(true);
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 		List<Firestation> listToSave = new ArrayList<>();
 		listToSave.add(new Firestation("addressNew1",1000));
@@ -246,25 +259,28 @@ class JsonFileMapperImplTest {
 		doNothing().when(objectMapperMock).writeValue(new File(""),jsonNodeExpected);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize(new File(""), "firestations", Firestation.class, listToSave);
+		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
 		assertTrue(result,"Success operation, expect true");
 		verify(objectMapperMock, times(1)).writeValue(new File(""),jsonNodeExpected);
 
 	}
-	
-	
+
+
 	@Test
 	@DisplayName("No Firestation already exist, 2 serialized")
 	void testSerializeObject_NoFirestationInFile_serialize2firestations()  throws Exception {
 		//ARRANGE
 		jsonTestString = 
 				"{\"fakeObjects\": [{ \"fakeName1\":\"fake1\", \"fakeName2\":\"fake2\"}]}";
-		
+
 		//Calling a real ObjectMapper to get JSONNode from the test String:
 		JsonNode jsonNodeTest = new ObjectMapper().readTree(jsonTestString);
 		logger.debug("jsonNodeTest={}",jsonNodeTest);
+
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
+		when(customPropertiesMock.getPersistance()).thenReturn(true);
 		when(objectMapperMock.readTree(any(File.class))).thenReturn(jsonNodeTest);
 		List<Firestation> listToSave = new ArrayList<>();
 		listToSave.add(new Firestation("addressNew1",1000));
@@ -272,15 +288,15 @@ class JsonFileMapperImplTest {
 
 		String jsonStringExpected = 
 				"{"
-				+ "\"fakeObjects\": [{ \"fakeName1\":\"fake1\", \"fakeName2\":\"fake2\"}],"
-				+ "\"firestations\":[{\"address\":\"addressNew1\",\"station\":1000},{\"address\":\"addressNew2\",\"station\":2000}]"
-				+ "}";
+						+ "\"fakeObjects\": [{ \"fakeName1\":\"fake1\", \"fakeName2\":\"fake2\"}],"
+						+ "\"firestations\":[{\"address\":\"addressNew1\",\"station\":1000},{\"address\":\"addressNew2\",\"station\":2000}]"
+						+ "}";
 		JsonNode jsonNodeExpected = new ObjectMapper().readTree(jsonStringExpected);
 
 		doNothing().when(objectMapperMock).writeValue(new File(""),jsonNodeExpected);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize(new File(""), "firestations", Firestation.class, listToSave);
+		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
 		assertTrue(result,"Success operation, expect true");
@@ -294,13 +310,32 @@ class JsonFileMapperImplTest {
 		//ARRANGE
 		//JsonEOFException:
 		List<Firestation> listToSave = new ArrayList<>();
+		when(customPropertiesMock.getJsonfile()).thenReturn("");
+		when(customPropertiesMock.getPersistance()).thenReturn(true);
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(IOException.class);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize(new File(""), "firestations", Firestation.class, listToSave);
+		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
 		assertFalse(result,"Failed operation due to exception, expect false");
 	}
-	
+
+
+	@Test
+	@DisplayName("Do not call write when persistance=false in application.properties")
+	void testSerialization_NotCalled()  throws Exception {
+		//ARRANGE
+		//JsonEOFException:
+		List<Firestation> listToSave = new ArrayList<>();
+		when(customPropertiesMock.getPersistance()).thenReturn(false);
+
+		//ACT
+		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
+
+		//ASSERT
+		assertTrue(result,"Operation was required to not execute, expect true");
+		verify(objectMapperMock, times(0)).writeValue(any(File.class),any(JsonNode.class));
+	}
+
 }

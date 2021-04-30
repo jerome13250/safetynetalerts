@@ -1,6 +1,5 @@
 package com.safetynet.alertsapp.repository;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,6 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
 		medicalrecordList = jsonFileMapper.deserialize(
-				Paths.get(props.getJsonfile()).toFile(),
 				"medicalrecords",
 				Medicalrecord.class);
 	}
@@ -66,19 +64,26 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 			return null;
 		}
 		else {
-			logger.error("Found {} Medicalrecords for {} {}",result.size(), firstname, lastname );
+			logger.debug("Found {} Medicalrecords for {} {}",result.size(), firstname, lastname );
 			throw new IllegalStateException ("Found "+result.size()+" Medicalrecords for "+result.size()+
 					" "+ firstname+" "+ lastname + ", but was expecting 1 Medicalrecord." );
 		}	
 	}
 
+	private boolean serialize() {
+		return jsonFileMapper.serialize("medicalrecords", Medicalrecord.class, medicalrecordList);
+	}
+	
 	@Override
 	public boolean add(Medicalrecord medicalrecord) {
 		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
 				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		return medicalrecordList.add(medicalrecord);
+		boolean ramData = medicalrecordList.add(medicalrecord);
+		boolean persistanceData = serialize();
+
+		return (ramData && persistanceData);
 	}
 
 	@Override
@@ -88,12 +93,12 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
 		for (Medicalrecord f : medicalrecordList) {
-			if (f.getFirstName().equals(medicalrecord.getFirstName()) &&
+			if (f.getFirstName().equals(medicalrecord.getFirstName()) && //firstname+lastname considered as primary key
 					f.getLastName().equals(medicalrecord.getLastName())) {
 				f.setBirthdate(medicalrecord.getBirthdate());
 				f.setMedications(medicalrecord.getMedications());
 				f.setAllergies(medicalrecord.getAllergies());
-				return true; //firstname+lastname considered as primary key
+				return serialize(); 
 			}
 		}
 		return false; //update failed, firstname+lastname not found
@@ -101,13 +106,14 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
-		return medicalrecordList.removeIf(medicalrecord-> 
+		boolean ramData =  medicalrecordList.removeIf(medicalrecord-> 
 		( 
 				medicalrecord.getFirstName().equals(firstName) &&
 				medicalrecord.getLastName().equals(lastName)
 				));
+		boolean persistanceData = serialize();
+		return (ramData && persistanceData);
+	
 	}
-
-
 
 }

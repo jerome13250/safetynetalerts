@@ -31,7 +31,7 @@ import com.safetynet.alertsapp.service.FirestationServiceImpl;
 //It disables full auto-configuration and instead apply only configuration relevant to MVC tests.
 //It auto-configures MockMvc instance as well.
 @WebMvcTest(controllers = FirestationController.class)  // we are asking to initialize only one web controller
-public class FirestationControllerTest {
+class FirestationControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;

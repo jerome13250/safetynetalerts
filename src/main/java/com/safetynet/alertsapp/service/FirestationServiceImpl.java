@@ -24,7 +24,6 @@ public class FirestationServiceImpl implements IFireStationService {
 			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
 
 			if(firestationNumber != null) {
-				logger.error("Firestation already exist for address={}, station={}",firestation.getAddress(),firestationNumber);
 				throw new BusinessResourceException("SaveFirestationError", "Firestation already exist: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.CONFLICT);
 			} 
 
@@ -35,7 +34,6 @@ public class FirestationServiceImpl implements IFireStationService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating firestation {} {}", firestation.getAddress(), firestation.getStation());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating firestation: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -46,7 +44,6 @@ public class FirestationServiceImpl implements IFireStationService {
 			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
 
 			if(firestationNumber == null) {
-				logger.error("Firestation does not exist: address={} ",firestation.getAddress());
 				throw new BusinessResourceException("UpdateFirestationError", "Firestation does not exist: address="+firestation.getAddress(), HttpStatus.NOT_FOUND);
 			} 
 			
@@ -58,40 +55,35 @@ public class FirestationServiceImpl implements IFireStationService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error updating firestation {} {}", firestation.getAddress(), firestation.getStation());
 			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Override
-	public void deleteFirestationByAddress(String address) {
+	public void deleteFirestationByAddress(String address) throws BusinessResourceException{
 		try{
 			boolean successDelete = firestationRepository.deleteByAddress(address);
 			if (!successDelete) {
-				logger.error("Firestation not found: address={}",address);
-				throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: address="+address, HttpStatus.NOT_FOUND);
+				throw new BusinessResourceException("DeleteFirestationError", "Firestation unknown: address="+address, HttpStatus.NOT_FOUND);
 			}
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
-			logger.error("Error deleting firestation: address={}",address);
-			throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: address="+address, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("DeleteFirestationError", "Technical error deleting firestation: address="+address, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
 
 	@Override
-	public void deleteFirestationByStation(Integer station) {
+	public void deleteFirestationByStation(Integer station) throws BusinessResourceException{
 		try{
 			boolean successDelete = firestationRepository.deleteByStation(station);
 			if (!successDelete) {
-				logger.error("Firestation not found: station={}",station);
-				throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: station="+station, HttpStatus.NOT_FOUND);
+				throw new BusinessResourceException("DeleteFirestationError", "Firestation unknown: station="+station, HttpStatus.NOT_FOUND);
 			}
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
-			logger.error("Error deleting firestation: station={}",station);
-			throw new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: station="+station, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("DeleteFirestationError", "Technical error deleting firestation: station="+station, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
 

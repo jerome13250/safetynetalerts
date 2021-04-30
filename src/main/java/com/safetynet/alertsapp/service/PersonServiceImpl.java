@@ -63,7 +63,7 @@ public class PersonServiceImpl implements IPersonService {
 	}
 
 	@Override
-	public void deletePerson(String firstname, String lastname) {
+	public void deletePerson(String firstname, String lastname) throws BusinessResourceException{
 		try{
 			boolean successDelete = personRepository.delete(firstname, lastname);
 			if (!successDelete) {
@@ -77,8 +77,5 @@ public class PersonServiceImpl implements IPersonService {
 			throw new BusinessResourceException("DeletePersonError", "Error deleting person: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
-
-
-
 
 }

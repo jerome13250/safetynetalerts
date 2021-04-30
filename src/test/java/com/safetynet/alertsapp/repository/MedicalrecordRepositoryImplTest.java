@@ -41,10 +41,6 @@ class MedicalrecordRepositoryImplTest {
 
 	@Mock
 	private JsonFileMapperImpl jsonFileMapperMock;
-	
-	@Mock
-	private CustomProperties customPropertiesMock;
-	
 
 	@BeforeEach
 	void initializeList() {
@@ -99,9 +95,7 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<>()
 						)
 				));
-		when(customPropertiesMock.getJsonfile()).thenReturn("thejsonfile.json");
 		when(jsonFileMapperMock.deserialize(
-				Paths.get("thejsonfile.json").toFile(),
 				"medicalrecords",
 				Medicalrecord.class))
 		.thenReturn(mockedList);
@@ -168,6 +162,8 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy100","fakeAllergy101"))
 						)
 				));
+		
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
 
 		//Act
 		medicalrecordRepositoryCUT.add(
@@ -248,6 +244,7 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1000","fakeAllergy1001","fakeAllergy1002"))
 						)
 				));
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
 
 		//Act
 		boolean result = medicalrecordRepositoryCUT.update(
@@ -367,7 +364,8 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
 						)
 				));
-
+		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		
 		//Act
 		boolean result = medicalrecordRepositoryCUT.delete("Mike","Hill");
 		List<Medicalrecord> objectList = medicalrecordRepositoryCUT.getAll();

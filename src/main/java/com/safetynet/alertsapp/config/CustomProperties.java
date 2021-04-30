@@ -11,4 +11,5 @@ import lombok.Data;
 public class CustomProperties {
 
 		private String jsonfile;
+		private Boolean persistance;
 }

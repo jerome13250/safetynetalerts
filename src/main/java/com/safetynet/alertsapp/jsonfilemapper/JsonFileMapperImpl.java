@@ -35,30 +35,19 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 	@Autowired
 	private ObjectMapper objectMapper; //this is for mocking purpose
 
-	//Custom property to read the json file path in application.properties
+	//Custom property to read the json parameters in application.properties
 	@Autowired
 	private CustomProperties customProperties;
-	
-	/**
-	 * Method to deserialize from JSON file (safetynet alerts format) to Java Objects
-	 * 
-	 * @param <T> the java Object type that is linked to the objectNodeName (Person, Firestation,...)
-	 * @param jsonSource the path to the JSON file.
-	 * @param objectNodeNameString the first level of json file containing arrays of Objects.
-	 * @param classType the class type of T
-	 * Example in our file : "persons" , "firestations", ...
-	 *
-	 * @return a List with the required Object type.
-	 *   
-	 */
+
 	@Override
-	public <T> List<T> deserialize(File jsonSource, String objectNodeNameString, Class<T> classType) {
+	public <T> List<T> deserialize(String objectNodeNameString, Class<T> classType) {
 
 		logger.debug("JsonFileMapper deserialize launched");
-		
+
 		List<T> objectList = new ArrayList<>();
 		try {
-			JsonNode jsonNodeRoot = objectMapper.readTree(customProperties.getJsonfile());
+			File jsonSource = new File(customProperties.getJsonfile());
+			JsonNode jsonNodeRoot = objectMapper.readTree(jsonSource);
 
 			//Get objects array under jsonNodeRoot:
 			JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
@@ -70,7 +59,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 				//setting date format for deserializing:
 				final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 				objectMapperSecondStep.setDateFormat(df);
-				
+
 				for(JsonNode j : jsonNodeObjectName) {
 					objectList.add(objectMapperSecondStep.readValue(j.toString(), classType));
 				}
@@ -78,7 +67,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 			else {
 				logger.debug("{} not found in json file.", objectNodeNameString);
 			}
-			
+
 		} catch (Exception e) {
 			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
 			e.printStackTrace();
@@ -86,44 +75,48 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 
 		return objectList;
 	}
-	
-	public <T> boolean serialize(File jsonSource, String objectNodeNameString, Class<T> classType, List<T> listToSave) {
 
-		logger.debug("JsonFileMapper serialize launched");
+	@Override
+	public <T> boolean serialize(String objectNodeNameString, Class<T> classType, List<T> listToSave) {
+		//save data to file if persistance is allowed in application.properties:
+		if (Boolean.TRUE.equals(customProperties.getPersistance())) {
 
-		try {
-			JsonNode jsonNodeRoot = objectMapper.readTree(customProperties.getJsonfile());
-			ArrayNode arrayNodeObjectName;
-			
-			//Get object array under jsonNodeRoot:
-			JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
-			if (jsonNodeObjectName != null) {
-				//To update an existing node, need to cast it to ObjectNode:
-				arrayNodeObjectName = (ArrayNode) jsonNodeObjectName;
-				arrayNodeObjectName.removeAll();// clean all
+			logger.debug("JsonFileMapper serialize launched");
+
+			try {
+				File jsonSource = new File(customProperties.getJsonfile());
+
+				JsonNode jsonNodeRoot = objectMapper.readTree(jsonSource);
+				ArrayNode arrayNodeObjectName;
+
+				//Get object array under jsonNodeRoot:
+				JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
+				if (jsonNodeObjectName != null) {
+					//To update an existing node, need to cast it to ObjectNode:
+					arrayNodeObjectName = (ArrayNode) jsonNodeObjectName;
+					arrayNodeObjectName.removeAll();// clean all
+				}
+				else {
+					logger.debug("{} not found in json file.", objectNodeNameString);
+					arrayNodeObjectName = ((ObjectNode)jsonNodeRoot).putArray(objectNodeNameString);
+				}
+				//need a second step ObjectMapper because first one needs mock but not this one:
+				ObjectMapper objectMapperSecondStep = new ObjectMapper();
+				//setting date format for deserializing:
+				final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+				objectMapperSecondStep.setDateFormat(df);
+
+				for(T elementToSave: listToSave) {
+					arrayNodeObjectName.add(objectMapperSecondStep.valueToTree(elementToSave));
+					logger.debug("elementToSave={}",elementToSave);
+				}
+
+				objectMapper.writeValue(jsonSource, jsonNodeRoot);
+			} catch (Exception e) {
+				logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
+				e.printStackTrace();
+				return false;
 			}
-			else {
-				logger.debug("{} not found in json file.", objectNodeNameString);
-				arrayNodeObjectName = ((ObjectNode)jsonNodeRoot).putArray(objectNodeNameString);
-			}
-			//need a second step ObjectMapper because first one needs mock but not this one:
-			ObjectMapper objectMapperSecondStep = new ObjectMapper();
-			//setting date format for deserializing:
-			final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-			objectMapperSecondStep.setDateFormat(df);
-			
-			for(T elementToSave: listToSave) {
-				arrayNodeObjectName.add(objectMapperSecondStep.valueToTree(elementToSave));
-				logger.debug("elementToSave={}",elementToSave);
-			}
-			
-			//save data to file:
-			objectMapper.writeValue(jsonSource, jsonNodeRoot);
-			
-		} catch (Exception e) {
-			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
-			e.printStackTrace();
-			return false;
 		}
 		return true;
 	}

@@ -29,7 +29,7 @@ import com.safetynet.alertsapp.model.Person;
 import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class PersonServiceImplTest {
+class PersonServiceImplTest {
 
 	private final Logger logger = LoggerFactory.getLogger(PersonServiceImplTest.class);
 

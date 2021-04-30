@@ -1,6 +1,5 @@
 package com.safetynet.alertsapp.repository;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,6 @@ public class PersonRepositoryImpl implements IPersonRepository {
 	protected void loadJsonDataFromFile() {
 		logger.debug("Calling loadJsonDataFromFile");
 		personList = jsonFileMapper.deserialize(
-				Paths.get(props.getJsonfile()).toFile(),
 				"persons",
 				Person.class);
 	}
@@ -84,7 +82,7 @@ public class PersonRepositoryImpl implements IPersonRepository {
 			return null;
 		}
 		else {//this is to test case doubles : error
-			logger.error("Found {} persons for {} {} , but was expecting 1.",result.size(), firstname, lastname );
+			logger.debug("Found {} persons for {} {} , but was expecting 1.",result.size(), firstname, lastname );
 			throw new IllegalStateException("Found "+result.size()+" persons for " +
 					" " + firstname+" "+ lastname + ", but was expecting 1 Person.");
 
@@ -97,6 +95,10 @@ public class PersonRepositoryImpl implements IPersonRepository {
 		person.getLastName().equals(lastname)).collect(Collectors.toList());
 	}
 
+	private boolean serialize() {
+		return jsonFileMapper.serialize("persons", Person.class, personList);
+	}
+	
 	@Override
 	public boolean add(Person person) throws BusinessResourceException {
 		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
@@ -104,7 +106,10 @@ public class PersonRepositoryImpl implements IPersonRepository {
 				null == person.getZip() ) {//donnees incompletes
 			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		return personList.add(person);
+		boolean ramData = personList.add(person); //RAM
+		boolean persistanceData = serialize(); //FILE
+
+		return (ramData && persistanceData);
 	}
 
 	@Override
@@ -115,14 +120,14 @@ public class PersonRepositoryImpl implements IPersonRepository {
 			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
 		for (Person p : personList) {
-			if (p.getFirstName().equals(person.getFirstName()) &&
+			if (p.getFirstName().equals(person.getFirstName()) && //firstname+lastname considered as primary key
 					p.getLastName().equals(person.getLastName())) {
 				p.setAddress(person.getAddress());
 				p.setCity(person.getCity());
 				p.setEmail(person.getEmail());
 				p.setPhone(person.getPhone());
 				p.setZip(person.getZip());
-				return true; //firstname+lastname considered as primary key
+				return serialize(); 
 			}
 		}
 		return false; //update failed, firstname+lastname not found
@@ -147,11 +152,15 @@ public class PersonRepositoryImpl implements IPersonRepository {
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
-		return personList.removeIf(person-> 
+		boolean ramData =  personList.removeIf(person-> 
 		( 
 				person.getFirstName().equals(firstName) &&
 				person.getLastName().equals(lastName)
 				));
+		
+		boolean persistanceData = serialize(); //FILE
+		return (ramData && persistanceData);
+		
 	}
 
 

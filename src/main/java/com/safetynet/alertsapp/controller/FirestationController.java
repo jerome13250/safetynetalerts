@@ -27,9 +27,9 @@ public class FirestationController {
 	@Autowired
 	private IFireStationService firestationService;
 	
-	@PostMapping("/firestation")
 	//the @RequestBody annotation maps the HttpRequest body to a transfer or domain object,
 	//enabling automatic deserialization of the inbound HttpRequest body onto a Java object.
+	@PostMapping("/firestation")
 	public ResponseEntity<Firestation> postFirestation(@RequestBody Firestation firestation) {
 		logger.info("POST /firestation called");
 		Firestation firestationSaved = firestationService.saveFirestation(firestation);	
@@ -46,7 +46,7 @@ public class FirestationController {
 	}
 	
 	@DeleteMapping(value = "/firestation", params = "address") // params parameter to filter by HTTP parameters
-	public ResponseEntity<Void> deleteUser(@RequestParam(required = true) String address) 
+	public ResponseEntity<Void> deleteFirestation(@RequestParam(required = true) String address) 
 			throws BusinessResourceException {
 		logger.info("DELETE /firestation?address called");
 		firestationService.deleteFirestationByAddress(address);
