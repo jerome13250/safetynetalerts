@@ -21,13 +21,6 @@ public class PersonServiceImpl implements IPersonService {
 	@Override
 	public Person savePerson(Person person) throws BusinessResourceException{
 		try{
-			Person personFromDB = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
-
-			if(personFromDB != null) {
-				logger.error("Person already exist: {} {}",person.getFirstName(),person.getLastName());
-				throw new BusinessResourceException("SavePersonError", "Person already exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.CONFLICT);
-			} 
-
 			personRepository.add(person);
 			return personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
 		}
@@ -35,21 +28,14 @@ public class PersonServiceImpl implements IPersonService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error creating person {} {}", person.getFirstName(), person.getLastName());
-			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
+			logger.debug("Technical error creating person {} {}", person.getFirstName(), person.getLastName());
+			throw new BusinessResourceException("SavePersonError", "Technical error creating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@Override
 	public Person updatePerson(Person person) throws BusinessResourceException{
 		try{
-			Person personFromDB = personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
-
-			if(personFromDB == null) {
-				logger.error("Person does not exist: {} {}",person.getFirstName(),person.getLastName());
-				throw new BusinessResourceException("UpdatePersonError", "Person does not exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.NOT_FOUND);
-			} 
-			
 			personRepository.update(person);
 			return personRepository.getByFirstnameLastname(person.getFirstName(), person.getLastName());
 		}
@@ -57,23 +43,20 @@ public class PersonServiceImpl implements IPersonService {
 			throw e;
 		}
 		catch(Exception ex){
-			logger.error("Technical error updating person {} {}", person.getFirstName(), person.getLastName());
-			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
+			logger.debug("Technical error updating person {} {}", person.getFirstName(), person.getLastName());
+			throw new BusinessResourceException("UpdatePersonError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Override
 	public void deletePerson(String firstname, String lastname) throws BusinessResourceException{
-		try{
-			boolean successDelete = personRepository.delete(firstname, lastname);
-			if (!successDelete) {
-				logger.error("Person not found: {} {}",firstname,lastname);
-				throw new BusinessResourceException("DeletePersonError", "Error deleting person: "+firstname+" "+lastname, HttpStatus.NOT_FOUND);
-			}
+		try {
+			personRepository.delete(firstname, lastname);
+	
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
-			logger.error("Technical error deleting person {} {}", firstname, lastname);
+			logger.debug("Technical error deleting person {} {}", firstname, lastname);
 			throw new BusinessResourceException("DeletePersonError", "Error deleting person: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}

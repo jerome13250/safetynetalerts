@@ -186,6 +186,26 @@ class FirestationRepositoryImplTest {
 	}
 
 	@Test
+	@DisplayName("3 objects Firestation + add one more, but already exist")
+	void testAdd_3firestations_addOneThatAlreadyExists()  throws Exception {
+		//Arrange
+		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333)
+				));
+				
+		//Act
+		assertThrows(BusinessResourceException.class, () -> firestationRepositoryCUT.add(new Firestation("adress1", 0)));
+		List<Firestation> objectList = firestationRepositoryCUT.getAll();
+
+		//Assert
+		assertEquals(3,objectList.size(),"Expected list must not change : 3");
+		assertEquals(expectedList,objectList,"Returned list must be initial List");
+	}
+	
+	@Test
 	@DisplayName("Test add incomplete Firestation")
 	void testAdd_incompleteFirestation()  throws Exception {
 		//Arrange
@@ -240,12 +260,11 @@ class FirestationRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = firestationRepositoryCUT.update(new Firestation("adressUnknown", 1));
+		assertThrows(BusinessResourceException.class, ()-> firestationRepositoryCUT.update(new Firestation("adressUnknown", 1)));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failure : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as initial List");
 	}
 
@@ -303,12 +322,11 @@ class FirestationRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = firestationRepositoryCUT.deleteByAddress("adressUnknown");
+		assertThrows(BusinessResourceException.class, () -> firestationRepositoryCUT.deleteByAddress("adressUnknown"));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failed : result must be false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
 
@@ -352,12 +370,11 @@ class FirestationRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = firestationRepositoryCUT.deleteByStation(1);
+		assertThrows(BusinessResourceException.class, () -> firestationRepositoryCUT.deleteByStation(1));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failed : result must be false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
 	

@@ -21,12 +21,6 @@ public class FirestationServiceImpl implements IFireStationService {
 	@Override
 	public Firestation saveFirestation(Firestation firestation) throws BusinessResourceException{
 		try{
-			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
-
-			if(firestationNumber != null) {
-				throw new BusinessResourceException("SaveFirestationError", "Firestation already exist: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.CONFLICT);
-			} 
-
 			firestationRepository.add(firestation);
 			return new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
 		}
@@ -41,12 +35,6 @@ public class FirestationServiceImpl implements IFireStationService {
 	@Override
 	public Firestation updateFirestation(Firestation firestation) throws BusinessResourceException{
 		try{
-			Integer firestationNumber = firestationRepository.getByAddress(firestation.getAddress());
-
-			if(firestationNumber == null) {
-				throw new BusinessResourceException("UpdateFirestationError", "Firestation does not exist: address="+firestation.getAddress(), HttpStatus.NOT_FOUND);
-			} 
-			
 			firestationRepository.update(firestation);
 			Firestation result = new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
 			return result;
@@ -55,17 +43,14 @@ public class FirestationServiceImpl implements IFireStationService {
 			throw e;
 		}
 		catch(Exception ex){
-			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating or updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("UpdateFirestationError", "Technical error creating or updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Override
 	public void deleteFirestationByAddress(String address) throws BusinessResourceException{
 		try{
-			boolean successDelete = firestationRepository.deleteByAddress(address);
-			if (!successDelete) {
-				throw new BusinessResourceException("DeleteFirestationError", "Firestation unknown: address="+address, HttpStatus.NOT_FOUND);
-			}
+			firestationRepository.deleteByAddress(address);
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){
@@ -76,10 +61,7 @@ public class FirestationServiceImpl implements IFireStationService {
 	@Override
 	public void deleteFirestationByStation(Integer station) throws BusinessResourceException{
 		try{
-			boolean successDelete = firestationRepository.deleteByStation(station);
-			if (!successDelete) {
-				throw new BusinessResourceException("DeleteFirestationError", "Firestation unknown: station="+station, HttpStatus.NOT_FOUND);
-			}
+			firestationRepository.deleteByStation(station);
 		}catch (BusinessResourceException e) {
 				throw e;
 		}catch(Exception ex){

@@ -25,10 +25,6 @@ public class PersonRepositoryImpl implements IPersonRepository {
 	@Autowired
 	private IJsonFileMapper jsonFileMapper;
 
-	//Custom property to read the json file path in application.properties
-	@Autowired
-	private CustomProperties props;
-
 	//Cannot call loadJsonDataFromFile in constructor, must use @PostConstruct to access to jsonFileMapper :
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
 	//In the @PostConstruct method the bean is fully initialized so we can use the dependency jsonFileMapper.
@@ -85,7 +81,6 @@ public class PersonRepositoryImpl implements IPersonRepository {
 			logger.debug("Found {} persons for {} {} , but was expecting 1.",result.size(), firstname, lastname );
 			throw new IllegalStateException("Found "+result.size()+" persons for " +
 					" " + firstname+" "+ lastname + ", but was expecting 1 Person.");
-
 		}	
 	}
 
@@ -101,24 +96,32 @@ public class PersonRepositoryImpl implements IPersonRepository {
 	
 	@Override
 	public boolean add(Person person) throws BusinessResourceException {
-		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
-				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
-				null == person.getZip() ) {//donnees incompletes
-			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
+		if(!person.allAttributesAreSet()) {//donnees incompletes
+			throw new BusinessResourceException("SavePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		boolean ramData = personList.add(person); //RAM
-		boolean persistanceData = serialize(); //FILE
-
-		return (ramData && persistanceData);
+		
+		Person personFromDB = getByFirstnameLastname(person.getFirstName(), person.getLastName());
+		if(personFromDB != null) {
+			logger.debug("Person already exist: {} {}",person.getFirstName(),person.getLastName());
+			throw new BusinessResourceException("SavePersonError", "Person already exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.CONFLICT);
+		} 
+		
+		personList.add(person);
+		return serialize();
 	}
 
 	@Override
 	public boolean update(Person person) {
-		if(null == person.getFirstName() || null == person.getLastName() || null == person.getAddress() ||
-				null == person.getCity() || null == person.getEmail() || null == person.getPhone() ||
-				null == person.getZip() ) {//donnees incompletes
-			throw new BusinessResourceException("IncompletePerson", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
+		if(!person.allAttributesAreSet()) {//donnees incompletes
+			throw new BusinessResourceException("UpdatePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
+		
+		Person personFromDB = getByFirstnameLastname(person.getFirstName(), person.getLastName());
+		if(personFromDB == null) {
+			logger.debug("Person does not exist: {} {}",person.getFirstName(),person.getLastName());
+			throw new BusinessResourceException("UpdatePersonError", "Person does not exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.NOT_FOUND);
+		} 
+		
 		for (Person p : personList) {
 			if (p.getFirstName().equals(person.getFirstName()) && //firstname+lastname considered as primary key
 					p.getLastName().equals(person.getLastName())) {
@@ -127,39 +130,27 @@ public class PersonRepositoryImpl implements IPersonRepository {
 				p.setEmail(person.getEmail());
 				p.setPhone(person.getPhone());
 				p.setZip(person.getZip());
-				return serialize(); 
 			}
 		}
-		return false; //update failed, firstname+lastname not found
+		return serialize(); 
 	}
 
-	/*This would be for PATCH partial update
-	public boolean patch(Person person) {
-		for (Person p : personList) {
-			if (p.getFirstName().equals(person.getFirstName()) &&
-					p.getLastName().equals(person.getLastName())) {
-				if(person.getAddress()!=null) {p.setAddress(person.getAddress());}
-				if(person.getCity()!=null) {p.setCity(person.getCity());}
-				if(person.getEmail()!=null) {p.setEmail(person.getEmail());}
-				if(person.getPhone()!=null) {p.setPhone(person.getPhone());}
-				if(person.getZip()!=null) {p.setZip(person.getZip());}
-				return true; //firstname+lastname considered as primary key
-			}
-		}
-		return false; //update failed, firstname+lastname not found
-	}
-	 */
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
-		boolean ramData =  personList.removeIf(person-> 
+		Person personFromDB = getByFirstnameLastname(firstName, lastName);
+		if(personFromDB == null) {
+			logger.debug("Person does not exist: {} {}",firstName,lastName);
+			throw new BusinessResourceException("DeletePersonError", "Person does not exist: "+firstName+" "+lastName, HttpStatus.NOT_FOUND);
+		}
+		
+		personList.removeIf(person-> 
 		( 
 				person.getFirstName().equals(firstName) &&
 				person.getLastName().equals(lastName)
 				));
 		
-		boolean persistanceData = serialize(); //FILE
-		return (ramData && persistanceData);
+		return serialize();
 		
 	}
 

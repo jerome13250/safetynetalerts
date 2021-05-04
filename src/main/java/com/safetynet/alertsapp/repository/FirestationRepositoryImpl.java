@@ -60,12 +60,6 @@ public class FirestationRepositoryImpl implements IFirestationRepository {
 		return firestationByStationnumber;
 	}
 
-	/**
-	 * Search and return the firestation number for a specific address
-	 * @param address the adress required
-	 * @return firestation number for a specific address, <b>null if address is not found.</b>
-	 * @throws IllegalStateException if an address has more than 1 firestation number.
-	 */
 	@Override
 	public Integer getByAddress(String address) throws IllegalStateException {
 		List<Firestation> result = firestationList.stream().filter(f->f.getAddress().equals(address)).collect(Collectors.toList());
@@ -89,44 +83,63 @@ public class FirestationRepositoryImpl implements IFirestationRepository {
 
 	@Override
 	public boolean add(Firestation firestation) {
-		if(null == firestation.getAddress() || null == firestation.getStation() ) {//donnees incompletes
-			throw new BusinessResourceException("IncompleteFirestation", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
+		if(!firestation.allAttributesAreSet()) {//donnees incompletes
+			throw new BusinessResourceException("AddFirestationError", "Unable to add firestation, informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
+		
+		Integer firestationNumber = getByAddress(firestation.getAddress());
+		if(firestationNumber != null) {
+			throw new BusinessResourceException("SaveFirestationError", "Firestation already exists: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.CONFLICT);
+		} 
 
-		boolean ramData = firestationList.add(firestation); //RAM
+		firestationList.add(firestation); //RAM
 		boolean persistanceData = serialize(); //FILE
-
-		return (ramData && persistanceData);
+		
+		return persistanceData;
 	}
 
 	@Override
 	public boolean update(Firestation firestation) {
-		if(null == firestation.getAddress() || null == firestation.getStation() ) {//donnees incompletes
-			throw new BusinessResourceException("IncompleteFirestation", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
+		if(!firestation.allAttributesAreSet()) {
+			throw new BusinessResourceException("UpdateFirestationError", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
+		
+		Integer firestationNumber = getByAddress(firestation.getAddress());
+		if(firestationNumber == null) {
+			throw new BusinessResourceException("UpdateFirestationError", "Firestation does not exist: address="+firestation.getAddress(), HttpStatus.NOT_FOUND);
+		} 
 
 		for (Firestation f : firestationList) {
 			if (f.getAddress().equals(firestation.getAddress())) {
 				f.setStation(firestation.getStation());
-				boolean persistanceData = serialize();
-				return persistanceData;
 			}
 		}
-		return false; //update failed, address not found
+		boolean persistanceData = serialize();
+		return persistanceData;
 	}
 
 	@Override
 	public boolean deleteByAddress(String address) {
-		boolean ramData =  firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
+		Integer firestationNumber = getByAddress(address);
+		if(firestationNumber == null) {
+			throw new BusinessResourceException("DeleteFirestationError", "Firestation does not exist: address="+address, HttpStatus.NOT_FOUND);
+		}
+		
+		firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
 		boolean persistanceData = serialize();
-		return (ramData && persistanceData);
+		return persistanceData;
 	}
 
 	@Override
 	public boolean deleteByStation(Integer station) {
-		boolean ramData =  firestationList.removeIf(firestation-> firestation.getStation().equals(station));
+		List<Firestation> listToDelete = getByStationnumber(station);
+		if(listToDelete.isEmpty()) {
+			throw new BusinessResourceException("DeleteFirestationError", "Firestation does not exist: station="+station, HttpStatus.NOT_FOUND);
+		}
+		
+		firestationList.removeIf(firestation-> firestation.getStation().equals(station));
 		boolean persistanceData = serialize();
-		return (ramData && persistanceData);
+		return persistanceData;
 	}
 }
 

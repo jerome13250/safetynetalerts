@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safetynet.alertsapp.config.CustomProperties;
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 
 /**
  * This class uses Jackson to map from JSON file to Java Objects
@@ -53,7 +55,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 			JsonNode jsonNodeObjectName = jsonNodeRoot.get(objectNodeNameString); //returns null if objectNodeName not found
 			if (jsonNodeObjectName != null) {
 				String objectsJsonString = jsonNodeObjectName.toString();
-				logger.debug("objectsJsonString={}",objectsJsonString);
+				logger.trace("objectsJsonString={}",objectsJsonString);
 				//need a second step ObjectMapper because first one needs mock but not this one:
 				ObjectMapper objectMapperSecondStep = new ObjectMapper();
 				//setting date format for deserializing:
@@ -69,8 +71,8 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 			}
 
 		} catch (Exception e) {
-			logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
-			e.printStackTrace();
+			logger.error("{} deserialize from Json has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
+			
 		}
 
 		return objectList;
@@ -108,14 +110,14 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 
 				for(T elementToSave: listToSave) {
 					arrayNodeObjectName.add(objectMapperSecondStep.valueToTree(elementToSave));
-					logger.debug("elementToSave={}",elementToSave);
+					logger.trace("elementToSave={}",elementToSave);
 				}
 
 				objectMapper.writeValue(jsonSource, jsonNodeRoot);
 			} catch (Exception e) {
-				logger.error("{} loadJsonDataFromFile has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
-				e.printStackTrace();
-				return false;
+				logger.debug("{} serialize to Json has failed: {} , message: {}", objectNodeNameString, e, e.getMessage());
+				throw new BusinessResourceException("SerializationError", "Technical error: unable to serialize "+objectNodeNameString+" in "+customProperties.getJsonfile(), HttpStatus.INTERNAL_SERVER_ERROR);
+				
 			}
 		}
 		return true;

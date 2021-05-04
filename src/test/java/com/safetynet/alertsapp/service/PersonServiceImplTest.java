@@ -45,17 +45,16 @@ class PersonServiceImplTest {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com");    
 		Person personSaved = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com"); 
-		when(personRepositoryMock.getByFirstnameLastname("New", "NewName"))
-		.thenReturn(null)//At first the person is not in our data
-		.thenReturn(personSaved);//At the end the person is present
 		when(personRepositoryMock.add(personToSave)).thenReturn(true);
+		when(personRepositoryMock.getByFirstnameLastname("New", "NewName"))
+		.thenReturn(personSaved);//At the end the person is present
 
 		//Act
 		Person result = personServiceCUT.savePerson(personToSave);
 
 		//Assert
 		assertNotNull(result);
-		assertEquals(personToSave,result);
+		assertEquals(personSaved,result);
 		verify(personRepositoryMock, times(1)).add(any(Person.class));
 
 	}
@@ -65,7 +64,7 @@ class PersonServiceImplTest {
 	void testSavePerson_PersonAlreadyExist_BusinessResourceException() throws Exception {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com");
-		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenReturn(personToSave); //Person already exist
+		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenThrow(BusinessResourceException.class); //Person already exist
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.savePerson(personToSave));
@@ -87,7 +86,6 @@ class PersonServiceImplTest {
 	void testSavePerson_incompletePerson_BusinessResourceException() throws Exception {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", null, null, "addressNew", "cityNew", "new@mail.com");
-		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenReturn(null);
 		doThrow(BusinessResourceException.class).when(personRepositoryMock).add(personToSave);
 
 		//Act
@@ -98,10 +96,8 @@ class PersonServiceImplTest {
 	@DisplayName("Update Person: success case")
 	void testUpdatePerson() throws Exception {
 		//Arrange
-		Person personToUpdate = new Person("John", "Doe", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
 		Person personUpdated = new Person("John", "Doe", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
 		when(personRepositoryMock.getByFirstnameLastname("John", "Doe"))
-		.thenReturn(personToUpdate)//The person is in our data
 		.thenReturn(personUpdated);//At the end the person is present
 		when(personRepositoryMock.update(personUpdated)).thenReturn(true);
 
@@ -120,7 +116,7 @@ class PersonServiceImplTest {
 		//Arrange
 		Person personToUpdate = new Person("John", "Unknown", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
 		Person personUpdated = new Person("John", "Unknown", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
-		when(personRepositoryMock.getByFirstnameLastname("John", "Unknown")).thenReturn(null); //Person does not exist in data
+		when(personRepositoryMock.getByFirstnameLastname("John", "Unknown")).thenThrow(BusinessResourceException.class);
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.updatePerson(personUpdated));
@@ -144,7 +140,6 @@ class PersonServiceImplTest {
 		//Arrange
 		Person personToUpdate = new Person("John", "Doe", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
 		Person personUpdated = new Person("John", "Doe", null, null, null, null, null); 
-		when(personRepositoryMock.getByFirstnameLastname("John", "Doe")).thenReturn(personToUpdate); //Person already exist
 		doThrow(BusinessResourceException.class).when(personRepositoryMock).update(personUpdated);
 
 		//Act
@@ -169,7 +164,7 @@ class PersonServiceImplTest {
 	@DisplayName("Delete Person: fail case cause nothing has been deleted")
 	void testDeletePerson_nothingDeleted_BusinessResourceException() throws Exception {
 		//Arrange
-		when(personRepositoryMock.delete("John", "Doe")).thenReturn(false);
+		when(personRepositoryMock.delete("John", "Doe")).thenThrow(BusinessResourceException.class);
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.deletePerson("John", "Doe"));

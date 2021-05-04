@@ -46,7 +46,6 @@ class FirestationServiceImplTest {
 		Firestation firestationToSave = new Firestation("NewAddress", 1);    
 		Firestation firestationSaved = new Firestation("NewAddress", 1); 
 		when(firestationRepositoryMock.getByAddress("NewAddress"))
-		.thenReturn(null)//At first the firestation is not in our data
 		.thenReturn(1);//At the end the firestation is present, it returns the station number
 		when(firestationRepositoryMock.add(firestationToSave)).thenReturn(true);
 
@@ -65,7 +64,7 @@ class FirestationServiceImplTest {
 	void testSaveFirestation_FirestationAlreadyExist_BusinessResourceException() throws Exception {
 		//Arrange
 		Firestation firestationToSave = new Firestation("NewAddress", 1);
-		when(firestationRepositoryMock.getByAddress("NewAddress")).thenReturn(1); //Firestation already exist
+		when(firestationRepositoryMock.getByAddress("NewAddress")).thenThrow(BusinessResourceException.class); //Firestation already exist
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->firestationServiceCUT.saveFirestation(firestationToSave));
@@ -87,7 +86,6 @@ class FirestationServiceImplTest {
 	void testSaveFirestation_incompleteFirestation_BusinessResourceException() throws Exception {
 		//Arrange
 		Firestation firestationToSave = new Firestation("NewAddress", 1);
-		when(firestationRepositoryMock.getByAddress("NewAddress")).thenReturn(null);
 		doThrow(BusinessResourceException.class).when(firestationRepositoryMock).add(firestationToSave);
 
 		//Act
@@ -101,7 +99,6 @@ class FirestationServiceImplTest {
 		Firestation firestationToUpdate = new Firestation("address", 1);
 		Firestation firestationUpdated = new Firestation("address", 2); 
 		when(firestationRepositoryMock.getByAddress("address"))
-		.thenReturn(1)//The firestation is in our data
 		.thenReturn(2);//At the end the firestation is present
 		when(firestationRepositoryMock.update(firestationUpdated)).thenReturn(true);
 
@@ -120,7 +117,7 @@ class FirestationServiceImplTest {
 		//Arrange
 		Firestation firestationToUpdate = new Firestation("address", 1);
 		Firestation firestationUpdated = new Firestation("address", 2);  
-		when(firestationRepositoryMock.getByAddress("address")).thenReturn(null); //Firestation does not exist in data
+		when(firestationRepositoryMock.getByAddress("address")).thenThrow(BusinessResourceException.class); //Firestation does not exist in data
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->firestationServiceCUT.updateFirestation(firestationUpdated));
@@ -144,7 +141,6 @@ class FirestationServiceImplTest {
 		//Arrange
 		Firestation firestationToUpdate = new Firestation("address", 1);
 		Firestation firestationUpdated = new Firestation("address", null); 
-		when(firestationRepositoryMock.getByAddress("address")).thenReturn(1); //Firestation already exist
 		doThrow(BusinessResourceException.class).when(firestationRepositoryMock).update(firestationUpdated);
 
 		//Act
@@ -164,17 +160,17 @@ class FirestationServiceImplTest {
 		verify(firestationRepositoryMock, times(1)).deleteByAddress("address");
 
 	}
-		
+
 	@Test
-	@DisplayName("Delete Firestation by address: fail case cause nothing has been deleted")
-	void testDeleteFirestationByAddress_nothingDeleted_BusinessResourceException() throws Exception {
+	@DisplayName("Delete Firestation by address: fail case cause Firestation is unknown")
+	void testDeleteFirestationByAddress_firestationUnknown() throws Exception {
 		//Arrange
-		when(firestationRepositoryMock.deleteByAddress("address")).thenReturn(false);
+		when(firestationRepositoryMock.deleteByAddress("address")).thenThrow(BusinessResourceException.class);
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->firestationServiceCUT.deleteFirestationByAddress("address"));
 	}
-
+	
 	@Test
 	@DisplayName("Delete Firestation by address: fail case cause UnsupportedOperationException occured")
 	void testDeleteFirestationByAddress_nothingDeleted_Exception() throws Exception {
@@ -198,17 +194,17 @@ class FirestationServiceImplTest {
 		verify(firestationRepositoryMock, times(1)).deleteByStation(1);
 
 	}
-		
+
 	@Test
-	@DisplayName("Delete Firestation by station: fail case cause nothing has been deleted")
-	void testDeleteFirestationByStation_nothingDeleted_BusinessResourceException() throws Exception {
+	@DisplayName("Delete Firestation by station: fail case cause Firestation is unknown")
+	void testDeleteFirestationByStation_firestationUnknown() throws Exception {
 		//Arrange
-		when(firestationRepositoryMock.deleteByStation(1)).thenReturn(false);
+		when(firestationRepositoryMock.deleteByStation(1)).thenThrow(BusinessResourceException.class);
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->firestationServiceCUT.deleteFirestationByStation(1));
 	}
-
+	
 	@Test
 	@DisplayName("Delete Firestation by station: fail case cause UnsupportedOperationException occured")
 	void testDeleteFirestationByStation_nothingDeleted_Exception() throws Exception {

@@ -24,10 +24,6 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 
 	@Autowired
 	private IJsonFileMapper jsonFileMapper;
-
-	//Custom property to read the json file path in application.properties
-	@Autowired
-	private CustomProperties props;
 	
 	//Cannot use constructor, must use @PostConstruct to access to jsonFileMapper :
 	//when the constructor is called, the bean is not yet initialized - i.e. no dependencies are injected.
@@ -76,44 +72,58 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 	
 	@Override
 	public boolean add(Medicalrecord medicalrecord) {
-		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
-				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
+		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		boolean ramData = medicalrecordList.add(medicalrecord);
-		boolean persistanceData = serialize();
-
-		return (ramData && persistanceData);
+		
+		Medicalrecord med= getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
+		if(med != null) {
+			throw new BusinessResourceException("UpdateMedicalrecordError", "Medicalrecord already exists: firstName="+medicalrecord.getFirstName() +
+					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
+		}
+		
+		medicalrecordList.add(medicalrecord);
+		return serialize();
 	}
 
 	@Override
 	public boolean update(Medicalrecord medicalrecord) {
-		if(null == medicalrecord.getFirstName() || null == medicalrecord.getLastName() || null == medicalrecord.getBirthdate() ||
-				null == medicalrecord.getMedications() || null == medicalrecord.getAllergies()  ) {//donnees incompletes
+		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		for (Medicalrecord f : medicalrecordList) {
-			if (f.getFirstName().equals(medicalrecord.getFirstName()) && //firstname+lastname considered as primary key
-					f.getLastName().equals(medicalrecord.getLastName())) {
-				f.setBirthdate(medicalrecord.getBirthdate());
-				f.setMedications(medicalrecord.getMedications());
-				f.setAllergies(medicalrecord.getAllergies());
-				return serialize(); 
+		
+		Medicalrecord med= getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
+		if(med == null) {
+			throw new BusinessResourceException("UpdateMedicalrecordError", "Medicalrecord does not exist: firstName="+medicalrecord.getFirstName() +
+					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
+		}
+		
+		for (Medicalrecord m : medicalrecordList) {
+			if (m.getFirstName().equals(medicalrecord.getFirstName()) && //firstname+lastname considered as primary key
+					m.getLastName().equals(medicalrecord.getLastName())) {
+				m.setBirthdate(medicalrecord.getBirthdate());
+				m.setMedications(medicalrecord.getMedications());
+				m.setAllergies(medicalrecord.getAllergies());
 			}
 		}
-		return false; //update failed, firstname+lastname not found
+		return serialize(); 
 	}
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
-		boolean ramData =  medicalrecordList.removeIf(medicalrecord-> 
+		Medicalrecord medicalrecord = getByFirstnameAndLastName(firstName, lastName);
+		if(medicalrecord == null) {
+			throw new BusinessResourceException("DeleteMedicalrecordError", "Medicalrecord does not exist: firstName="+firstName +
+					" lastname=" + lastName, HttpStatus.NOT_FOUND);
+		}
+		
+		medicalrecordList.removeIf(m-> 
 		( 
-				medicalrecord.getFirstName().equals(firstName) &&
-				medicalrecord.getLastName().equals(lastName)
+				m.getFirstName().equals(firstName) &&
+				m.getLastName().equals(lastName)
 				));
 		boolean persistanceData = serialize();
-		return (ramData && persistanceData);
-	
+		return persistanceData;
 	}
 
 }

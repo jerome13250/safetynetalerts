@@ -99,6 +99,26 @@ class PersonRepositoryImplTest {
 	}
 
 	@Test
+	@DisplayName("3 objects Person + add one that already exists")
+	void testAdd_3persons_addOneThatAlreadyExists()  throws Exception {
+		//Arrange
+		Person personJohnDoe = new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com");
+		List<Person> expectedList = new ArrayList<> (Arrays.asList(
+				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
+				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
+				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
+				));
+
+		//Act
+		assertThrows(BusinessResourceException.class, ()-> personRepositoryCUT.add(personJohnDoe));
+		List<Person> objectList = personRepositoryCUT.getAll();
+
+		//Assert
+		assertEquals(3,objectList.size(),"Expected list size is 3");
+		assertEquals(expectedList,objectList,"Returned list must be initial List");
+	}
+	
+	@Test
 	@DisplayName("Test add incomplete Person")
 	void testAdd_incompletePerson()  throws Exception {
 		//Arrange
@@ -157,6 +177,7 @@ class PersonRepositoryImplTest {
 	@DisplayName("3 objects Person + try update inexistant one")
 	void testUpdate_3persons_tryUpdateInexistantOne()  throws Exception {
 		//Arrange
+		Person personUnknown = new Person("unknown","unknown","0", 0, "none", "no city", "unknown@mail.com");
 		List<Person> expectedList = new ArrayList<> (Arrays.asList(
 				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
 				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
@@ -164,14 +185,11 @@ class PersonRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = personRepositoryCUT.update(
-				new Person("unknown","unknown","0", 0, "none", "no city", "unknown@mail.com")
-				);
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.update(personUnknown));
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failure : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as initial List");
 	}
 
@@ -238,12 +256,11 @@ class PersonRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = personRepositoryCUT.delete("unknown","guy");
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.delete("unknown","guy"));
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, nothing deleted");
 	}
 

@@ -181,6 +181,54 @@ class MedicalrecordRepositoryImplTest {
 		assertEquals(expectedList,objectList,"Returned list must be initial List + added medicalrecord");
 	}
 
+	
+	@Test
+	@DisplayName("3 objects Medicalrecord + add one that already exists")
+	void testAdd_3medicalrecords_addOneThatAlreadyExists()  throws Exception {
+		//Arrange
+		LocalDate date2021April1 = LocalDate.of(2021, 4, 1);
+
+		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
+		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
+				new Medicalrecord(
+						"John",
+						"Doe",
+						date1984March6th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1"))
+						),
+				new Medicalrecord(
+						"Mike",
+						"Hill",
+						date1990December15th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2", "fakeMedic3")),
+						new ArrayList<>()
+						),
+				new Medicalrecord(
+						"Jack",
+						"Steel",
+						date1928February28th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
+						)
+				));
+		
+		//Act
+		assertThrows(BusinessResourceException.class, () -> medicalrecordRepositoryCUT.add(
+				new Medicalrecord(
+						"Jack",
+						"Steel",
+						date1928February28th,
+						new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
+						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
+						)));
+		List<Medicalrecord> objectList = medicalrecordRepositoryCUT.getAll();
+
+		//Assert
+		assertEquals(3,objectList.size(),"Expected list size is 3");
+		assertEquals(expectedList,objectList,"Returned list must be initial List");
+	}
+	
 	@Test
 	@DisplayName("Test add incomplete Medicalrecord")
 	void testAdd_incompleteMedicalrecord()  throws Exception {
@@ -327,19 +375,18 @@ class MedicalrecordRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = medicalrecordRepositoryCUT.update(
+		assertThrows(BusinessResourceException.class, () ->  medicalrecordRepositoryCUT.update(
 				new Medicalrecord(
 						"Jack",
 						"Plastic",
 						date2050January1st,
 						new ArrayList<> (Arrays.asList("")),
 						new ArrayList<> (Arrays.asList("fakeAllergy9999"))
-						));
+						)));
 		List<Medicalrecord> objectList = medicalrecordRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failure : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList");
 	}
 
@@ -405,12 +452,11 @@ class MedicalrecordRepositoryImplTest {
 				));
 
 		//Act
-		boolean result = medicalrecordRepositoryCUT.delete("Mike","Mountain");
+		assertThrows(BusinessResourceException.class, () -> medicalrecordRepositoryCUT.delete("Mike","Mountain"));
 		List<Medicalrecord> objectList = medicalrecordRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertFalse(result,"Expected result to be failed : false");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, no record removed");
 	}
 	

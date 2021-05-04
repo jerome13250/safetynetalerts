@@ -27,4 +27,15 @@ public class Medicalrecord {
 	private List<String> medications;
 	private List<String> allergies;
 
+	public boolean allAttributesAreSet() {
+		if(null == firstName ||
+				null == lastName ||
+				null == birthdate ||
+				null == medications  ||
+				null == allergies) {
+			return false;
+		}
+		return true;
+	}
+	
 }

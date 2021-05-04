@@ -59,7 +59,6 @@ class MedicalrecordServiceImplTest {
 				new ArrayList<> (Arrays.asList("fakeAllergy1"))
 				);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName"))
-		.thenReturn(null)//At first the medicalrecord is not in our data
 		.thenReturn(medicalrecordSaved);//At the end the medicalrecord is present
 		when(medicalrecordRepositoryMock.add(medicalrecordToSave)).thenReturn(true);
 
@@ -84,7 +83,7 @@ class MedicalrecordServiceImplTest {
 				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1"))
 				);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName")).thenReturn(medicalrecordToSave); //Medicalrecord already exist
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName")).thenThrow(BusinessResourceException.class);
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.saveMedicalrecord(medicalrecordToSave));
@@ -118,7 +117,6 @@ class MedicalrecordServiceImplTest {
 				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1"))
 				);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName")).thenReturn(null);
 		doThrow(BusinessResourceException.class).when(medicalrecordRepositoryMock).add(medicalrecordToSave);
 
 		//Act
@@ -129,13 +127,6 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Update Medicalrecord: success case")
 	void testUpdateMedicalrecord() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordToUpdate = new Medicalrecord(
-				"John", 
-				"Doe", 
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
 		Medicalrecord medicalrecordUpdated = new Medicalrecord(
 				"John", 
 				"Doe", 
@@ -143,10 +134,9 @@ class MedicalrecordServiceImplTest {
 				new ArrayList<> (Arrays.asList("fakeMedic1")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
 				);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe"))
-		.thenReturn(medicalrecordToUpdate)//The medicalrecord is in our data
-		.thenReturn(medicalrecordUpdated);//At the end the medicalrecord is present
 		when(medicalrecordRepositoryMock.update(medicalrecordUpdated)).thenReturn(true);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe"))
+		.thenReturn(medicalrecordUpdated);//At the end the medicalrecord is present
 
 		//Act
 		Medicalrecord result = medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated);
@@ -161,24 +151,17 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Update Medicalrecord: fail case Medicalrecord does not exist in data")
 	void testUpdateMedicalrecord_MedicalrecordDoesNotExist_BusinessResourceException() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordToUpdate = new Medicalrecord(
-				"John", 
-				"Doe", 
+		Medicalrecord medicalrecordUnknown = new Medicalrecord(
+				"Unknown", 
+				"Guy", 
 				LocalDate.of(1984, 3, 6),
 				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1"))
 				);
-		Medicalrecord medicalrecordUpdated = new Medicalrecord(
-				"John", 
-				"Doe", 
-				LocalDate.of(1990, 12, 10),
-				new ArrayList<> (Arrays.asList("fakeMedic1")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
-				);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe")).thenReturn(null); //Medicalrecord does not exist in data
+		when(medicalrecordRepositoryMock.update(medicalrecordUnknown)).thenThrow(BusinessResourceException.class); //Medicalrecord does not exist in data
 
-		//Act
-		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated));
+		//Act-Assert
+		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUnknown));
 	}
 	
 	@Test
@@ -209,24 +192,16 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Update Medicalrecord: fail case cause Medicalrecord object is incomplete")
 	void testUpdateMedicalrecord_incompleteMedicalrecord_BusinessResourceException() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordToUpdate = new Medicalrecord(
-				"John", 
-				"Doe", 
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
-		Medicalrecord medicalrecordUpdated = new Medicalrecord(
+		Medicalrecord medicalrecordIncomplete = new Medicalrecord(
 				"John", 
 				"Doe", 
 				null,
 				null,
 				null);
-		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe")).thenReturn(medicalrecordToUpdate); //Medicalrecord already exist
-		doThrow(BusinessResourceException.class).when(medicalrecordRepositoryMock).update(medicalrecordUpdated);
+		when(medicalrecordRepositoryMock.update(medicalrecordIncomplete)).thenThrow(BusinessResourceException.class);
 
 		//Act
-		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated));
+		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordIncomplete));
 	}
 
 	@Test
@@ -247,7 +222,7 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Delete Medicalrecord: fail case cause nothing has been deleted")
 	void testDeleteMedicalrecord_nothingDeleted_BusinessResourceException() throws Exception {
 		//Arrange
-		when(medicalrecordRepositoryMock.delete("John", "Doe")).thenReturn(false);
+		when(medicalrecordRepositoryMock.delete("John", "Doe")).thenThrow(BusinessResourceException.class);
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.deleteMedicalrecord("John", "Doe"));

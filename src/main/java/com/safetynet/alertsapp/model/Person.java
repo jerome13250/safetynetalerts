@@ -17,4 +17,17 @@ public class Person {
 	private String city;
 	private String email;
 	
+	public boolean allAttributesAreSet() {
+		if(null == firstName ||
+				null == lastName ||
+				null == phone ||
+				null == zip  ||
+				null == address ||
+				null == city ||
+				null == email) {
+			return false;
+		}
+		return true;
+	}
+	
 }

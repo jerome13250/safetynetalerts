@@ -10,4 +10,11 @@ import lombok.NoArgsConstructor;
 public class Firestation {
 	private String address;
 	private Integer station;
+	
+	public boolean allAttributesAreSet() {
+		if(null == address || null == station ) {
+			return false;
+		}
+		return true;
+	}
 }

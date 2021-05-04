@@ -15,14 +15,12 @@ public class HealthCheck implements HealthIndicator {
 	
 	@Override
 	public Health health() {
-		
 		if (safetynetalertsService.getAllFirestation().isEmpty() || 
 				safetynetalertsService.getAllMedicalrecord().isEmpty() ||
 				safetynetalertsService.getAllPerson().isEmpty()) {
 			return Health.down().withDetail("Cause", "Data has not been loaded from json file").build();
 		}
-
 		return Health.up().build();
 	}
-
 }
+
