@@ -1,16 +1,13 @@
 package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,10 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
-import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Firestation;
 
 @ExtendWith(MockitoExtension.class)
@@ -133,8 +128,6 @@ class FirestationRepositoryImplTest {
 	
 		firestationRepositoryCUT.setFirestationList(dataInitialList);
 		
-		int expected = -1;
-
 		//Act-Assert
 		assertThrows(IllegalStateException.class,()->firestationRepositoryCUT.getByAddress("adress1"));
 		
@@ -151,14 +144,13 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333),
 				new Firestation("adress4", 444)
 				));
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("firestations", Firestation.class, expectedList);
 		
 		//Act
-		boolean result = firestationRepositoryCUT.add(new Firestation("adress4", 444));
+		firestationRepositoryCUT.add(new Firestation("adress4", 444));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
-		assertTrue(result,"The operation must be success");
 		assertEquals(4,objectList.size(),"Expected list size is 4");
 		assertEquals(expectedList,objectList,"Returned list must be initial List + added firestation");
 	}
@@ -167,11 +159,18 @@ class FirestationRepositoryImplTest {
 	@DisplayName("3 objects Firestation + add one more, serialize failure")
 	void testAdd_3firestations_addOneMore_serializeFailure()  throws Exception {
 		//Arrange
+		Firestation newFirestation = new Firestation("adress4", 444);
+		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
+				new Firestation("adress1", 1000),
+				new Firestation("adress2", 12345),
+				new Firestation("adress3", 333),
+				new Firestation("adress4", 444)
+				));
 		//serialize fail:
-		doThrow(BusinessResourceException.class).when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doThrow(BusinessResourceException.class).when(jsonFileMapperMock).serialize("firestations", Firestation.class, expectedList);
 		
 		//Act
-		assertThrows(BusinessResourceException.class, ()-> firestationRepositoryCUT.add(new Firestation("adress4", 444)));
+		assertThrows(BusinessResourceException.class, ()-> firestationRepositoryCUT.add(newFirestation));
 
 	}
 
@@ -179,6 +178,7 @@ class FirestationRepositoryImplTest {
 	@DisplayName("3 objects Firestation + add one more, but already exist")
 	void testAdd_3firestations_addOneThatAlreadyExists()  throws Exception {
 		//Arrange
+		Firestation newFirestation = new Firestation("adress1", 0);
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
@@ -187,7 +187,7 @@ class FirestationRepositoryImplTest {
 				));
 				
 		//Act
-		assertThrows(BusinessResourceException.class, () -> firestationRepositoryCUT.add(new Firestation("adress1", 0)));
+		assertThrows(BusinessResourceException.class, () -> firestationRepositoryCUT.add(newFirestation));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
@@ -227,15 +227,14 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("firestations", Firestation.class, expectedList);
 		
 		//Act
-		boolean result = firestationRepositoryCUT.update(new Firestation("adress2", 1));
+		firestationRepositoryCUT.update(new Firestation("adress2", 1));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation must be 1 for address2");
 	}
 
@@ -243,6 +242,7 @@ class FirestationRepositoryImplTest {
 	@DisplayName("3 objects Firestation + try update inexistant one")
 	void testUpdate_3firestations_tryUpdateInexistantOne()  throws Exception {
 		//Arrange
+		Firestation newFirestation = new Firestation("adressUnknown", 1);
 		List<Firestation> expectedList = new ArrayList<> (Arrays.asList(
 				new Firestation("adress1", 1000),
 				new Firestation("adress2", 12345),
@@ -250,7 +250,7 @@ class FirestationRepositoryImplTest {
 				));
 
 		//Act
-		assertThrows(BusinessResourceException.class, ()-> firestationRepositoryCUT.update(new Firestation("adressUnknown", 1)));
+		assertThrows(BusinessResourceException.class, ()-> firestationRepositoryCUT.update(newFirestation));
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
@@ -289,15 +289,14 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("firestations", Firestation.class, expectedList);;
 		
 		//Act
-		boolean result = firestationRepositoryCUT.deleteByAddress("adress1");
+		firestationRepositoryCUT.deleteByAddress("adress1");
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except address1 must be removed");
 	}
 
@@ -337,15 +336,14 @@ class FirestationRepositoryImplTest {
 				new Firestation("adress3", 333)
 				));
 
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("firestations", Firestation.class, expectedList);
 		
 		//Act
-		boolean result = firestationRepositoryCUT.deleteByStation(1000);
+		firestationRepositoryCUT.deleteByStation(1000);
 		List<Firestation> objectList = firestationRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except firestation 1000 must be removed");
 	}
 

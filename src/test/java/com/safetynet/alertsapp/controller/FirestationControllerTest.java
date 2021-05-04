@@ -90,7 +90,7 @@ class FirestationControllerTest {
 	
 	@Test
 	void testDeleteFirestationByAddress() throws Exception {
-		MvcResult result = mockMvc.perform(delete("/firestation")
+		mockMvc.perform(delete("/firestation")
 				.param("address", "address"))
 				.andExpect(status().isGone()).andReturn();
 		verify(firestationService).deleteFirestationByAddress("address");
@@ -102,7 +102,7 @@ class FirestationControllerTest {
 		doThrow(new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: John Unknown", HttpStatus.NOT_FOUND))
 		.when(firestationService).deleteFirestationByAddress("address");
 		//Act
-		MvcResult result = mockMvc.perform(delete("/firestation")
+		mockMvc.perform(delete("/firestation")
 				.param("address", "address"))
 				.andExpect(status().isNotFound()).andReturn();
 		//Assert
@@ -111,7 +111,7 @@ class FirestationControllerTest {
 	
 	@Test
 	void testDeleteFirestationByStation() throws Exception {
-		MvcResult result = mockMvc.perform(delete("/firestation")
+		mockMvc.perform(delete("/firestation")
 				.param("station", "1"))
 				.andExpect(status().isGone()).andReturn();
 		verify(firestationService).deleteFirestationByStation(1);
@@ -123,7 +123,7 @@ class FirestationControllerTest {
 		doThrow(new BusinessResourceException("DeleteFirestationError", "Error deleting firestation: 1", HttpStatus.NOT_FOUND))
 		.when(firestationService).deleteFirestationByStation(1);
 		//Act
-		MvcResult result = mockMvc.perform(delete("/firestation")
+		mockMvc.perform(delete("/firestation")
 				.param("station", "1"))
 				.andExpect(status().isNotFound()).andReturn();
 		//Assert

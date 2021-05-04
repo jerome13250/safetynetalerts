@@ -1,15 +1,11 @@
 package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
 import com.safetynet.alertsapp.model.Person;
@@ -160,17 +155,16 @@ class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				));
 
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("persons", Person.class, expectedList);
 		
 		//Act
-		boolean result = personRepositoryCUT.update(
+		personRepositoryCUT.update(
 				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				);
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except 1 person updated");
 	}
 
@@ -178,7 +172,10 @@ class PersonRepositoryImplTest {
 	@DisplayName("3 objects Person + try update inexistant one")
 	void testUpdate_3persons_tryUpdateInexistantOne()  throws Exception {
 		//Arrange
-		Person personUnknown = new Person("unknown","unknown","0", 0, "none", "no city", "unknown@mail.com");
+		Person personUnknown1 = new Person("unknown","unknown","0", 0, "none", "no city", "unknown@mail.com");
+		Person personUnknown2 = new Person("John","unknown","0", 0, "none", "no city", "unknown@mail.com");
+		Person personUnknown3 = new Person("unknown","Doe","0", 0, "none", "no city", "unknown@mail.com");
+		
 		List<Person> expectedList = new ArrayList<> (Arrays.asList(
 				new Person("John","Doe","1-88888888", 12345, "adress1", "Gotham", "johndoe@mail.com"),
 				new Person("Mike","Doe","1-99999999", 12345, "adress1", "Gotham", "mikedoe@mail.com"),
@@ -186,7 +183,9 @@ class PersonRepositoryImplTest {
 				));
 
 		//Act
-		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.update(personUnknown));
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.update(personUnknown1));
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.update(personUnknown2));
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.update(personUnknown3));
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert
@@ -234,15 +233,14 @@ class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
 				));
 
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("persons", Person.class, expectedList);
 		
 		//Act
-		boolean result = personRepositoryCUT.delete("Mike","Doe");
+		personRepositoryCUT.delete("Mike","Doe");
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList except one must be removed");
 	}
 
@@ -257,7 +255,9 @@ class PersonRepositoryImplTest {
 				));
 
 		//Act
-		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.delete("unknown","guy"));
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.delete("unknown","unknown")); //firstname and lastname different
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.delete("John","unknown")); //lastname different only
+		assertThrows(BusinessResourceException.class,()->personRepositoryCUT.delete("unknown","Doe")); //firstname different only
 		List<Person> objectList = personRepositoryCUT.getAll();
 
 		//Assert

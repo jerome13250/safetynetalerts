@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice(basePackages = {"com.safetynet.alertsapp"} ) 
 public class GlobalExceptionHandlerController extends ResponseEntityExceptionHandler{
 	
-	private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandlerController.class);
+	private final Logger myLogger = LoggerFactory.getLogger(GlobalExceptionHandlerController.class);
 
     @ExceptionHandler(BusinessResourceException.class)
     public ResponseEntity<BusinessResourceExceptionDTO> businessResourceError(HttpServletRequest req, BusinessResourceException ex) {
@@ -22,8 +22,8 @@ public class GlobalExceptionHandlerController extends ResponseEntityExceptionHan
         response.setErrorCode(ex.getErrorCode());
         response.setErrorMessage(ex.getMessage());
         response.setRequestURL(req.getRequestURL().toString());
-        logger.error("Status: {}, message: {}" ,ex.getStatus() ,ex.getMessage());
-        return new ResponseEntity<BusinessResourceExceptionDTO>(response, ex.getStatus());
+        myLogger.error("Status: {}, message: {}" ,ex.getStatus() ,ex.getMessage());
+        return new ResponseEntity<>(response, ex.getStatus());
     }
     
     @ExceptionHandler(Exception.class)//toutes les autres erreurs non gérées par le service sont interceptées ici
@@ -33,8 +33,8 @@ public class GlobalExceptionHandlerController extends ResponseEntityExceptionHan
         response.setErrorCode("Technical Error");
         response.setErrorMessage(ex.getMessage());
         response.setRequestURL(req.getRequestURL().toString()); 
-        logger.error("Status: {}, message: {}" ,HttpStatus.INTERNAL_SERVER_ERROR ,ex.getMessage());
-        return new ResponseEntity<BusinessResourceExceptionDTO>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        myLogger.error("Status: {}, message: {}" ,HttpStatus.INTERNAL_SERVER_ERROR ,ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
 }

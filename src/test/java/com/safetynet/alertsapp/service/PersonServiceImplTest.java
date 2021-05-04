@@ -10,19 +10,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Person;
@@ -30,8 +23,6 @@ import com.safetynet.alertsapp.repository.IPersonRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PersonServiceImplTest {
-
-	private final Logger logger = LoggerFactory.getLogger(PersonServiceImplTest.class);
 
 	@InjectMocks
 	PersonServiceImpl personServiceCUT;
@@ -45,9 +36,8 @@ class PersonServiceImplTest {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com");    
 		Person personSaved = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com"); 
-		when(personRepositoryMock.add(personToSave)).thenReturn(true);
-		when(personRepositoryMock.getByFirstnameLastname("New", "NewName"))
-		.thenReturn(personSaved);//At the end the person is present
+		doNothing().when(personRepositoryMock).add(personToSave);
+		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenReturn(personSaved);
 
 		//Act
 		Person result = personServiceCUT.savePerson(personToSave);
@@ -60,8 +50,8 @@ class PersonServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Save Person: fail case Person already exists in data")
-	void testSavePerson_PersonAlreadyExist_BusinessResourceException() throws Exception {
+	@DisplayName("Save Person: fail cause BusinessResourceException")
+	void testSavePerson_BusinessResourceException() throws Exception {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com");
 		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenThrow(BusinessResourceException.class); //Person already exist
@@ -71,22 +61,11 @@ class PersonServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Save Person: fail case cause multiple Person already exists in data")
-	void testSavePerson_doublesFirstnameLastname_IllegalStateException() throws Exception {
+	@DisplayName("Save Person: fail cause IllegalStateException")
+	void testSavePerson_IllegalStateException() throws Exception {
 		//Arrange
 		Person personToSave = new Person("New", "NewName", "0-0000", 0, "addressNew", "cityNew", "new@mail.com");
 		when(personRepositoryMock.getByFirstnameLastname("New", "NewName")).thenThrow(IllegalStateException.class);
-
-		//Act
-		assertThrows(BusinessResourceException.class,()->personServiceCUT.savePerson(personToSave));
-	}
-
-	@Test
-	@DisplayName("Save Person: fail case cause Person object is incomplete")
-	void testSavePerson_incompletePerson_BusinessResourceException() throws Exception {
-		//Arrange
-		Person personToSave = new Person("New", "NewName", null, null, "addressNew", "cityNew", "new@mail.com");
-		doThrow(BusinessResourceException.class).when(personRepositoryMock).add(personToSave);
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.savePerson(personToSave));
@@ -99,7 +78,7 @@ class PersonServiceImplTest {
 		Person personUpdated = new Person("John", "Doe", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
 		when(personRepositoryMock.getByFirstnameLastname("John", "Doe"))
 		.thenReturn(personUpdated);//At the end the person is present
-		when(personRepositoryMock.update(personUpdated)).thenReturn(true);
+		doNothing().when(personRepositoryMock).update(personUpdated);
 
 		//Act
 		Person result = personServiceCUT.updatePerson(personUpdated);
@@ -111,22 +90,20 @@ class PersonServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Update Person: fail case Person does not exist in data")
-	void testUpdatePerson_PersonDoesNotExist_BusinessResourceException() throws Exception {
+	@DisplayName("Update Person: fail cause BusinessResourceException")
+	void testUpdatePerson_BusinessResourceException() throws Exception {
 		//Arrange
-		Person personToUpdate = new Person("John", "Unknown", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
-		Person personUpdated = new Person("John", "Unknown", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
+		Person personToUpdate = new Person("John", "Unknown", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
 		when(personRepositoryMock.getByFirstnameLastname("John", "Unknown")).thenThrow(BusinessResourceException.class);
 
 		//Act
-		assertThrows(BusinessResourceException.class,()->personServiceCUT.updatePerson(personUpdated));
+		assertThrows(BusinessResourceException.class,()->personServiceCUT.updatePerson(personToUpdate));
 	}
 	
 	@Test
-	@DisplayName("Update Person: fail case cause multiple Person already exists in data")
-	void testUpdatePerson_doublesFirstnameLastname_IllegalStateException() throws Exception {
+	@DisplayName("Update Person: fail cause IllegalStateException")
+	void testUpdatePerson_IllegalStateException() throws Exception {
 		//Arrange
-		Person personToUpdate = new Person("John", "Doe", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
 		Person personUpdated = new Person("John", "Doe", "2-2222", 2, "address2", "city2", "johndoe2@mail.com"); 
 		when(personRepositoryMock.getByFirstnameLastname("John", "Doe")).thenThrow(IllegalStateException.class);
 
@@ -135,22 +112,10 @@ class PersonServiceImplTest {
 	}
 	
 	@Test
-	@DisplayName("Update Person: fail case cause Person object is incomplete")
-	void testUpdatePerson_incompletePerson_BusinessResourceException() throws Exception {
-		//Arrange
-		Person personToUpdate = new Person("John", "Doe", "1-1111", 1, "address1", "city1", "johndoe@mail.com");
-		Person personUpdated = new Person("John", "Doe", null, null, null, null, null); 
-		doThrow(BusinessResourceException.class).when(personRepositoryMock).update(personUpdated);
-
-		//Act
-		assertThrows(BusinessResourceException.class,()->personServiceCUT.updatePerson(personUpdated));
-	}
-
-	@Test
 	@DisplayName("Delete Person: success case")
 	void testDeletePerson() throws Exception {
 		//Arrange
-		when(personRepositoryMock.delete("John", "Doe")).thenReturn(true);
+		doNothing().when(personRepositoryMock).delete("John", "Doe");
 
 		//Act
 		personServiceCUT.deletePerson("John", "Doe");
@@ -161,10 +126,10 @@ class PersonServiceImplTest {
 	}
 	
 	@Test
-	@DisplayName("Delete Person: fail case cause nothing has been deleted")
-	void testDeletePerson_nothingDeleted_BusinessResourceException() throws Exception {
+	@DisplayName("Delete Person: fail cause BusinessResourceException")
+	void testDeletePerson_BusinessResourceException() throws Exception {
 		//Arrange
-		when(personRepositoryMock.delete("John", "Doe")).thenThrow(BusinessResourceException.class);
+		doThrow(BusinessResourceException.class).when(personRepositoryMock).delete("John", "Doe");
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.deletePerson("John", "Doe"));
@@ -174,7 +139,7 @@ class PersonServiceImplTest {
 	@DisplayName("Delete Person: fail case cause UnsupportedOperationException occured")
 	void testDeletePerson_nothingDeleted_Exception() throws Exception {
 		//Arrange
-		when(personRepositoryMock.delete("John", "Doe")).thenThrow(UnsupportedOperationException.class);
+		doThrow(UnsupportedOperationException.class).when(personRepositoryMock).delete("John", "Doe");
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->personServiceCUT.deletePerson("John", "Doe"));

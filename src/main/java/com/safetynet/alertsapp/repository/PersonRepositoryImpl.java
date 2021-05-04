@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Person;
@@ -95,9 +94,7 @@ public class PersonRepositoryImpl implements IPersonRepository {
 	}
 	
 	@Override
-	public boolean add(Person person) throws BusinessResourceException {
-		boolean result = false;
-		
+	public void add(Person person) throws BusinessResourceException {
 		if(!person.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("SavePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -108,23 +105,13 @@ public class PersonRepositoryImpl implements IPersonRepository {
 			throw new BusinessResourceException("SavePersonError", "Person already exists: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.CONFLICT);
 		} 
 		
-		result = personList.add(person);
+		personList.add(person);
 		serialize();
-		return result;
 	}
 
 	@Override
-	public boolean update(Person person) {
-		boolean result = false;
-		if(!person.allAttributesAreSet()) {//donnees incompletes
-			throw new BusinessResourceException("UpdatePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
-		}
-		
-		Person personFromDB = getByFirstnameLastname(person.getFirstName(), person.getLastName());
-		if(personFromDB == null) {
-			logger.debug("Person does not exist: {} {}",person.getFirstName(),person.getLastName());
-			throw new BusinessResourceException("UpdatePersonError", "Person does not exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.NOT_FOUND);
-		} 
+	public void update(Person person) {
+		boolean successUpdate = false;
 		
 		for (Person p : personList) {
 			if (p.getFirstName().equals(person.getFirstName()) && //firstname+lastname considered as primary key
@@ -134,33 +121,33 @@ public class PersonRepositoryImpl implements IPersonRepository {
 				p.setEmail(person.getEmail());
 				p.setPhone(person.getPhone());
 				p.setZip(person.getZip());
-				result = true;
+				successUpdate = true;
 				break;
 			}
 		}
+		
+		if(!successUpdate) {
+			logger.debug("Person does not exist: {} {}",person.getFirstName(),person.getLastName());
+			throw new BusinessResourceException("UpdatePersonError", "Person does not exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.NOT_FOUND);
+		} 
+		
 		serialize();
-		return result;
 	}
 
 
 	@Override
-	public boolean delete(String firstName, String lastName) {
-		boolean result = false;
-		Person personFromDB = getByFirstnameLastname(firstName, lastName);
-		if(personFromDB == null) {
-			logger.debug("Person does not exist: {} {}",firstName,lastName);
-			throw new BusinessResourceException("DeletePersonError", "Person does not exist: "+firstName+" "+lastName, HttpStatus.NOT_FOUND);
-		}
-		
-		result = personList.removeIf(person-> 
+	public void delete(String firstName, String lastName) {
+		boolean successDelete = personList.removeIf(person-> 
 		( 
 				person.getFirstName().equals(firstName) &&
 				person.getLastName().equals(lastName)
 				));
-		
+		if(!successDelete) {
+			logger.debug("Person does not exist: {} {}",firstName,lastName);
+			throw new BusinessResourceException("DeletePersonError", "Person does not exist: "+firstName+" "+lastName, HttpStatus.NOT_FOUND);
+		}
+	
 		serialize();
-		return result;
-		
 	}
 
 

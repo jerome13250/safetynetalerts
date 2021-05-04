@@ -10,10 +10,10 @@ public interface IMedicalrecordRepository {
 
 	Medicalrecord getByFirstnameAndLastName(String firstname, String lastname);
 
-	boolean add(Medicalrecord medicalrecord);
+	void add(Medicalrecord medicalrecord);
 
-	boolean update(Medicalrecord medicalrecord);
+	void update(Medicalrecord medicalrecord);
 
-	boolean delete(String firstName, String lastName);
+	void delete(String firstName, String lastName);
 
 }

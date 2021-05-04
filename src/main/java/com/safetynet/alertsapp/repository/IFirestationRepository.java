@@ -18,12 +18,12 @@ public interface IFirestationRepository {
 	 */
 	Integer getByAddress(String address) throws IllegalStateException;
 
-	boolean add(Firestation firestation);
+	void add(Firestation firestation);
 
-	boolean update(Firestation firestation);
+	void update(Firestation firestation);
 
-	boolean deleteByAddress(String address);
+	void deleteByAddress(String address);
 
-	boolean deleteByStation(Integer station);
+	void deleteByStation(Integer station);
 
 }

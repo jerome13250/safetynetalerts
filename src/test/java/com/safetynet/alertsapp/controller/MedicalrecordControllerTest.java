@@ -118,7 +118,7 @@ class MedicalrecordControllerTest {
 	
 	@Test
 	void testDeleteMedicalrecord() throws Exception {
-		MvcResult result = mockMvc.perform(delete("/medicalRecord")
+		mockMvc.perform(delete("/medicalRecord")
 				.param("firstname", "John")
 				.param("lastname", "Doe"))
 				.andExpect(status().isGone()).andReturn();
@@ -131,7 +131,7 @@ class MedicalrecordControllerTest {
 		doThrow(new BusinessResourceException("DeleteMedicalrecordError", "Error deleting medicalrecord: John Unknown", HttpStatus.NOT_FOUND))
 		.when(medicalrecordService).deleteMedicalrecord("John","Unknown");
 		//Act
-		MvcResult result = mockMvc.perform(delete("/medicalRecord")
+		mockMvc.perform(delete("/medicalRecord")
 				.param("firstname", "John")
 				.param("lastname", "Unknown"))
 				.andExpect(status().isNotFound()).andReturn();

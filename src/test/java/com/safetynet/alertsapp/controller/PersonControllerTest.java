@@ -90,7 +90,7 @@ class PersonControllerTest {
 	
 	@Test
 	void testDeletePerson() throws Exception {
-		MvcResult result = mockMvc.perform(delete("/person")
+		mockMvc.perform(delete("/person")
 				.param("firstname", "John")
 				.param("lastname", "Doe"))
 				.andExpect(status().isGone()).andReturn();
@@ -103,7 +103,7 @@ class PersonControllerTest {
 		doThrow(new BusinessResourceException("DeletePersonError", "Error deleting person: John Unknown", HttpStatus.NOT_FOUND))
 		.when(personService).deletePerson("John","Unknown");
 		//Act
-		MvcResult result = mockMvc.perform(delete("/person")
+		mockMvc.perform(delete("/person")
 				.param("firstname", "John")
 				.param("lastname", "Unknown"))
 				.andExpect(status().isNotFound()).andReturn();

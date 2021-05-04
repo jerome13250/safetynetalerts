@@ -1,16 +1,11 @@
 package com.safetynet.alertsapp.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.JsonFileMapperImpl;
-import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,7 +157,7 @@ class MedicalrecordRepositoryImplTest {
 						)
 				));
 		
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("medicalrecords", Medicalrecord.class, expectedList);
 
 		//Act
 		medicalrecordRepositoryCUT.add(
@@ -187,8 +180,6 @@ class MedicalrecordRepositoryImplTest {
 	@DisplayName("3 objects Medicalrecord + add one that already exists")
 	void testAdd_3medicalrecords_addOneThatAlreadyExists()  throws Exception {
 		//Arrange
-		LocalDate date2021April1 = LocalDate.of(2021, 4, 1);
-
 		//Arrays.asList() alone does not support any structural modification (i.e. removing or adding elements):
 		List<Medicalrecord> expectedList = new ArrayList<> (Arrays.asList(
 				new Medicalrecord(
@@ -293,10 +284,10 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1000","fakeAllergy1001","fakeAllergy1002"))
 						)
 				));
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("medicalrecords", Medicalrecord.class, expectedList);
 
 		//Act
-		boolean result = medicalrecordRepositoryCUT.update(
+		medicalrecordRepositoryCUT.update(
 				new Medicalrecord(
 						"Jack",
 						"Steel",
@@ -308,7 +299,6 @@ class MedicalrecordRepositoryImplTest {
 
 		//Assert
 		assertEquals(3,objectList.size(),"Expected list size is 3");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as expected List with 1 record modified");
 	}
 
@@ -412,15 +402,14 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
 						)
 				));
-		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
+		doNothing().when(jsonFileMapperMock).serialize("medicalrecords", Medicalrecord.class, expectedList);
 		
 		//Act
-		boolean result = medicalrecordRepositoryCUT.delete("Mike","Hill");
+		medicalrecordRepositoryCUT.delete("Mike","Hill");
 		List<Medicalrecord> objectList = medicalrecordRepositoryCUT.getAll();
 
 		//Assert
 		assertEquals(2,objectList.size(),"Expected list size is 2");
-		assertTrue(result,"Expected result to be successful : true");
 		assertEquals(expectedList,objectList,"Returned list must be same as mockedList, with 1 record removed");
 	}
 

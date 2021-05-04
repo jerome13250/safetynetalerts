@@ -13,17 +13,13 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Medicalrecord;
@@ -31,8 +27,6 @@ import com.safetynet.alertsapp.repository.IMedicalrecordRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MedicalrecordServiceImplTest {
-
-	private final Logger logger = LoggerFactory.getLogger(MedicalrecordServiceImplTest.class);
 
 	@InjectMocks
 	MedicalrecordServiceImpl medicalrecordServiceCUT;
@@ -60,7 +54,7 @@ class MedicalrecordServiceImplTest {
 				);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName"))
 		.thenReturn(medicalrecordSaved);//At the end the medicalrecord is present
-		when(medicalrecordRepositoryMock.add(medicalrecordToSave)).thenReturn(true);
+		doNothing().when(medicalrecordRepositoryMock).add(medicalrecordToSave);
 
 		//Act
 		Medicalrecord result = medicalrecordServiceCUT.saveMedicalrecord(medicalrecordToSave);
@@ -73,16 +67,10 @@ class MedicalrecordServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Save Medicalrecord: fail case Medicalrecord already exists in data")
-	void testSaveMedicalrecord_MedicalrecordAlreadyExist_BusinessResourceException() throws Exception {
+	@DisplayName("Save Medicalrecord: fail cause BusinessResourceException")
+	void testSaveMedicalrecord_BusinessResourceException() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordToSave = new Medicalrecord(
-				"New",
-				"NewName",
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
+		Medicalrecord medicalrecordToSave = new Medicalrecord("New","NewName",LocalDate.of(1984, 3, 6),new ArrayList<>(),new ArrayList<>());
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName")).thenThrow(BusinessResourceException.class);
 
 		//Act
@@ -90,34 +78,11 @@ class MedicalrecordServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("Save Medicalrecord: fail case cause multiple Medicalrecord already exists in data")
-	void testSaveMedicalrecord_doublesFirstnameLastname_IllegalStateException() throws Exception {
+	@DisplayName("Save Medicalrecord: fail cause IllegalStateException")
+	void testSaveMedicalrecord_IllegalStateException() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordToSave = new Medicalrecord(
-				"New",
-				"NewName",
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
+		Medicalrecord medicalrecordToSave = new Medicalrecord("New","NewName",LocalDate.of(1984, 3, 6),new ArrayList<>(),new ArrayList<>());
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("New", "NewName")).thenThrow(IllegalStateException.class);
-
-		//Act
-		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.saveMedicalrecord(medicalrecordToSave));
-	}
-
-	@Test
-	@DisplayName("Save Medicalrecord: fail case cause Medicalrecord object is incomplete")
-	void testSaveMedicalrecord_incompleteMedicalrecord_BusinessResourceException() throws Exception {
-		//Arrange
-		Medicalrecord medicalrecordToSave = new Medicalrecord(
-				"New",
-				"NewName",
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
-		doThrow(BusinessResourceException.class).when(medicalrecordRepositoryMock).add(medicalrecordToSave);
 
 		//Act
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.saveMedicalrecord(medicalrecordToSave));
@@ -127,46 +92,35 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Update Medicalrecord: success case")
 	void testUpdateMedicalrecord() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordUpdated = new Medicalrecord(
-				"John", 
-				"Doe", 
-				LocalDate.of(1990, 12, 10),
-				new ArrayList<> (Arrays.asList("fakeMedic1")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
-				);
-		when(medicalrecordRepositoryMock.update(medicalrecordUpdated)).thenReturn(true);
+		Medicalrecord medicalrecordToUpdate = new Medicalrecord("John","Doe",LocalDate.of(1984, 3, 6),new ArrayList<>(),new ArrayList<>());
+		Medicalrecord medicalrecordExpected = new Medicalrecord("John","Doe",LocalDate.of(1984, 3, 6),new ArrayList<>(),new ArrayList<>());
+		doNothing().when(medicalrecordRepositoryMock).update(medicalrecordToUpdate);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe"))
-		.thenReturn(medicalrecordUpdated);//At the end the medicalrecord is present
+		.thenReturn(medicalrecordToUpdate);//At the end the medicalrecord is present
 
 		//Act
-		Medicalrecord result = medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated);
+		Medicalrecord result = medicalrecordServiceCUT.updateMedicalrecord(medicalrecordToUpdate);
 
 		//Assert
 		assertNotNull(result);
-		assertEquals(medicalrecordUpdated,result);
+		assertEquals(medicalrecordExpected,result);
 		verify(medicalrecordRepositoryMock, times(1)).update(any(Medicalrecord.class));
 	}
 
 	@Test
-	@DisplayName("Update Medicalrecord: fail case Medicalrecord does not exist in data")
-	void testUpdateMedicalrecord_MedicalrecordDoesNotExist_BusinessResourceException() throws Exception {
+	@DisplayName("Update Medicalrecord: fail cause BusinessResourceException")
+	void testUpdateMedicalrecord_BusinessResourceException() throws Exception {
 		//Arrange
-		Medicalrecord medicalrecordUnknown = new Medicalrecord(
-				"Unknown", 
-				"Guy", 
-				LocalDate.of(1984, 3, 6),
-				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1"))
-				);
-		when(medicalrecordRepositoryMock.update(medicalrecordUnknown)).thenThrow(BusinessResourceException.class); //Medicalrecord does not exist in data
+		Medicalrecord medicalrecordUnknown = new Medicalrecord("Unknown","Guy",LocalDate.of(1984, 3, 6),new ArrayList<>(),new ArrayList<>());
+		doThrow(BusinessResourceException.class).when(medicalrecordRepositoryMock).update(medicalrecordUnknown);
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUnknown));
 	}
 	
 	@Test
-	@DisplayName("Update Medicalrecord: fail case cause multiple Medicalrecord already exists in data")
-	void testUpdateMedicalrecord_doublesFirstnameLastname_IllegalStateException() throws Exception {
+	@DisplayName("Update Medicalrecord: fail cause IllegalStateException")
+	void testUpdateMedicalrecord_IllegalStateException() throws Exception {
 		//Arrange
 		Medicalrecord medicalrecordToUpdate = new Medicalrecord(
 				"John", 
@@ -175,40 +129,17 @@ class MedicalrecordServiceImplTest {
 				new ArrayList<> (Arrays.asList("fakeMedic1","fakeMedic2")),
 				new ArrayList<> (Arrays.asList("fakeAllergy1"))
 				);
-		Medicalrecord medicalrecordUpdated = new Medicalrecord(
-				"John", 
-				"Doe", 
-				LocalDate.of(1990, 12, 10),
-				new ArrayList<> (Arrays.asList("fakeMedic1")),
-				new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
-				);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John", "Doe")).thenThrow(IllegalStateException.class);
 
 		//Act
-		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordUpdated));
+		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordToUpdate));
 	}
 	
-	@Test
-	@DisplayName("Update Medicalrecord: fail case cause Medicalrecord object is incomplete")
-	void testUpdateMedicalrecord_incompleteMedicalrecord_BusinessResourceException() throws Exception {
-		//Arrange
-		Medicalrecord medicalrecordIncomplete = new Medicalrecord(
-				"John", 
-				"Doe", 
-				null,
-				null,
-				null);
-		when(medicalrecordRepositoryMock.update(medicalrecordIncomplete)).thenThrow(BusinessResourceException.class);
-
-		//Act
-		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.updateMedicalrecord(medicalrecordIncomplete));
-	}
-
 	@Test
 	@DisplayName("Delete Medicalrecord: success case")
 	void testDeleteMedicalrecord() throws Exception {
 		//Arrange
-		when(medicalrecordRepositoryMock.delete("John", "Doe")).thenReturn(true);
+		doNothing().when(medicalrecordRepositoryMock).delete("John", "Doe");
 
 		//Act
 		medicalrecordServiceCUT.deleteMedicalrecord("John", "Doe");
@@ -222,7 +153,7 @@ class MedicalrecordServiceImplTest {
 	@DisplayName("Delete Medicalrecord: fail case cause nothing has been deleted")
 	void testDeleteMedicalrecord_nothingDeleted_BusinessResourceException() throws Exception {
 		//Arrange
-		when(medicalrecordRepositoryMock.delete("John", "Doe")).thenThrow(BusinessResourceException.class);
+		doThrow(BusinessResourceException.class).when(medicalrecordRepositoryMock).delete("John", "Doe");
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.deleteMedicalrecord("John", "Doe"));
@@ -230,9 +161,9 @@ class MedicalrecordServiceImplTest {
 	
 	@Test
 	@DisplayName("Delete Medicalrecord: fail case cause UnsupportedOperationException occured")
-	void testDeleteMedicalrecord_nothingDeleted_Exception() throws Exception {
+	void testDeleteMedicalrecord_UnsupportedOperationException() throws Exception {
 		//Arrange
-		when(medicalrecordRepositoryMock.delete("John", "Doe")).thenThrow(UnsupportedOperationException.class);
+		doThrow(UnsupportedOperationException.class).when(medicalrecordRepositoryMock).delete("John", "Doe");
 
 		//Act-Assert
 		assertThrows(BusinessResourceException.class,()->medicalrecordServiceCUT.deleteMedicalrecord("John", "Doe"));

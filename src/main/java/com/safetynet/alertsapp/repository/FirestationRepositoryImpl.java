@@ -82,9 +82,8 @@ public class FirestationRepositoryImpl implements IFirestationRepository {
 	}
 
 	@Override
-	public boolean add(Firestation firestation) {
-		boolean result = false;
-		
+	public void add(Firestation firestation) {
+
 		if(!firestation.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("AddFirestationError", "Unable to add firestation, informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -94,60 +93,52 @@ public class FirestationRepositoryImpl implements IFirestationRepository {
 			throw new BusinessResourceException("SaveFirestationError", "Firestation already exists: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.CONFLICT);
 		} 
 
-		result = firestationList.add(firestation);
-		serialize(); //FILE
-		return result;
+		firestationList.add(firestation);
+		serialize();
 	}
 
 	@Override
-	public boolean update(Firestation firestation) {
-		boolean result = false;
+	public void update(Firestation firestation) {
+		boolean resultUpdate = false;
 		
 		if(!firestation.allAttributesAreSet()) {
 			throw new BusinessResourceException("UpdateFirestationError", "Firestation informations are incomplete: "+ firestation.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
 		
-		Integer firestationNumber = getByAddress(firestation.getAddress());
-		if(firestationNumber == null) {
-			throw new BusinessResourceException("UpdateFirestationError", "Firestation does not exist: address="+firestation.getAddress(), HttpStatus.NOT_FOUND);
-		} 
-
 		for (Firestation f : firestationList) {
 			if (f.getAddress().equals(firestation.getAddress())) {
 				f.setStation(firestation.getStation());
-				result = true;
+				resultUpdate = true;
 				break;
 			}
 		}
+		
+		if(!resultUpdate) {
+			throw new BusinessResourceException("UpdateFirestationError", "Firestation does not exist: address="+firestation.getAddress(), HttpStatus.NOT_FOUND);
+		} 
 		serialize();
-		return result;
 	}
 
 	@Override
-	public boolean deleteByAddress(String address) {
-		boolean result = false;
-		Integer firestationNumber = getByAddress(address);
-		if(firestationNumber == null) {
+	public void deleteByAddress(String address) {
+		boolean resultUpdate = false;
+		resultUpdate = firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
+		
+		if(!resultUpdate) {
 			throw new BusinessResourceException("DeleteFirestationError", "Firestation does not exist: address="+address, HttpStatus.NOT_FOUND);
 		}
-		
-		result = firestationList.removeIf(firestation-> firestation.getAddress().equals(address));
 		serialize();
-		return result;
 	}
 
 	@Override
-	public boolean deleteByStation(Integer station) {
-		boolean result = false;
+	public void deleteByStation(Integer station) {
+		boolean resultUpdate = false;
+		resultUpdate = firestationList.removeIf(firestation-> firestation.getStation().equals(station));
 		
-		List<Firestation> listToDelete = getByStationnumber(station);
-		if(listToDelete.isEmpty()) {
+		if(!resultUpdate) {
 			throw new BusinessResourceException("DeleteFirestationError", "Firestation does not exist: station="+station, HttpStatus.NOT_FOUND);
 		}
-		
-		result = firestationList.removeIf(firestation-> firestation.getStation().equals(station));
 		serialize();
-		return result;
 	}
 }
 

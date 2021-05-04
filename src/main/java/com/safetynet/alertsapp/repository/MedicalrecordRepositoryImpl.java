@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import com.safetynet.alertsapp.config.CustomProperties;
 import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.jsonfilemapper.IJsonFileMapper;
 import com.safetynet.alertsapp.model.Medicalrecord;
@@ -71,9 +70,7 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 	}
 	
 	@Override
-	public boolean add(Medicalrecord medicalrecord) {
-		boolean result = false;
-		
+	public void add(Medicalrecord medicalrecord) {
 		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -84,56 +81,52 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
 		}
 		
-		result = medicalrecordList.add(medicalrecord);
+		medicalrecordList.add(medicalrecord);
 		serialize();
-		return result;
 	}
 
 	@Override
-	public boolean update(Medicalrecord medicalrecord) {
-		boolean result = false;
+	public void update(Medicalrecord medicalrecord) {
+		boolean successUpdate = false;
 		
 		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
-		
-		Medicalrecord med= getByFirstnameAndLastName(medicalrecord.getFirstName(), medicalrecord.getLastName());
-		if(med == null) {
-			throw new BusinessResourceException("UpdateMedicalrecordError", "Medicalrecord does not exist: firstName="+medicalrecord.getFirstName() +
-					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
-		}
-		
+
 		for (Medicalrecord m : medicalrecordList) {
 			if (m.getFirstName().equals(medicalrecord.getFirstName()) && //firstname+lastname considered as primary key
 					m.getLastName().equals(medicalrecord.getLastName())) {
 				m.setBirthdate(medicalrecord.getBirthdate());
 				m.setMedications(medicalrecord.getMedications());
 				m.setAllergies(medicalrecord.getAllergies());
-				result = true;
+				successUpdate = true;
 				break;
 			}
 		}
-		serialize();
-		return result; 
+
+		if(!successUpdate) {
+			throw new BusinessResourceException("UpdateMedicalrecordError", "Medicalrecord does not exist: firstName="+medicalrecord.getFirstName() +
+					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
+		}
+		
+		serialize(); 
 	}
 
 	@Override
-	public boolean delete(String firstName, String lastName) {
-		boolean result = false;
+	public void delete(String firstName, String lastName) {
+		boolean successDelete = false;
 		
-		Medicalrecord medicalrecord = getByFirstnameAndLastName(firstName, lastName);
-		if(medicalrecord == null) {
-			throw new BusinessResourceException("DeleteMedicalrecordError", "Medicalrecord does not exist: firstName="+firstName +
-					" lastname=" + lastName, HttpStatus.NOT_FOUND);
-		}
-		
-		result = medicalrecordList.removeIf(m-> 
+		successDelete = medicalrecordList.removeIf(m-> 
 		( 
 				m.getFirstName().equals(firstName) &&
 				m.getLastName().equals(lastName)
 				));
+		
+		if(!successDelete) {
+			throw new BusinessResourceException("DeleteMedicalrecordError", "Medicalrecord does not exist: firstName="+firstName +
+					" lastname=" + lastName, HttpStatus.NOT_FOUND);
+		}
 		serialize();
-		return result;
 	}
 
 }

@@ -11,14 +11,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -107,8 +105,7 @@ public class SafetynetalertsServiceImpl implements ISafetynetalertsService {
 			if (med==null) {
 				med = new Medicalrecord(p.getFirstName(),p.getLastName(), LocalDate.now(),new ArrayList<>(), new ArrayList<>());
 			}
-			
-			
+
 			if(calculateAge(med.getBirthdate())<18) {
 				ObjectNode person = result.addObject();
 				person.put("firstName", p.getFirstName());
@@ -116,9 +113,9 @@ public class SafetynetalertsServiceImpl implements ISafetynetalertsService {
 				person.put("age", calculateAge(med.getBirthdate()));
 
 				ArrayNode family = person.putArray("family");
-				personListForAddress.stream().filter(p1->(
-						!p1.getFirstName().equals(p.getFirstName()) ||
-						!p1.getLastName().equals(p.getLastName()))
+				personListForAddress.stream().filter(p1-> !( //remove the child from list
+						p1.getFirstName().equals(p.getFirstName()) &&
+						p1.getLastName().equals(p.getLastName()))
 						).forEach(p2->{
 							ObjectNode familyMember = family.addObject();
 							familyMember.put("firstName", p2.getFirstName());

@@ -44,7 +44,7 @@ public class PersonServiceImpl implements IPersonService {
 		}
 		catch(Exception ex){
 			logger.debug("Technical error updating person {} {}", person.getFirstName(), person.getLastName());
-			throw new BusinessResourceException("UpdatePersonError", "Technical error creating or updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("UpdatePersonError", "Technical error updating person: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -57,7 +57,7 @@ public class PersonServiceImpl implements IPersonService {
 				throw e;
 		}catch(Exception ex){
 			logger.debug("Technical error deleting person {} {}", firstname, lastname);
-			throw new BusinessResourceException("DeletePersonError", "Error deleting person: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("DeletePersonError", "Technical error deleting person: "+firstname+" "+lastname, HttpStatus.INTERNAL_SERVER_ERROR);
 		}		
 	}
 

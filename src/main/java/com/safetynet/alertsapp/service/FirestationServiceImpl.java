@@ -1,7 +1,5 @@
 package com.safetynet.alertsapp.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,7 +11,6 @@ import com.safetynet.alertsapp.repository.IFirestationRepository;
 @Service
 public class FirestationServiceImpl implements IFireStationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(FirestationServiceImpl.class);
 
 	@Autowired
 	IFirestationRepository firestationRepository;
@@ -28,7 +25,7 @@ public class FirestationServiceImpl implements IFireStationService {
 			throw e;
 		}
 		catch(Exception ex){
-			throw new BusinessResourceException("SaveOrUpdateUserError", "Technical error creating firestation: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("SaveFirestationError", "Technical error creating firestation: address="+firestation.getAddress()+" station="+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -36,14 +33,13 @@ public class FirestationServiceImpl implements IFireStationService {
 	public Firestation updateFirestation(Firestation firestation) throws BusinessResourceException{
 		try{
 			firestationRepository.update(firestation);
-			Firestation result = new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
-			return result;
+			return new Firestation(firestation.getAddress(),firestationRepository.getByAddress(firestation.getAddress()));
 		}
 		catch (BusinessResourceException e) {
 			throw e;
 		}
 		catch(Exception ex){
-			throw new BusinessResourceException("UpdateFirestationError", "Technical error creating or updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessResourceException("UpdateFirestationError", "Technical error updating firestation: "+firestation.getAddress()+" "+firestation.getStation(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

@@ -32,7 +32,6 @@ import com.safetynet.alertsapp.repository.IPersonRepository;
 @ExtendWith(MockitoExtension.class)
 class SafetynetalertsServiceImplTest {
 
-	private final Logger logger = LoggerFactory.getLogger(SafetynetalertsServiceImplTest.class);
 	ObjectMapper mapper = new ObjectMapper();
 
 	List<Firestation> firestationInitialList;
@@ -45,12 +44,14 @@ class SafetynetalertsServiceImplTest {
 	Medicalrecord medicalrecordJackDoe;
 	Medicalrecord medicalrecordJasonYoung;
 	Medicalrecord medicalrecordMikeOld;
+	Medicalrecord medicalrecordJohnTest;
 	//Person
 	List<Person> personInitialList;
 	List<Person> personListForAddress1;
 	List<Person> personListForAddress2;
 	List<Person> personListForAddress3;
 	List<Person> personListForGotham;
+	List<Person> personListNameDoe;
 	Person personJohnDoe;
 	Person personMikeDoe;
 	Person personJackDoe;
@@ -58,6 +59,7 @@ class SafetynetalertsServiceImplTest {
 	Person personMikeOld;
 	Person personClarkKent;
 	Person NoMedicalRecordDoe;
+	Person personJohnTest;
 
 	final LocalDate dateNow = LocalDate.now(); 
 	LocalDate dateFor5YearsOld;
@@ -113,8 +115,11 @@ class SafetynetalertsServiceImplTest {
 		medicalrecordMikeOld = new Medicalrecord("Mike", "Old", dateFor80YearsOld,
 				new ArrayList<>(Arrays.asList("fakeMedic1", "fakeMedic2", "fakeMedic3")),
 				new ArrayList<>(Arrays.asList("fakeAllergy1", "fakeAllergy2")));
+		medicalrecordJohnTest = new Medicalrecord("John", "Test", dateFor35YearsOld,
+				new ArrayList<>(),
+				new ArrayList<>());
 		medicalrecordInitialList = new ArrayList<>(
-				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe,medicalrecordJasonYoung,medicalrecordMikeOld));
+				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe,medicalrecordJasonYoung,medicalrecordMikeOld,medicalrecordJohnTest));
 
 		personJohnDoe = new Person("John", "Doe", "1-1111", 12345, "address1", "Gotham", "johndoe@mail.com");
 		personMikeDoe = new Person("Mike", "Doe", "1-1111", 12345, "address1", "Gotham", "mikedoe@mail.com");
@@ -123,18 +128,20 @@ class SafetynetalertsServiceImplTest {
 		personJasonYoung = new Person("Jason", "Young", "2-2222", 78965, "address2", "Gotham", "jasonyoung@mail.com");
 		personMikeOld = new Person("Mike", "Old", "3-3333", 95175, "address3", "Los Angeles", "mikeold@mail.com");
 		personClarkKent = new Person("Clark", "Kent", "4-4444", 99999, "address4", "Metropolis", "superman@mail.com");
-
+		personJohnTest = new Person("John", "Test", "1-1111", 12345, "address1", "Gotham", "johntest@mail.com");
 
 		personInitialList = new ArrayList<>(
 				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe,personJasonYoung,personMikeOld,personClarkKent));
 		personListForAddress1 = new ArrayList<>(
-				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe));
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe,personJohnTest));
 		personListForAddress2 = new ArrayList<>(
 				Arrays.asList(personJasonYoung));
 		personListForAddress3 = new ArrayList<>(
 				Arrays.asList(personMikeOld));
 		personListForGotham = new ArrayList<>(
 				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,personJasonYoung,NoMedicalRecordDoe));
+		personListNameDoe = new ArrayList<>(
+				Arrays.asList(personJohnDoe,personMikeDoe,personJackDoe,NoMedicalRecordDoe));
 
 	}
 
@@ -184,7 +191,7 @@ class SafetynetalertsServiceImplTest {
 		JsonNode result = SafetynetalertsServiceCUT.getPersonsByStationnumber(1);
 
 		//Assert
-		assertEquals(expected,result,"The 2 json must have the dame data");
+		assertEquals(expected,result,"The 2 json must have the same data");
 	}
 
 	@Test
@@ -198,31 +205,55 @@ class SafetynetalertsServiceImplTest {
 		family1.addObject().put("firstName", "Mike").put("lastName", "Doe");
 		family1.addObject().put("firstName", "Jack").put("lastName", "Doe");
 		family1.addObject().put("firstName", "NoMedicalRecord").put("lastName", "Doe");
+		family1.addObject().put("firstName", "John").put("lastName", "Test");
 		ObjectNode person2 = expected.addObject();
 		person2.put("firstName", "Mike").put("lastName", "Doe").put("age", 15);
 		ArrayNode family2 = person2.putArray("family");
 		family2.addObject().put("firstName", "John").put("lastName", "Doe");
 		family2.addObject().put("firstName", "Jack").put("lastName", "Doe");
 		family2.addObject().put("firstName", "NoMedicalRecord").put("lastName", "Doe");
+		family2.addObject().put("firstName", "John").put("lastName", "Test");
 		ObjectNode person3 = expected.addObject(); //No medical record => age=0
 		person3.put("firstName", "NoMedicalRecord").put("lastName", "Doe").put("age", 0);
 		ArrayNode family3 = person3.putArray("family");
 		family3.addObject().put("firstName", "John").put("lastName", "Doe");
 		family3.addObject().put("firstName", "Mike").put("lastName", "Doe");
 		family3.addObject().put("firstName", "Jack").put("lastName", "Doe");
+		family3.addObject().put("firstName", "John").put("lastName", "Test");
 
 		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Test")).thenReturn(medicalrecordJohnTest);
 
 		//Act
 		JsonNode result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("address1");
 
 		//Assert
-		assertEquals(expected,result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 json must have the same data");
 	}
+
+	@Test
+	@DisplayName("Get Children By Address + But no other family member")
+	void test_getChildrenByAddressAndListOtherFamilyMembers_ButNoOtherFamilyMember() {
+		//Arrange
+		ArrayNode expected = mapper.createArrayNode();
+		ObjectNode person1 = expected.addObject();
+		person1.put("firstName", "John").put("lastName", "Doe").put("age", 5);
+		ArrayNode family1 = person1.putArray("family");
+
+		when(personRepositoryMock.getByAddress("address1")).thenReturn(new ArrayList<>(Arrays.asList(personJohnDoe)));//only 1 child at this address
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
+
+		//Act
+		JsonNode result = SafetynetalertsServiceCUT.getChildrenByAddressAndListOtherFamilyMembers("address1");
+
+		//Assert
+		assertEquals(expected,result,"The 2 JSON must have the same data");
+	}
+
 
 	@Test
 	@DisplayName("Get phone numbers for a specific firestation number")
@@ -240,7 +271,7 @@ class SafetynetalertsServiceImplTest {
 		JsonNode result = SafetynetalertsServiceCUT.getPhoneNumbersForStationNumber(1);
 
 		//Assert
-		assertEquals(expected,result,"The 2 Json must have the dame data");
+		assertEquals(expected,result,"The 2 Json must have the same data");
 	}
 
 	/**
@@ -280,12 +311,16 @@ class SafetynetalertsServiceImplTest {
 		ObjectNode p4 = expected.addObject().put("firstname","NoMedicalRecord").put("lastname","Doe").put("phone","0-0000").put("age",0).put("firestation",1);
 		ArrayNode med4 = p4.putArray("medications");
 		ArrayNode allergy4 = p4.putArray("allergies");
-
+		//John Test
+		ObjectNode p5 = expected.addObject().put("firstname","John").put("lastname","Test").put("phone","1-1111").put("age",35).put("firestation",1);
+		ArrayNode med5 = p5.putArray("medications");
+		ArrayNode allergy5 = p5.putArray("allergies");
 
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Test")).thenReturn(medicalrecordJohnTest);
 		when(firestationRepositoryMock.getByAddress("address1")).thenReturn(1);
 		when(personRepositoryMock.getByAddress("address1")).thenReturn(personListForAddress1);
 
@@ -293,7 +328,7 @@ class SafetynetalertsServiceImplTest {
 		JsonNode result = SafetynetalertsServiceCUT.getPersonsFirestationAndMedicalRecordByAddress("address1");
 
 		//Assert
-		assertEquals(expected,result,"The 2 String must have the same data");
+		assertEquals(expected,result,"The 2 JSON must have the same data");
 	}
 
 	/**
@@ -341,6 +376,10 @@ class SafetynetalertsServiceImplTest {
 		ObjectNode address1p4 = personList1.addObject().put("firstname","NoMedicalRecord").put("lastname","Doe").put("phone","0-0000").put("age",0);
 		ArrayNode address1med4 = address1p4.putArray("medications");
 		ArrayNode address1allergy4 = address1p4.putArray("allergies");
+		//John Test
+		ObjectNode address1p5 = personList1.addObject().put("firstname","John").put("lastname","Test").put("phone","1-1111").put("age",35);
+		ArrayNode address1med5 = address1p5.putArray("medications");
+		ArrayNode address1allergy5 = address1p5.putArray("allergies");
 
 		//Firestation 1 / address 2
 		ObjectNode address2ForList1 = addressesList1.addObject();
@@ -373,6 +412,7 @@ class SafetynetalertsServiceImplTest {
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("NoMedicalRecord","Doe")).thenReturn(null);
+		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Test")).thenReturn(medicalrecordJohnTest);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jason","Young")).thenReturn(medicalrecordJasonYoung);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Old")).thenReturn(medicalrecordMikeOld);
 
@@ -388,7 +428,7 @@ class SafetynetalertsServiceImplTest {
 		JsonNode result = SafetynetalertsServiceCUT.getAddressesListOfPersonsPerStationNumberList(listFirestations);
 
 		//Assert
-		assertEquals(expected,result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 JSON must have the same data");
 	}
 
 	/*
@@ -434,18 +474,32 @@ class SafetynetalertsServiceImplTest {
 		ArrayNode med4 = p4.putArray("medications");
 		ArrayNode allergy4 = p4.putArray("allergies");
 
-
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("John","Doe")).thenReturn(medicalrecordJohnDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Jack","Doe")).thenReturn(medicalrecordJackDoe);
 		when(medicalrecordRepositoryMock.getByFirstnameAndLastName("Mike","Doe")).thenReturn(medicalrecordMikeDoe);
 		when(personRepositoryMock.getByFirstnameLastname("John", "Doe")).thenReturn(personJohnDoe);
-		when(personRepositoryMock.getByLastname("Doe")).thenReturn(personListForAddress1);
+		when(personRepositoryMock.getByLastname("Doe")).thenReturn(personListNameDoe);
 
 		//Act
 		JsonNode result = SafetynetalertsServiceCUT.getPersonInfoByFirstNameAndLastName("John", "Doe");
 
 		//Assert
-		assertEquals(expected,result,"The 2 String must have the dame data");
+		assertEquals(expected,result,"The 2 JSON must have the same data");
+
+	}
+
+	@Test
+	@DisplayName("Get a person info (and display persons with same name) but Person is not found")
+	void test_getPersonInfoByFirstNameAndLastName_PersonNotFound() {
+
+		//Arrange
+		ArrayNode expected = mapper.createArrayNode();
+
+		//Act
+		JsonNode result = SafetynetalertsServiceCUT.getPersonInfoByFirstNameAndLastName("unknown", "unknown");
+
+		//Assert
+		assertEquals(expected,result,"The Json must be empty");
 
 	}
 
@@ -474,7 +528,7 @@ class SafetynetalertsServiceImplTest {
 		//Assert
 		assertEquals(expected,result,"The 2 JSON must have the same data");
 	}
-	
+
 	@Test
 	@DisplayName("test getAllFirestation")
 	void test_getAllFirestation() {
@@ -493,7 +547,7 @@ class SafetynetalertsServiceImplTest {
 		//Assert
 		assertEquals(expected,result,"The 2 List must have the same data");
 	}
-	
+
 	@Test
 	@DisplayName("test getAllPerson")
 	void test_getAllPerson() {
@@ -508,13 +562,13 @@ class SafetynetalertsServiceImplTest {
 		//Assert
 		assertEquals(expected,result,"The 2 List must have the same data");
 	}
-	
+
 	@Test
 	@DisplayName("test getAllMedicalrecord")
 	void test_getAllMedicalrecord() {
 		//Arrange
 		List<Medicalrecord> expected = new ArrayList<>(
-				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe,medicalrecordJasonYoung,medicalrecordMikeOld));
+				Arrays.asList(medicalrecordJohnDoe,medicalrecordMikeDoe,medicalrecordJackDoe, medicalrecordJasonYoung,medicalrecordMikeOld, medicalrecordJohnTest));
 		when(medicalrecordRepositoryMock.getAll()).thenReturn(medicalrecordInitialList);
 
 		//Act
@@ -523,8 +577,8 @@ class SafetynetalertsServiceImplTest {
 		//Assert
 		assertEquals(expected,result,"The 2 List must have the same data");
 	}
-	
-	
+
+
 }
 
 

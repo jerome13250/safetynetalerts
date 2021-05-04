@@ -12,9 +12,6 @@ public class Firestation {
 	private Integer station;
 	
 	public boolean allAttributesAreSet() {
-		if(null == address || null == station ) {
-			return false;
-		}
-		return true;
+		return !(null == address || null == station );
 	}
 }

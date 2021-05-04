@@ -26,10 +26,10 @@ public interface IPersonRepository {
 
 	List<Person> getByLastname(String lastname);
 
-	boolean add(Person person) throws BusinessResourceException;
+	void add(Person person) throws BusinessResourceException;
 
-	boolean update(Person person);
+	void update(Person person);
 
-	boolean delete(String firstName, String lastName);
+	void delete(String firstName, String lastName);
 
 }

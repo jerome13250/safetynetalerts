@@ -18,16 +18,13 @@ public class Person {
 	private String email;
 	
 	public boolean allAttributesAreSet() {
-		if(null == firstName ||
+		return !(null == firstName ||
 				null == lastName ||
 				null == phone ||
 				null == zip  ||
 				null == address ||
 				null == city ||
-				null == email) {
-			return false;
-		}
-		return true;
+				null == email);
 	}
 	
 }
