@@ -79,7 +79,7 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 	}
 
 	@Override
-	public <T> boolean serialize(String objectNodeNameString, Class<T> classType, List<T> listToSave) {
+	public <T> void serialize(String objectNodeNameString, Class<T> classType, List<T> listToSave) {
 		//save data to file if persistance is allowed in application.properties:
 		if (Boolean.TRUE.equals(customProperties.getPersistance())) {
 
@@ -120,6 +120,5 @@ public class JsonFileMapperImpl implements IJsonFileMapper {
 				
 			}
 		}
-		return true;
 	}
 }

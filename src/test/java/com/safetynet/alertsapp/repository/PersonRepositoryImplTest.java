@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
@@ -159,7 +160,7 @@ class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-0000", 999, "adress0", "Nowhere", "mattdamon@updated.com")
 				));
 
-		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
 		
 		//Act
 		boolean result = personRepositoryCUT.update(
@@ -233,7 +234,7 @@ class PersonRepositoryImplTest {
 				new Person("Matt","Damon","1-22222222", 789654, "adress2", "New-York", "mattdamon@mail.com")
 				));
 
-		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
 		
 		//Act
 		boolean result = personRepositoryCUT.delete("Mike","Doe");

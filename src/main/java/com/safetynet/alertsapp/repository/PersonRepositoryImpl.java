@@ -90,12 +90,14 @@ public class PersonRepositoryImpl implements IPersonRepository {
 		person.getLastName().equals(lastname)).collect(Collectors.toList());
 	}
 
-	private boolean serialize() {
-		return jsonFileMapper.serialize("persons", Person.class, personList);
+	private void serialize() {
+		jsonFileMapper.serialize("persons", Person.class, personList);
 	}
 	
 	@Override
 	public boolean add(Person person) throws BusinessResourceException {
+		boolean result = false;
+		
 		if(!person.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("SavePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -103,15 +105,17 @@ public class PersonRepositoryImpl implements IPersonRepository {
 		Person personFromDB = getByFirstnameLastname(person.getFirstName(), person.getLastName());
 		if(personFromDB != null) {
 			logger.debug("Person already exist: {} {}",person.getFirstName(),person.getLastName());
-			throw new BusinessResourceException("SavePersonError", "Person already exist: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.CONFLICT);
+			throw new BusinessResourceException("SavePersonError", "Person already exists: "+person.getFirstName()+" "+person.getLastName(), HttpStatus.CONFLICT);
 		} 
 		
-		personList.add(person);
-		return serialize();
+		result = personList.add(person);
+		serialize();
+		return result;
 	}
 
 	@Override
 	public boolean update(Person person) {
+		boolean result = false;
 		if(!person.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("UpdatePersonError", "Person informations are incomplete: "+ person.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -130,27 +134,32 @@ public class PersonRepositoryImpl implements IPersonRepository {
 				p.setEmail(person.getEmail());
 				p.setPhone(person.getPhone());
 				p.setZip(person.getZip());
+				result = true;
+				break;
 			}
 		}
-		return serialize(); 
+		serialize();
+		return result;
 	}
 
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
+		boolean result = false;
 		Person personFromDB = getByFirstnameLastname(firstName, lastName);
 		if(personFromDB == null) {
 			logger.debug("Person does not exist: {} {}",firstName,lastName);
 			throw new BusinessResourceException("DeletePersonError", "Person does not exist: "+firstName+" "+lastName, HttpStatus.NOT_FOUND);
 		}
 		
-		personList.removeIf(person-> 
+		result = personList.removeIf(person-> 
 		( 
 				person.getFirstName().equals(firstName) &&
 				person.getLastName().equals(lastName)
 				));
 		
-		return serialize();
+		serialize();
+		return result;
 		
 	}
 

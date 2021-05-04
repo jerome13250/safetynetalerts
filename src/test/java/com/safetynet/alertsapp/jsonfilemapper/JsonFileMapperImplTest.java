@@ -2,6 +2,7 @@ package com.safetynet.alertsapp.jsonfilemapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alertsapp.config.CustomProperties;
+import com.safetynet.alertsapp.exception.BusinessResourceException;
 import com.safetynet.alertsapp.model.Firestation;
 import com.safetynet.alertsapp.model.Medicalrecord;
 import com.safetynet.alertsapp.model.Person;
@@ -259,10 +261,9 @@ class JsonFileMapperImplTest {
 		doNothing().when(objectMapperMock).writeValue(new File(""),jsonNodeExpected);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
+		jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
-		assertTrue(result,"Success operation, expect true");
 		verify(objectMapperMock, times(1)).writeValue(new File(""),jsonNodeExpected);
 
 	}
@@ -296,10 +297,9 @@ class JsonFileMapperImplTest {
 		doNothing().when(objectMapperMock).writeValue(new File(""),jsonNodeExpected);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
+		jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
-		assertTrue(result,"Success operation, expect true");
 		verify(objectMapperMock, times(1)).writeValue(new File(""),jsonNodeExpected);
 
 	}
@@ -314,11 +314,9 @@ class JsonFileMapperImplTest {
 		when(customPropertiesMock.getPersistance()).thenReturn(true);
 		when(objectMapperMock.readTree(any(File.class))).thenThrow(IOException.class);
 
-		//ACT
-		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
+		//ACT-ASSERT
+		assertThrows(BusinessResourceException.class, ()-> jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave));
 
-		//ASSERT
-		assertFalse(result,"Failed operation due to exception, expect false");
 	}
 
 
@@ -331,10 +329,9 @@ class JsonFileMapperImplTest {
 		when(customPropertiesMock.getPersistance()).thenReturn(false);
 
 		//ACT
-		boolean result = jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
+		jsonFileMapperCUT.serialize("firestations", Firestation.class, listToSave);
 
 		//ASSERT
-		assertTrue(result,"Operation was required to not execute, expect true");
 		verify(objectMapperMock, times(0)).writeValue(any(File.class),any(JsonNode.class));
 	}
 

@@ -66,12 +66,14 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 		}	
 	}
 
-	private boolean serialize() {
-		return jsonFileMapper.serialize("medicalrecords", Medicalrecord.class, medicalrecordList);
+	private void serialize() {
+		jsonFileMapper.serialize("medicalrecords", Medicalrecord.class, medicalrecordList);
 	}
 	
 	@Override
 	public boolean add(Medicalrecord medicalrecord) {
+		boolean result = false;
+		
 		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -82,12 +84,15 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 					" lastname=" + medicalrecord.getLastName(), HttpStatus.NOT_FOUND);
 		}
 		
-		medicalrecordList.add(medicalrecord);
-		return serialize();
+		result = medicalrecordList.add(medicalrecord);
+		serialize();
+		return result;
 	}
 
 	@Override
 	public boolean update(Medicalrecord medicalrecord) {
+		boolean result = false;
+		
 		if(!medicalrecord.allAttributesAreSet()) {//donnees incompletes
 			throw new BusinessResourceException("IncompleteMedicalrecord", "Medicalrecord informations are incomplete: "+ medicalrecord.toString(), HttpStatus.EXPECTATION_FAILED);
 		}
@@ -104,26 +109,31 @@ public class MedicalrecordRepositoryImpl implements IMedicalrecordRepository {
 				m.setBirthdate(medicalrecord.getBirthdate());
 				m.setMedications(medicalrecord.getMedications());
 				m.setAllergies(medicalrecord.getAllergies());
+				result = true;
+				break;
 			}
 		}
-		return serialize(); 
+		serialize();
+		return result; 
 	}
 
 	@Override
 	public boolean delete(String firstName, String lastName) {
+		boolean result = false;
+		
 		Medicalrecord medicalrecord = getByFirstnameAndLastName(firstName, lastName);
 		if(medicalrecord == null) {
 			throw new BusinessResourceException("DeleteMedicalrecordError", "Medicalrecord does not exist: firstName="+firstName +
 					" lastname=" + lastName, HttpStatus.NOT_FOUND);
 		}
 		
-		medicalrecordList.removeIf(m-> 
+		result = medicalrecordList.removeIf(m-> 
 		( 
 				m.getFirstName().equals(firstName) &&
 				m.getLastName().equals(lastName)
 				));
-		boolean persistanceData = serialize();
-		return persistanceData;
+		serialize();
+		return result;
 	}
 
 }

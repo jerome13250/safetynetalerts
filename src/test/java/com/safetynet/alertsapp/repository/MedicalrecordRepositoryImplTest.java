@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -163,7 +164,7 @@ class MedicalrecordRepositoryImplTest {
 						)
 				));
 		
-		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
 
 		//Act
 		medicalrecordRepositoryCUT.add(
@@ -292,7 +293,7 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1000","fakeAllergy1001","fakeAllergy1002"))
 						)
 				));
-		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
 
 		//Act
 		boolean result = medicalrecordRepositoryCUT.update(
@@ -411,7 +412,7 @@ class MedicalrecordRepositoryImplTest {
 						new ArrayList<> (Arrays.asList("fakeAllergy1","fakeAllergy2"))
 						)
 				));
-		when(jsonFileMapperMock.serialize(any(String.class), any(Class.class), any(List.class))).thenReturn(true);
+		doNothing().when(jsonFileMapperMock).serialize(any(String.class), any(Class.class), any(List.class));
 		
 		//Act
 		boolean result = medicalrecordRepositoryCUT.delete("Mike","Hill");

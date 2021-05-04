@@ -29,6 +29,6 @@ public interface IJsonFileMapper {
 	 * @return true if operation successes, false otherwise.
 	 *   
 	 */
-	<T> boolean serialize(String objectNodeNameString, Class<T> classType, List<T> listToSave);
+	<T> void serialize(String objectNodeNameString, Class<T> classType, List<T> listToSave);
 	
 }
