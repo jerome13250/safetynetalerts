@@ -80,3 +80,13 @@ http://localhost:8080/flood/stations?stations=1,2,3,4
 http://localhost:8080/personInfo?firstName=Lily&lastName=Cooper
 
 http://localhost:8080/communityEmail?city=Culver
+
+The following Actuators are available:
+
+[INFO](http://localhost:8080/actuator/info)
+
+[HEALTH](http://localhost:8080/actuator/health)
+
+[METRICS](http://localhost:8080/actuator/metrics)
+
+[HTTPTRACE](http://localhost:8080/actuator/httptrace)
