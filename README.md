@@ -46,7 +46,7 @@ Check that you have :
    ```
 3. Select the safetynetalerts directory
    ```sh
-   cd /safetynetalerts
+   cd safetynetalerts
    ```
 4. Package the application (fat jar file)
    ```sh
