@@ -56,7 +56,7 @@ Check that you have :
    ```JS
    java -jar ./target/SafetyNetAlerts-0.0.1-SNAPSHOT.jar
    ```
-   NOTE: respect the execution of jar from safetynetalerts folder as done above as the application loads json file in ./json/ folder.
+   NOTE: respect the execution of jar from safetynetalerts folder as done above as the application loads json file in safetynetalerts/json/ folder.
 
 
 
