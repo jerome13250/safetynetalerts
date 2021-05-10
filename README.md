@@ -44,14 +44,19 @@ Check that you have :
    ```sh
    git clone https://github.com/jerome13250/safetynetalerts.git
    ```
-3. Package the application (fat jar file)
+3. Select the safetynetalerts directory
+   ```sh
+   cd /safetynetalerts
+   ```
+4. Package the application (fat jar file)
    ```sh
    mvnw package
    ```
-4. Execute the jar file
+5. Execute the jar file
    ```JS
    java -jar ./target/SafetyNetAlerts-0.0.1-SNAPSHOT.jar
    ```
+   NOTE: respect the execution of jar from safetynetalerts folder as done above as the application loads json file in ./json/ folder.
 
 
 
